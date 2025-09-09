@@ -15,24 +15,42 @@ interface RouterProps {
 export function Router({ context, postType, initialView }: RouterProps) {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [initialized, setInitialized] = useState(false);
+    const [initializing, setInitializing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [view, setView] = useState<
       'home' | 'play' | 'collection' | 'leaderboard' | 'info' | 'progress'
     >(initialView || 'home');
 
+    // Run a one-time initialization without spawning overlapping calls.
     useInterval(async () => {
-        if (!initialized) {
+      if (!initialized && !initializing) {
+        setInitializing(true);
+        try {
           await initializeUser();
           setInitialized(true);
+        } finally {
+          setInitializing(false);
         }
-      }, 100);
+      }
+    }, 200);
 
   const initializeUser = async () => {
     try {
       setIsLoading(true);
       const service = new Service(context.redis, context.reddit);
-      const username = context.reddit.getCurrentUser?.() || 'anonymous';
+      // Try to resolve the current username across possible API shapes.
+      let username: string = 'anonymous';
+      try {
+        const me: any = await (context.reddit?.getCurrentUser?.());
+        if (typeof me === 'string' && me) username = me;
+        else if (me && typeof me === 'object') {
+          if (typeof me.username === 'string' && me.username) username = me.username;
+          else if (typeof me.name === 'string' && me.name) username = me.name;
+        }
+      } catch {
+        // fall back to anonymous
+      }
       
       let user = await service.getUser(username);
       if (!user) {
