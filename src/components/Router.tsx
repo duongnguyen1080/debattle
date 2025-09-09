@@ -66,6 +66,15 @@ export function Router({ context, postType, initialView }: RouterProps) {
     }
   };
 
+  // For post types that don't require user init (pinned/collection), render immediately
+  if (postType === 'collection') {
+    return <CollectionPost context={context} currentUser={currentUser} />;
+  }
+  if (postType === 'pinned') {
+    return <PinnedPost context={context} currentUser={currentUser} />;
+  }
+
+  // Only gate the main game views behind initialization
   if (isLoading) {
     return (
       <vstack height="100%" width="100%" alignment="middle center" gap="medium">
@@ -85,14 +94,6 @@ export function Router({ context, postType, initialView }: RouterProps) {
         </button>
       </vstack>
     );
-  }
-
-  // If a specific post type was requested, show an appropriate view
-  if (postType === 'collection') {
-    return <CollectionPost context={context} currentUser={currentUser} />;
-  }
-  if (postType === 'pinned') {
-    return <PinnedPost context={context} currentUser={currentUser} />;
   }
 
   // Player-facing router
