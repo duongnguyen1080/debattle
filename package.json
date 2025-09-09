@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "debattle",
+  "version": "0.0.0",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "dependencies": {
+    "@devvit/public-api": "0.11.19",
+    "redis": "^5.8.2"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "dev": "devvit playtest",
+    "build": "devvit upload",
+    "deploy": "devvit publish"
+  }
+}
