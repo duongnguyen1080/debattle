@@ -1,4 +1,4 @@
-import { Devvit, useState, useInterval } from '@devvit/public-api';
+import { Devvit, useState } from '@devvit/public-api';
 import { CollectionPost } from './CollectionPost.js';
 import { PinnedPost } from './PinnedPost.js';
 import { Service } from '../services/Service.js';
@@ -13,87 +13,72 @@ interface RouterProps {
 }
 
 export function Router({ context, postType, initialView }: RouterProps) {
-    const [currentUser, setCurrentUser] = useState<any>(null);
-    const [initialized, setInitialized] = useState(false);
-    const [initializing, setInitializing] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [view, setView] = useState<
-      'home' | 'play' | 'collection' | 'leaderboard' | 'info' | 'progress'
-    >(initialView || 'home');
+  const service = new Service(context.redis, context.reddit);
 
-    // Run a one-time initialization without spawning overlapping calls.
-    useInterval(async () => {
-      if (!initialized && !initializing) {
-        setInitializing(true);
+  // Resolve username with Redis cache (userId → username), then hydrate the user once.
+  const [data] = useState<{ currentUser: User | null; username: string | null }>(
+    async () => {
+      const userId: string | undefined = (context as any)?.userId;
+
+      // Look up username with a cache to avoid repeated Reddit API calls.
+      const ttlMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+      let username: string | null = null;
+      if (userId) {
+        const cacheKey = `cache:userId-username:${userId}`;
+        const oldCacheKey = 'cache:userId-username';
+
+        username = (await context.redis.get(cacheKey)) || null;
+        if (!username) {
+          const legacy = await context.redis.hGet(oldCacheKey, userId);
+          if (legacy) {
+            username = legacy;
+            await context.redis.set(cacheKey, username, { expiration: new Date(Date.now() + ttlMs) });
+          }
+        }
+
+        if (!username) {
+          try {
+            const user = await context.reddit.getUserById(userId);
+            if (user?.username) {
+              username = user.username;
+              await context.redis.set(cacheKey, username, { expiration: new Date(Date.now() + ttlMs) });
+            }
+          } catch {
+            // ignore lookup failure
+          }
+        }
+      }
+
+      if (!username) {
+        // Last‑resort fallbacks for other API shapes
         try {
-          await initializeUser();
-          setInitialized(true);
-        } finally {
-          setInitializing(false);
+          const me: any = await (context.reddit?.getCurrentUser?.());
+          if (typeof me === 'string' && me) username = me;
+          else if (me && typeof me === 'object') username = me.username || me.name || null;
+        } catch {
+          /* noop */
         }
       }
-    }, 200);
 
-  const initializeUser = async () => {
-    try {
-      setIsLoading(true);
-      const service = new Service(context.redis, context.reddit);
-      // Try to resolve the current username across possible API shapes.
-      let username: string = 'anonymous';
-      try {
-        const me: any = await (context.reddit?.getCurrentUser?.());
-        if (typeof me === 'string' && me) username = me;
-        else if (me && typeof me === 'object') {
-          if (typeof me.username === 'string' && me.username) username = me.username;
-          else if (typeof me.name === 'string' && me.name) username = me.name;
-        }
-      } catch {
-        // fall back to anonymous
-      }
-      
-      let user = await service.getUser(username);
-      if (!user) {
-        user = await service.createUser(username);
-      }
-      
-      setCurrentUser(user);
-    } catch (err) {
-      setError('Failed to initialize user');
-      console.error('Router initialization error:', err);
-    } finally {
-      setIsLoading(false);
+      if (!username) username = 'anonymous';
+
+      let currentUser = await service.getUser(username);
+      if (!currentUser) currentUser = await service.createUser(username);
+
+      return { currentUser, username };
     }
-  };
+  );
 
-  // For post types that don't require user init (pinned/collection), render immediately
+  const [view, setView] = useState<
+    'home' | 'play' | 'collection' | 'leaderboard' | 'info' | 'progress'
+  >(initialView || 'home');
+
+  // For post types that don't require user data to render, route directly.
   if (postType === 'collection') {
-    return <CollectionPost context={context} currentUser={currentUser} />;
+    return <CollectionPost context={context} currentUser={data?.currentUser ?? null} />;
   }
   if (postType === 'pinned') {
-    return <PinnedPost context={context} currentUser={currentUser} />;
-  }
-
-  // Only gate the main game views behind initialization
-  if (isLoading) {
-    return (
-      <vstack height="100%" width="100%" alignment="middle center" gap="medium">
-        <text size="large">🎯 Loading Debattle...</text>
-        <text size="medium">⏳ Loading...</text>
-      </vstack>
-    );
-  }
-
-  if (error) {
-    return (
-      <vstack height="100%" width="100%" alignment="middle center" gap="medium">
-        <text size="large" color="red">❌ Error</text>
-        <text>{error}</text>
-        <button appearance="primary" onPress={initializeUser}>
-          Retry
-        </button>
-      </vstack>
-    );
+    return <PinnedPost context={context} currentUser={data?.currentUser ?? null} />;
   }
 
   // Player-facing router
@@ -101,7 +86,7 @@ export function Router({ context, postType, initialView }: RouterProps) {
     case 'home':
       return (
         <HomeScreen
-          currentUser={currentUser}
+          currentUser={data?.currentUser ?? null}
           onStart={() => setView('play')}
           onLeaderboard={() => setView('leaderboard')}
           onHowToPlay={() => setView('info')}
@@ -114,18 +99,18 @@ export function Router({ context, postType, initialView }: RouterProps) {
       return (
         <RoundV2Flow
           context={context}
-          currentUser={currentUser}
+          currentUser={data?.currentUser ?? null}
           onExit={() => setView('home')}
         />
       );
     case 'collection':
-      return <CollectionPost context={context} currentUser={currentUser} />;
+      return <CollectionPost context={context} currentUser={data?.currentUser ?? null} />;
     case 'leaderboard':
-      return <PinnedPost context={context} currentUser={currentUser} initialTab="leaderboard" />;
+      return <PinnedPost context={context} currentUser={data?.currentUser ?? null} initialTab="leaderboard" />;
     case 'info':
-      return <PinnedPost context={context} currentUser={currentUser} initialTab="info" />;
+      return <PinnedPost context={context} currentUser={data?.currentUser ?? null} initialTab="info" />;
     case 'progress':
-      return <PinnedPost context={context} currentUser={currentUser} initialTab="progress" />;
+      return <PinnedPost context={context} currentUser={data?.currentUser ?? null} initialTab="progress" />;
     default:
       return (
         <vstack height="100%" width="100%" alignment="middle center">
