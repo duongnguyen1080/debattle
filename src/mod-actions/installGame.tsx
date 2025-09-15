@@ -9,6 +9,7 @@ export const installGame: MenuItem = {
     const { ui, reddit, redis } = context;
     try {
       const community = await reddit.getCurrentSubreddit();
+      console.log('[InstallGame] subreddit', { name: community?.name });
 
       // Create a Pinned/Hub custom post as the moderator (experience post)
       const post = await reddit.submitPost({
@@ -21,6 +22,7 @@ export const installGame: MenuItem = {
         ),
         textFallback: { text: 'Debattle Community Hub — open in the Reddit app to view.' },
       });
+      console.log('[InstallGame] post created', { id: post?.id, url: (post as any)?.url });
 
       // Pin the post and store basic install metadata
       await Promise.all([
@@ -28,9 +30,15 @@ export const installGame: MenuItem = {
         redis.set('debattle:pinnedPostId', post.id),
         redis.set('debattle:settings', JSON.stringify({ subredditName: community.name })),
       ]);
+      console.log('[InstallGame] post pinned and settings saved');
 
       // Navigate and notify
-      if (ui.navigateTo) ui.navigateTo(post as any);
+      if (ui.navigateTo) {
+        console.log('[InstallGame] navigating to post');
+        ui.navigateTo(post as any);
+      } else {
+        console.log('[InstallGame] ui.navigateTo not available');
+      }
       await ui.showToast('Installed Debattle!');
     } catch (e) {
       console.error('Failed to install Debattle:', e);

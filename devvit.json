@@ -1,0 +1,12 @@
+{
+  "name": "debattle-game",
+  "permissions": {
+    "http": {
+      "enable": true,
+      "domains": ["api.openai.com"]
+    }
+  },
+  "blocks": {
+    "entry": "src/main.tsx"
+  }
+}

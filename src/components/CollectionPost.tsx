@@ -16,7 +16,11 @@ export function CollectionPost({ context, currentUser }: CollectionPostProps) {
   const loadCollectionData = async () => {
     try {
       setIsLoading(true);
-      const service = new Service(context.redis, context.reddit);
+      const service = new Service(
+        context.redis,
+        context.reddit,
+        { getSetting: context.settings?.get?.bind(context.settings) }
+      );
       
       // Get top riddles (simplified - in real implementation, you'd query by week)
       const activeRiddles = await service.getActiveRiddles();

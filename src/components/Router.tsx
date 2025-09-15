@@ -13,7 +13,11 @@ interface RouterProps {
 }
 
 export function Router({ context, postType, initialView }: RouterProps) {
-  const service = new Service(context.redis, context.reddit);
+  const service = new Service(
+    context.redis,
+    context.reddit,
+    { getSetting: context.settings?.get?.bind(context.settings) }
+  );
   console.log('[Router] render', { postType, initialView });
 
   // Resolve username with Redis cache (userId → username), then hydrate the user once.

@@ -33,6 +33,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     riddleId,
     startedAt,
     elapsed,
+    riddleTextLen: riddleText?.length ?? 0,
   });
 
   // Keep a steady heartbeat to force re-render and derive elapsed from startedAt.
@@ -41,6 +42,18 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     if (startedAt && step === 'answer') {
       const secs = Math.max(0, Math.floor((now - startedAt) / 1000));
       setElapsed(secs);
+    }
+
+    // Watchdog: if UI is stuck on the placeholder > 15s, force a visible fallback
+    if (
+      step === 'answer' &&
+      startedAt &&
+      riddleText?.startsWith('⏳ Generating riddle') &&
+      now - startedAt > 15000
+    ) {
+      const themeName = selectedTheme?.name || 'your chosen theme';
+      console.warn('[RoundV2Flow] watchdog replacing stuck riddle text with fallback');
+      setRiddleText(`On the theme of ${themeName}: What do you owe to yourself that cannot be owned?`);
     }
   }, 1000);
 
@@ -57,12 +70,16 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
 
     try {
       console.log('[RoundV2Flow] handleThemeSelect: creating service');
-      const service = new Service(context.redis, context.reddit);
+      const service = new Service(
+        context.redis,
+        context.reddit,
+        { getSetting: context.settings?.get?.bind(context.settings) }
+      );
       const username = currentUser?.username || 'anonymous';
       console.log('[RoundV2Flow] handleThemeSelect: calling createRiddleFromTheme', { username });
       const t0 = Date.now();
       const riddle = await service.createRiddleFromTheme({ theme: theme.id, playerUsername: username });
-      console.log('[RoundV2Flow] handleThemeSelect: riddle created', { id: riddle.id, ms: Date.now() - t0 });
+      console.log('[RoundV2Flow] handleThemeSelect: riddle created', { id: riddle.id, textLen: riddle.meta?.riddleText?.length ?? 0, ms: Date.now() - t0 });
       setRiddleId(riddle.id);
       setRiddleText(riddle.meta.riddleText);
     } catch (e) {
@@ -80,7 +97,11 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     if (!riddleId || !answerText.trim()) return;
     try {
       setIsSubmitting(true);
-      const service = new Service(context.redis, context.reddit);
+      const service = new Service(
+        context.redis,
+        context.reddit,
+        { getSetting: context.settings?.get?.bind(context.settings) }
+      );
       const username = currentUser?.username || 'anonymous';
       console.log('[RoundV2Flow] handleSubmitAnswer: submitting');
       const resp = await service.submitAnswer({ riddleId, username, answerText: answerText.trim(), elapsedMs: computedElapsed * 1000 });

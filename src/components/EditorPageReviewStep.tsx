@@ -22,7 +22,7 @@ export function EditorPageReviewStep({
       <text size="large">Preview before posting to the community</text>
 
       <vstack gap="large" width="100%" maxWidth="500px">
-        <vstack gap="medium" width="100%" padding="medium" backgroundColor="neutral">
+        <vstack gap="medium" width="100%" padding="medium">
           <text size="large" weight="bold">Theme: {theme.name}</text>
           
           <vstack gap="small" width="100%">

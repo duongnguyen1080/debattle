@@ -18,7 +18,11 @@ export function PinnedPost({ context, currentUser, initialTab }: PinnedPostProps
     const loadLeaderboard = async () => {
       console.log('[PinnedPost] loadLeaderboard: start');
       try {
-        const service = new Service(context.redis, context.reddit);
+        const service = new Service(
+          context.redis,
+          context.reddit,
+          { getSetting: context.settings?.get?.bind(context.settings) }
+        );
         console.log('[PinnedPost] loadLeaderboard: service created');
         const topUsers = await service.getLeaderboard(25);
         console.log('[PinnedPost] loadLeaderboard: got users', topUsers?.length ?? 0);

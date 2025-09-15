@@ -1,8 +1,0 @@
-name: debattle-game
-version: 1.0.0
-description: A riddle creation and solving game on Reddit
-author: debattle-team
-entrypoint: src/main.tsx
-redditAPI: true
-redis: true
-http: true

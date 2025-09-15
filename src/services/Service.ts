@@ -7,22 +7,30 @@ import { weightScores, calculatePostBonusFromUpvotes } from '../utils/gameUtils.
 export class Service {
   constructor(
     private redis: RedisClient,
-    private reddit: RedditAPIClient
+    private reddit: RedditAPIClient,
+    private opts?: { getSetting?: (key: string) => Promise<string | null | undefined> }
   ) {}
 
-  // --- AI integration (Anthropic only) ---
-  // Provider is fixed to 'anthropic' for this deployment.
-  // Key via env: ANTHROPIC_API_KEY
+  // --- AI integration (OpenAI) ---
+  // Uses OpenAI Chat Completions. Domain is on Devvit's allowlist.
+  // Key via env: OPENAI_API_KEY
   private get aiProvider(): 'openai' | 'anthropic' {
-    return 'anthropic';
+    return 'openai';
   }
 
-  private get anthropicModel(): string {
-    // pick a strong default; you can override via ANTHROPIC_MODEL
-    return process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20240620';
+  private get openaiModel(): string {
+    // pick a solid default; you can override via OPENAI_MODEL
+    return process.env.OPENAI_MODEL || 'gpt-4o-mini';
   }
 
   private clamp(n: number, min: number, max: number): number { return Math.max(min, Math.min(max, n)); }
+
+  // Normalize storage key for riddles. Accepts either bare id ("123:abc") or
+  // already-prefixed id ("riddle:123:abc") and returns a Redis key that won't
+  // double-prefix.
+  private riddleKey(id: string): string {
+    return id.startsWith('riddle:') ? id : `riddle:${id}`;
+  }
 
   private extractJSON(s: string): any {
     // Try to parse plain JSON or ```json fenced blocks
@@ -33,35 +41,53 @@ export class Service {
   }
 
 
-  private async callAnthropic(messages: { role: 'system'|'user'|'assistant'; content: string }[],
-                              systemPrompt: string = '',
-                              timeoutMs: number = 20000): Promise<string> {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('Missing ANTHROPIC_API_KEY');
+  private async callOpenAI(
+    messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
+    systemPrompt: string = '',
+    timeoutMs: number = 20000
+  ): Promise<string> {
+    const getSetting = this.opts?.getSetting;
+    const apiKey =
+      process.env.OPENAI_API_KEY ||
+      (getSetting ? await getSetting('OPENAI_API_KEY') : undefined) ||
+      (getSetting ? await getSetting('openaiApiKey') : undefined) ||
+      '';
+    const model =
+      process.env.OPENAI_MODEL ||
+      (getSetting ? await getSetting('OPENAI_MODEL') : undefined) ||
+      (getSetting ? await getSetting('openaiModel') : undefined) ||
+      this.openaiModel;
+
+    if (!apiKey) throw new Error('Missing OPENAI_API_KEY');
 
     const controller = new AbortController();
     const to = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
+          Authorization: `Bearer ${apiKey}`,
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          model: this.anthropicModel,
-          system: systemPrompt,
+          model,
+          messages: [
+            ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+            ...messages.map((m) => ({ role: m.role, content: m.content })),
+          ],
           max_tokens: 512,
-          messages: messages.map(m => ({ role: m.role, content: m.content })),
+          temperature: 0.7,
+          response_format: { type: 'json_object' },
         }),
         signal: controller.signal,
       });
-      if (!res.ok) throw new Error(`Anthropic error ${res.status}: ${await res.text()}`);
+      if (!res.ok) throw new Error(`OpenAI error ${res.status}: ${await res.text()}`);
       const data = await res.json();
-      const content = data.content?.[0]?.text ?? '';
+      const content = data.choices?.[0]?.message?.content ?? '';
       return String(content);
-    } finally { clearTimeout(to); }
+    } finally {
+      clearTimeout(to);
+    }
   }
 
   // Generate a philosophical riddle from theme
@@ -73,7 +99,7 @@ Rules:\n- 1â€“3 sentences max.\n- Do NOT include the answer.\n- No leading label
     const user = `Theme: ${theme}`;
 
     try {
-      const raw = await this.callAnthropic(
+      const raw = await this.callOpenAI(
         [{ role: 'user', content: user }],
         system,
         20000
@@ -101,7 +127,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
     const user = `Answer to evaluate:\n${answerText}`;
 
     try {
-      const raw = await this.callAnthropic(
+      const raw = await this.callOpenAI(
         [{ role: 'user', content: user }],
         system,
         20000
@@ -190,7 +216,8 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
   async createRiddleFromTheme(params: { theme: string; playerUsername: string }): Promise<RiddleV2> {
     const { theme, playerUsername } = params;
     console.log('[Service.createRiddleFromTheme] start', { theme, playerUsername });
-    const id = `riddle:${Date.now()}:${Math.random().toString(36).slice(2, 11)}`;
+    // Use a bare id for the model id; Redis keys will be prefixed via riddleKey().
+    const id = `${Date.now()}:${Math.random().toString(36).slice(2, 11)}`;
     const now = Date.now();
     const expiresAt = now + 24 * 60 * 60 * 1000; // 24h
 
@@ -208,7 +235,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
 
     console.log('[Service.createRiddleFromTheme] persisting');
     try {
-      await this.redis.set(`riddle:${id}`, JSON.stringify(riddle));
+      await this.redis.set(this.riddleKey(id), JSON.stringify(riddle));
       console.log('[Service.createRiddleFromTheme] stored riddle blob');
     } catch (e) {
       console.error('[Service.createRiddleFromTheme] failed to store riddle', e);
@@ -226,7 +253,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
   }
 
   async getRiddle(id: string): Promise<RiddleV2 | null> {
-    const raw = await this.redis.get(`riddle:${id}`);
+    const raw = await this.redis.get(this.riddleKey(id));
     if (!raw) return null;
     try { return JSON.parse(raw) as RiddleV2; } catch { return null; }
   }
@@ -250,7 +277,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
     };
 
     riddle.responses.push(response);
-    await this.redis.set(`riddle:${riddle.id}`, JSON.stringify(riddle));
+    await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
 
     // XP = total points
     await this.updateUserXp(username, response.total);
@@ -271,7 +298,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
       isCorrect: false
     };
     
-    const key = `riddle:${riddleId}:guesses`;
+    const key = `${this.riddleKey(riddleId)}:guesses`;
     const raw = await this.redis.get(key);
     const list: Guess[] = raw ? JSON.parse(raw) : [];
     list.push(newGuess);
@@ -280,7 +307,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
   }
 
   async upvoteGuess(riddleId: string, guessId: string): Promise<void> {
-    const key = `riddle:${riddleId}:guesses`;
+    const key = `${this.riddleKey(riddleId)}:guesses`;
     const raw = await this.redis.get(key);
     if (!raw) return;
     const list: Guess[] = JSON.parse(raw);
@@ -430,7 +457,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
       if (!riddle) continue;
       if (riddle.expiresAt < now) {
         riddle.status = 'archived';
-        await this.redis.set(`riddle:${rid}`, JSON.stringify(riddle));
+        await this.redis.set(this.riddleKey(rid), JSON.stringify(riddle));
       } else {
         remaining.push(rid);
       }

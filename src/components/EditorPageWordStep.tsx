@@ -10,11 +10,15 @@ interface EditorPageWordStepProps {
 export function EditorPageWordStep({ themes, onThemeSelect, onRefresh }: EditorPageWordStepProps) {
   const [timeRemaining, setTimeRemaining] = useState(10);
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
+  console.log('[EditorPageWordStep] render', { timeRemaining, selectedTheme: selectedTheme?.id, themeCount: themes.length });
 
   useInterval(() => {
     setTimeRemaining((t) => {
       if (t <= 1) {
-        if (!selectedTheme) onThemeSelect(themes[0]);
+        if (!selectedTheme) {
+          console.log('[EditorPageWordStep] timer auto-select first theme');
+          onThemeSelect(themes[0]);
+        }
         return 0;
       }
       return t - 1;
@@ -22,11 +26,13 @@ export function EditorPageWordStep({ themes, onThemeSelect, onRefresh }: EditorP
   }, 1000);
 
   const handleThemeSelect = (theme: Theme) => {
+    console.log('[EditorPageWordStep] handleThemeSelect click', { theme: theme.id });
     setSelectedTheme(theme);
     onThemeSelect(theme);
   };
 
   const handleRefresh = () => {
+    console.log('[EditorPageWordStep] handleRefresh click');
     setTimeRemaining(10);
     setSelectedTheme(null);
     onRefresh();
@@ -37,7 +43,7 @@ export function EditorPageWordStep({ themes, onThemeSelect, onRefresh }: EditorP
       <text size="xlarge">🎯 Choose Your Theme</text>
       <text size="large">Select a theme for your riddle</text>
       
-      <text size="medium" color={timeRemaining <= 3 ? 'red' : 'default'}>
+      <text size="medium">
         Time remaining: {timeRemaining}s
       </text>
 
