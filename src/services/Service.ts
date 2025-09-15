@@ -66,6 +66,7 @@ export class Service {
 
   // Generate a philosophical riddle from theme
   async generateRiddleFromAI(theme: string): Promise<{ riddleText: string }> {
+    console.log('[Service.generateRiddleFromAI] start', { theme });
     const system = `You are an AI riddle-smith. Write a SINGLE short philosophical riddle aligned to a given theme.
 Rules:\n- 1â€“3 sentences max.\n- Do NOT include the answer.\n- No leading labels like 'Riddle:'.\n- Avoid clichÃ©s.\n- The riddle must clearly relate to the provided theme.\nOutput strictly as JSON: {"riddleText": "..."}`;
 
@@ -83,9 +84,10 @@ Rules:\n- 1â€“3 sentences max.\n- Do NOT include the answer.\n- No leading label
       if (!obj || typeof obj.riddleText !== 'string') throw new Error('Invalid riddle JSON');
       const riddleText = obj.riddleText.trim();
       if (riddleText.length < 10) throw new Error('Riddle too short');
+      console.log('[Service.generateRiddleFromAI] success');
       return { riddleText };
     } catch (err) {
-      console.error('generateRiddleFromAI failed:', err);
+      console.error('[Service.generateRiddleFromAI] failed; using fallback', err);
       // graceful fallback to keep the game running
       return { riddleText: `On the theme of ${theme}: What do you owe to yourself that cannot be owned?` };
     }
@@ -187,6 +189,7 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
   // Riddle Management
   async createRiddleFromTheme(params: { theme: string; playerUsername: string }): Promise<RiddleV2> {
     const { theme, playerUsername } = params;
+    console.log('[Service.createRiddleFromTheme] start', { theme, playerUsername });
     const id = `riddle:${Date.now()}:${Math.random().toString(36).slice(2, 11)}`;
     const now = Date.now();
     const expiresAt = now + 24 * 60 * 60 * 1000; // 24h
@@ -203,9 +206,22 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
       responses: [],
     };
 
-    await this.redis.set(`riddle:${id}`, JSON.stringify(riddle));
-    const active = await this.getActiveRiddles();
-    await this.redis.set('riddles:active', JSON.stringify([ ...active, id ]));
+    console.log('[Service.createRiddleFromTheme] persisting');
+    try {
+      await this.redis.set(`riddle:${id}`, JSON.stringify(riddle));
+      console.log('[Service.createRiddleFromTheme] stored riddle blob');
+    } catch (e) {
+      console.error('[Service.createRiddleFromTheme] failed to store riddle', e);
+    }
+    try {
+      const active = await this.getActiveRiddles();
+      const next = Array.isArray(active) ? [...active, id] : [id];
+      await this.redis.set('riddles:active', JSON.stringify(next));
+      console.log('[Service.createRiddleFromTheme] updated active list', { count: next.length });
+    } catch (e) {
+      console.error('[Service.createRiddleFromTheme] failed to update active list', e);
+    }
+    console.log('[Service.createRiddleFromTheme] done', { id });
     return riddle;
   }
 
@@ -283,9 +299,11 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
 
   // Leaderboard Management
   async getLeaderboard(limit: number = 50): Promise<LeaderboardEntry[]> {
+    console.log('[Service.getLeaderboard] start', { limit });
     const users = await this.getAllUsers();
+    console.log('[Service.getLeaderboard] users fetched', { count: users.length });
     
-    return users
+    const result = users
       .sort((a, b) => b.xp - a.xp)
       .slice(0, limit)
       .map((user, index) => ({
@@ -295,15 +313,31 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
         flair: user.flair,
         rank: index + 1
       }));
+    console.log('[Service.getLeaderboard] returning', { resultCount: result.length });
+    return result;
   }
 
   async getAllUsers(): Promise<User[]> {
-    const usersRecord = await this.redis.hGetAll('users');
+    // hGetAll may return undefined/null on empty; normalize to empty object
+    const usersRecord = (await this.redis.hGetAll('users')) ?? ({} as Record<string, string>);
+    const keys = Object.keys(usersRecord);
+    console.log('[Service.getAllUsers] raw keys', { count: keys.length });
     const users: User[] = [];
     for (const raw of Object.values(usersRecord)) {
-      try { users.push(JSON.parse(raw)); } catch { /* skip */ }
+      try {
+        const u = JSON.parse(raw);
+        if (u && typeof u.username === 'string') users.push(u);
+      } catch {
+        // skip invalid entries
+      }
     }
-    return users.map(u => ({ ...u, level: calculateLevel(u.xp), flair: getFlairForLevel(calculateLevel(u.xp)) }));
+    const normalized = users.map((u) => ({
+      ...u,
+      level: calculateLevel(u.xp),
+      flair: getFlairForLevel(calculateLevel(u.xp)),
+    }));
+    console.log('[Service.getAllUsers] normalized users', { count: normalized.length });
+    return normalized;
   }
 
   // Utility Methods

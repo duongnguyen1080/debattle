@@ -19,52 +19,83 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   const [riddleId, setRiddleId] = useState<string | null>(null);
   const [riddleText, setRiddleText] = useState<string>('');
   const [answerText, setAnswerText] = useState<string>('');
-  const [elapsed, setElapsed] = useState<number>(0); // count-up (seconds)
+  // Elapsed seconds shown in the UI; derived from startedAt via a simple tick.
+  // Avoid relying on interval closures capturing stale state.
+  const [elapsed, setElapsed] = useState<number>(0);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ total: number; feedback: string } | null>(null);
 
+  console.log('[RoundV2Flow] render', {
+    step,
+    hasUser: !!currentUser,
+    selectedTheme: selectedTheme?.id,
+    riddleId,
+    startedAt,
+    elapsed,
+  });
+
+  // Keep a steady heartbeat to force re-render and derive elapsed from startedAt.
   useInterval(() => {
-    if (step === 'answer' && startedAt) {
-      const secs = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+    const now = Date.now();
+    if (startedAt && step === 'answer') {
+      const secs = Math.max(0, Math.floor((now - startedAt) / 1000));
       setElapsed(secs);
     }
   }, 1000);
 
   const handleThemeSelect = async (theme: Theme) => {
+    console.log('[RoundV2Flow] handleThemeSelect: start', { theme: theme.id });
     setSelectedTheme(theme);
-    // Generate AI riddle via service (V2)
+    // Optimistic navigation to answer step to avoid UI stall
+    const tStart = Date.now();
+    setStartedAt(tStart);
+    setElapsed(0);
+    setRiddleText('⏳ Generating riddle…');
+    setStep('answer');
+    console.log('[RoundV2Flow] handleThemeSelect: switched to answer optimistically', { startedAt: tStart });
+
     try {
+      console.log('[RoundV2Flow] handleThemeSelect: creating service');
       const service = new Service(context.redis, context.reddit);
       const username = currentUser?.username || 'anonymous';
+      console.log('[RoundV2Flow] handleThemeSelect: calling createRiddleFromTheme', { username });
+      const t0 = Date.now();
       const riddle = await service.createRiddleFromTheme({ theme: theme.id, playerUsername: username });
+      console.log('[RoundV2Flow] handleThemeSelect: riddle created', { id: riddle.id, ms: Date.now() - t0 });
       setRiddleId(riddle.id);
       setRiddleText(riddle.meta.riddleText);
-      setStartedAt(Date.now());
-      setElapsed(0);
-      setStep('answer');
     } catch (e) {
-      console.error('Failed to start round:', e);
+      console.error('[RoundV2Flow] handleThemeSelect: error', e);
+      // Fallback text if service fails entirely
+      setRiddleText(`On the theme of ${theme.name}: What do you owe to yourself that cannot be owned?`);
     }
   };
 
   const handleSubmitAnswer = async () => {
+    // Compute latest elapsed defensively from startedAt to avoid any stale state.
+    const now = Date.now();
+    const computedElapsed = startedAt ? Math.max(0, Math.floor((now - startedAt) / 1000)) : elapsed;
+    console.log('[RoundV2Flow] handleSubmitAnswer: start', { riddleId, hasAnswer: !!answerText.trim(), elapsed: computedElapsed });
     if (!riddleId || !answerText.trim()) return;
     try {
       setIsSubmitting(true);
       const service = new Service(context.redis, context.reddit);
       const username = currentUser?.username || 'anonymous';
-      const resp = await service.submitAnswer({ riddleId, username, answerText: answerText.trim(), elapsedMs: elapsed * 1000 });
+      console.log('[RoundV2Flow] handleSubmitAnswer: submitting');
+      const resp = await service.submitAnswer({ riddleId, username, answerText: answerText.trim(), elapsedMs: computedElapsed * 1000 });
+      console.log('[RoundV2Flow] handleSubmitAnswer: submitted', { total: resp.total });
       setResult({ total: resp.total, feedback: resp.feedback });
       setStep('result');
     } catch (e) {
-      console.error('Failed to submit answer:', e);
+      console.error('[RoundV2Flow] handleSubmitAnswer: error', e);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (step === 'theme') {
+    console.log('[RoundV2Flow] rendering theme step');
     return (
       <EditorPageWordStep
         themes={themes}
@@ -75,11 +106,12 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   }
 
   if (step === 'answer') {
+    console.log('[RoundV2Flow] rendering answer step', { elapsed, startedAt });
     return (
       <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
         <text size="xlarge">🧩 Your Riddle</text>
         <text size="large">Theme: {selectedTheme?.name ?? ''}</text>
-        <vstack gap="small" width="100%" maxWidth="560px" padding="medium" backgroundColor="neutral">
+        <vstack gap="small" width="100%" maxWidth="560px" padding="medium">
           <text size="medium">{riddleText}</text>
         </vstack>
 
@@ -111,6 +143,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   }
 
   // result
+  console.log('[RoundV2Flow] rendering result step', { result });
   return (
     <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
       <text size="xlarge">✅ Round Complete</text>

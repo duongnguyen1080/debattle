@@ -69,7 +69,7 @@ export function CollectionPost({ context, currentUser }: CollectionPostProps) {
           
           {topRiddles.length > 0 ? (
             topRiddles.map((riddle, index) => (
-              <vstack key={riddle.id} gap="small" width="100%" padding="medium" backgroundColor="neutral">
+          <vstack key={riddle.id} gap="small" width="100%" padding="medium">
                 <hstack gap="medium" width="100%" alignment="start">
                   <text size="large" weight="bold">#{index + 1}</text>
                   <vstack gap="small" width="100%">
@@ -111,7 +111,7 @@ export function CollectionPost({ context, currentUser }: CollectionPostProps) {
 
         {/* Current User Stats */}
         {currentUser && (
-          <vstack gap="medium" width="100%" padding="medium" backgroundColor="neutral">
+          <vstack gap="medium" width="100%" padding="medium">
             <text size="large" weight="bold">Your Stats</text>
             <hstack gap="large" width="100%" alignment="center">
               <vstack alignment="center">

@@ -13,19 +13,39 @@ export function PinnedPost({ context, currentUser, initialTab }: PinnedPostProps
     const [activeTab, setActiveTab] = useState<'leaderboard' | 'info' | 'progress'>(initialTab || 'leaderboard');
   
     const [loaded, setLoaded] = useState(false);
+    console.log('[PinnedPost] render start', { initialTab, hasUser: !!currentUser });
   
     const loadLeaderboard = async () => {
-      const service = new Service(context.redis, context.reddit);
-      const topUsers = await service.getLeaderboard(25);
-      setLeaderboard(topUsers);
-    };
-  
-    useInterval(async () => {
-      if (!loaded) {
-        await loadLeaderboard();
+      console.log('[PinnedPost] loadLeaderboard: start');
+      try {
+        const service = new Service(context.redis, context.reddit);
+        console.log('[PinnedPost] loadLeaderboard: service created');
+        const topUsers = await service.getLeaderboard(25);
+        console.log('[PinnedPost] loadLeaderboard: got users', topUsers?.length ?? 0);
+        setLeaderboard(topUsers);
+      } catch (e) {
+        // Fail gracefully: show empty leaderboard instead of hanging on loading
+        console.error('[PinnedPost] loadLeaderboard: error', e);
+        setLeaderboard([]);
+      } finally {
+        console.log('[PinnedPost] loadLeaderboard: setLoaded(true)');
         setLoaded(true);
       }
-    }, 100);
+    };
+  
+    // Kick off initial load using Devvit's async state initializer pattern
+    const [_initOnce] = useState(async () => {
+      console.log('[PinnedPost] initOnce: start');
+      await loadLeaderboard();
+      console.log('[PinnedPost] initOnce: done');
+      return true;
+    });
+
+    // Optional: small poller if we later want periodic refreshes
+    useInterval(async () => {
+      if (!loaded) return; // avoid double-load before first resolve
+      // no-op for now; leave hook to allow future refresh logic
+    }, 5000);
 
   const getCurrentUserRank = (): number => {
     if (!currentUser) return 0;
@@ -43,6 +63,7 @@ export function PinnedPost({ context, currentUser, initialTab }: PinnedPostProps
   };
 
   if (!loaded) {
+    console.log('[PinnedPost] rendering: loading state');
     return (
       <vstack height="100%" width="100%" alignment="middle center" gap="medium">
         <text size="large">🏛️ Loading Community Hub...</text>
@@ -53,6 +74,7 @@ export function PinnedPost({ context, currentUser, initialTab }: PinnedPostProps
 
   return (
     <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
+      {console.log('[PinnedPost] rendering: content state', { activeTab, leaderboardCount: leaderboard.length })}
       <text size="xlarge">🏛️ Debattle Community Hub</text>
       <text size="large">Welcome to the ultimate riddle community!</text>
 
@@ -174,7 +196,7 @@ export function PinnedPost({ context, currentUser, initialTab }: PinnedPostProps
             const nextLevel = getNextLevelInfo();
             if (nextLevel) {
               return (
-                <vstack gap="small" width="100%" padding="medium" backgroundColor="neutral">
+                <vstack gap="small" width="100%" padding="medium">
                   <text size="medium" weight="bold">Next Level: {nextLevel.nextTier.level}</text>
                   <text size="small">{nextLevel.nextTier.flair}</text>
                   <text size="small">{nextLevel.nextTier.notes}</text>
@@ -185,7 +207,7 @@ export function PinnedPost({ context, currentUser, initialTab }: PinnedPostProps
               );
             }
             return (
-              <vstack gap="small" width="100%" padding="medium" backgroundColor="neutral">
+              <vstack gap="small" width="100%" padding="medium">
                 <text size="medium" weight="bold">🏆 Maximum Level Reached!</text>
                 <text size="small">You are a {currentUser.flair}</text>
                 <text size="small">Keep playing to maintain your status!</text>

@@ -14,11 +14,13 @@ interface RouterProps {
 
 export function Router({ context, postType, initialView }: RouterProps) {
   const service = new Service(context.redis, context.reddit);
+  console.log('[Router] render', { postType, initialView });
 
   // Resolve username with Redis cache (userId → username), then hydrate the user once.
   const [data] = useState<{ currentUser: User | null; username: string | null }>(
     async () => {
       const userId: string | undefined = (context as any)?.userId;
+      console.log('[Router] resolve user: start', { hasUserId: !!userId });
 
       // Look up username with a cache to avoid repeated Reddit API calls.
       const ttlMs = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -28,6 +30,7 @@ export function Router({ context, postType, initialView }: RouterProps) {
         const oldCacheKey = 'cache:userId-username';
 
         username = (await context.redis.get(cacheKey)) || null;
+        if (username) console.log('[Router] resolve user: cache hit', { cacheKey, username });
         if (!username) {
           const legacy = await context.redis.hGet(oldCacheKey, userId);
           if (legacy) {
@@ -42,6 +45,7 @@ export function Router({ context, postType, initialView }: RouterProps) {
             if (user?.username) {
               username = user.username;
               await context.redis.set(cacheKey, username, { expiration: new Date(Date.now() + ttlMs) });
+              console.log('[Router] resolve user: fetched by id', { username });
             }
           } catch {
             // ignore lookup failure
@@ -55,15 +59,23 @@ export function Router({ context, postType, initialView }: RouterProps) {
           const me: any = await (context.reddit?.getCurrentUser?.());
           if (typeof me === 'string' && me) username = me;
           else if (me && typeof me === 'object') username = me.username || me.name || null;
+          if (username) console.log('[Router] resolve user: fallback currentUser', { username });
         } catch {
           /* noop */
         }
       }
 
-      if (!username) username = 'anonymous';
+      if (!username) {
+        username = 'anonymous';
+        console.log('[Router] resolve user: defaulting to anonymous');
+      }
 
       let currentUser = await service.getUser(username);
-      if (!currentUser) currentUser = await service.createUser(username);
+      if (!currentUser) {
+        console.log('[Router] currentUser: not found, creating', { username });
+        currentUser = await service.createUser(username);
+      }
+      console.log('[Router] currentUser: ready', { username, xp: currentUser?.xp, level: currentUser?.level });
 
       return { currentUser, username };
     }
@@ -75,11 +87,10 @@ export function Router({ context, postType, initialView }: RouterProps) {
 
   // For post types that don't require user data to render, route directly.
   if (postType === 'collection') {
+    console.log('[Router] route: collection post');
     return <CollectionPost context={context} currentUser={data?.currentUser ?? null} />;
   }
-  if (postType === 'pinned') {
-    return <PinnedPost context={context} currentUser={data?.currentUser ?? null} />;
-  }
+  // Note: do not short-circuit pinned here; allow HomeScreen (Start) to render
 
   // Player-facing router
   switch (view) {
