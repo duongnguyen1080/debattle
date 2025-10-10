@@ -6,35 +6,70 @@ interface HomeScreenProps {
   onStart: () => void;
   onLeaderboard: () => void;
   onHowToPlay: () => void;
-  onCollection: () => void;
   onProgress: () => void;
 }
 
-export function HomeScreen({ currentUser, onStart, onLeaderboard, onHowToPlay, onCollection, onProgress }: HomeScreenProps) {
+export function HomeScreen({ currentUser, onStart, onLeaderboard, onHowToPlay, onProgress }: HomeScreenProps) {
+  console.log('HomeScreen render');
   console.log('[HomeScreen] render', { hasUser: !!currentUser, level: currentUser?.level, flair: currentUser?.flair });
-  return (
-    <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
-      <text size="xlarge">🏛️ Debattle</text>
-      <text size="large">Philosophical riddles, crafted and judged by Arete</text>
 
-      <vstack gap="small" width="100%" maxWidth="420px">
-        {console.log('[HomeScreen] buttons rendered')}
-        <button appearance="primary" width="100%" onPress={() => { console.log('[HomeScreen] onStart clicked'); onStart(); }}>🎯 Start Round</button>
-        <button appearance="secondary" width="100%" onPress={() => { console.log('[HomeScreen] onLeaderboard clicked'); onLeaderboard(); }}>🏆 Leaderboard</button>
-        <button appearance="secondary" width="100%" onPress={() => { console.log('[HomeScreen] onCollection clicked'); onCollection(); }}>📚 Weekly Collection</button>
-        <button appearance="secondary" width="100%" onPress={() => { console.log('[HomeScreen] onHowToPlay clicked'); onHowToPlay(); }}>ℹ️ How to Play</button>
+  return (
+    <zstack width="100%" height="100%">
+      <image
+        url="background_1.png"
+        width="100%"
+        height="100%"
+        imageWidth={1536}
+        imageHeight={1024}
+        resizeMode="cover"
+        description="Ancient door background"
+      />
+
+      <vstack width="100%" height="100%" padding="large" gap="medium">
+        <spacer grow />
+
+        <vstack alignment="middle center" gap="medium">
+          <zstack width="203px" height="106px">
+            <image
+              url="knock button.gif"
+              width="100%"
+              height="100%"
+              imageWidth={203}
+              imageHeight={106}
+              resizeMode="fit"
+              description="Animated Knock The Door button"
+              onPress={() => {
+                console.log('[HomeScreen] Knock The Door pressed');
+                onStart();
+              }}
+            />
+          </zstack>
+        </vstack>
       </vstack>
 
-      {currentUser && (
-        <vstack gap="small" width="100%" maxWidth="420px" padding="medium">
-          <text size="medium" weight="bold" alignment="center">Level {currentUser.level} • {currentUser.flair}</text>
-          <button appearance="secondary" width="100%" onPress={onProgress}>📊 View Your Progress</button>
-        </vstack>
-      )}
-
-      {!currentUser && (
-        <text size="small" color="secondary">Sign in to track your progress</text>
-      )}
-    </vstack>
+      <hstack width="100%" padding="large" gap="small">
+        <spacer grow />
+        <image
+          url="info_icon.png"
+          imageWidth={1080}
+          imageHeight={1080}
+          width="40px"
+          height="40px"
+          resizeMode="fit"
+          description="How to play"
+          onPress={() => { console.log('[HomeScreen] info icon pressed'); onHowToPlay(); }}
+        />
+        <image
+          url="profile_icon.png"
+          imageWidth={1080}
+          imageHeight={1080}
+          width="40px"
+          height="40px"
+          resizeMode="fit"
+          description="View profile"
+          onPress={() => { console.log('[HomeScreen] profile icon pressed'); onProgress(); }}
+        />
+      </hstack>
+    </zstack>
   );
 }

@@ -1,8 +1,9 @@
-import { Devvit, useInterval, useState } from '@devvit/public-api';
+import { Devvit, useInterval, useState, useAsync } from '@devvit/public-api';
 import { Service } from '../../services/Service.js';
 import { User, Theme } from '../../types/index.js';
 import { getRandomThemes } from '../../utils/gameUtils.js';
-import { EditorPageWordStep } from '../EditorPageWordStep.js';
+
+const FALLBACK_RIDDLE_TEXT = 'Consider this: What do you owe to yourself that cannot be owned?';
 
 interface RoundV2FlowProps {
   context: any;
@@ -10,14 +11,13 @@ interface RoundV2FlowProps {
   onExit: () => void;
 }
 
-type Step = 'theme' | 'answer' | 'result';
+type Step = 'answer' | 'result';
 
 export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) {
-  const [step, setStep] = useState<Step>('theme');
-  const [themes, setThemes] = useState<Theme[]>(getRandomThemes(3));
-  const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
+  const [step, setStep] = useState<Step>('answer');
+  const [riddleTheme, setRiddleTheme] = useState<Theme | null>(null);
   const [riddleId, setRiddleId] = useState<string | null>(null);
-  const [riddleText, setRiddleText] = useState<string>('');
+  const [riddleText, setRiddleText] = useState<string>('⏳ Generating riddle…');
   const [answerText, setAnswerText] = useState<string>('');
   // Elapsed seconds shown in the UI; derived from startedAt via a simple tick.
   // Avoid relying on interval closures capturing stale state.
@@ -25,11 +25,15 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ total: number; feedback: string } | null>(null);
+  // Trigger object to kick off async riddle creation via useAsync
+  const [riddleRequest, setRiddleRequest] = useState<{ themeId: string; themeName: string; nonce: number } | null>(null);
+  const [initializing, setInitializing] = useState(true);
+  const [isAnswering, setIsAnswering] = useState(false);
 
   console.log('[RoundV2Flow] render', {
     step,
     hasUser: !!currentUser,
-    selectedTheme: selectedTheme?.id,
+    theme: riddleTheme?.id,
     riddleId,
     startedAt,
     elapsed,
@@ -51,43 +55,69 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       riddleText?.startsWith('⏳ Generating riddle') &&
       now - startedAt > 15000
     ) {
-      const themeName = selectedTheme?.name || 'your chosen theme';
       console.warn('[RoundV2Flow] watchdog replacing stuck riddle text with fallback');
-      setRiddleText(`On the theme of ${themeName}: What do you owe to yourself that cannot be owned?`);
+      setRiddleText(FALLBACK_RIDDLE_TEXT);
     }
   }, 1000);
 
-  const handleThemeSelect = async (theme: Theme) => {
-    console.log('[RoundV2Flow] handleThemeSelect: start', { theme: theme.id });
-    setSelectedTheme(theme);
-    // Optimistic navigation to answer step to avoid UI stall
-    const tStart = Date.now();
-    setStartedAt(tStart);
-    setElapsed(0);
-    setRiddleText('⏳ Generating riddle…');
-    setStep('answer');
-    console.log('[RoundV2Flow] handleThemeSelect: switched to answer optimistically', { startedAt: tStart });
+  useAsync(
+    async () => {
+      if (!initializing) {
+        return null;
+      }
+      const [randomTheme] = getRandomThemes(1);
+      const theme = randomTheme ?? { id: 'mystery', name: 'Mystery', description: 'System generated theme', difficulty: 2 };
+      const startTime = Date.now();
+      console.log('[RoundV2Flow] initializing round with system-picked theme', { theme: theme.id });
+      setRiddleTheme(theme);
+      setStartedAt(startTime);
+      setElapsed(0);
+      setRiddleText('⏳ Generating riddle…');
+      setRiddleId(null);
+      setAnswerText('');
+      setResult(null);
+      setIsAnswering(false);
+      setRiddleRequest({ themeId: theme.id, themeName: theme.name, nonce: startTime });
+      setInitializing(false);
+      return null;
+    },
+    { depends: [initializing ? 'init' : 'ready'] }
+  );
 
-    try {
-      console.log('[RoundV2Flow] handleThemeSelect: creating service');
-      const service = new Service(
-        context.redis,
-        context.reddit,
-        { getSetting: context.settings?.get?.bind(context.settings) }
-      );
-      const username = currentUser?.username || 'anonymous';
-      console.log('[RoundV2Flow] handleThemeSelect: calling createRiddleFromTheme', { username });
-      const t0 = Date.now();
-      const riddle = await service.createRiddleFromTheme({ theme: theme.id, playerUsername: username });
-      console.log('[RoundV2Flow] handleThemeSelect: riddle created', { id: riddle.id, textLen: riddle.meta?.riddleText?.length ?? 0, ms: Date.now() - t0 });
-      setRiddleId(riddle.id);
-      setRiddleText(riddle.meta.riddleText);
-    } catch (e) {
-      console.error('[RoundV2Flow] handleThemeSelect: error', e);
-      // Fallback text if service fails entirely
-      setRiddleText(`On the theme of ${theme.name}: What do you owe to yourself that cannot be owned?`);
-    }
-  };
+  // Perform async riddle creation driven by state; update UI in finally
+  {
+    useAsync(
+      async () => {
+        if (!riddleRequest) return null;
+        console.log('[RoundV2Flow] useAsync(createRiddle) start', { theme: riddleRequest.themeId });
+        const service = new Service(
+          context.redis,
+          context.reddit,
+          { getSetting: context.settings?.get?.bind(context.settings) }
+        );
+        const username = currentUser?.username || 'anonymous';
+        const t0 = Date.now();
+        const riddle = await service.createRiddleFromTheme({ theme: riddleRequest.themeId, playerUsername: username });
+        console.log('[RoundV2Flow] useAsync(createRiddle) done', { id: riddle.id, ms: Date.now() - t0 });
+        return riddle;
+      },
+      {
+        depends: [riddleRequest?.nonce ?? ''],
+        finally: (riddle) => {
+          if (!riddleRequest) return;
+          if (riddle) {
+            setRiddleId(riddle.id);
+            setRiddleText(riddle.meta?.riddleText ?? '');
+            setIsAnswering(false);
+          } else {
+            // Fallback text if service failed or returned empty
+            setRiddleText(FALLBACK_RIDDLE_TEXT);
+            setIsAnswering(false);
+          }
+        },
+      }
+    );
+  }
 
   const handleSubmitAnswer = async () => {
     // Compute latest elapsed defensively from startedAt to avoid any stale state.
@@ -108,6 +138,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       console.log('[RoundV2Flow] handleSubmitAnswer: submitted', { total: resp.total });
       setResult({ total: resp.total, feedback: resp.feedback });
       setStep('result');
+      setIsAnswering(false);
     } catch (e) {
       console.error('[RoundV2Flow] handleSubmitAnswer: error', e);
     } finally {
@@ -115,51 +146,107 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     }
   };
 
-  if (step === 'theme') {
-    console.log('[RoundV2Flow] rendering theme step');
-    return (
-      <EditorPageWordStep
-        themes={themes}
-        onThemeSelect={handleThemeSelect}
-        onRefresh={() => setThemes(getRandomThemes(3))}
-      />
-    );
-  }
-
   if (step === 'answer') {
     console.log('[RoundV2Flow] rendering answer step', { elapsed, startedAt });
     return (
-      <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
-        <text size="xlarge">🧩 Your Riddle</text>
-        <text size="large">Theme: {selectedTheme?.name ?? ''}</text>
-        <vstack gap="small" width="100%" maxWidth="560px" padding="medium">
-          <text size="medium">{riddleText}</text>
-        </vstack>
+      <zstack width="100%" height="100%">
+        <image
+          url="background_2.png"
+          width="100%"
+          height="100%"
+          imageWidth={1536}
+          imageHeight={1024}
+          resizeMode="cover"
+          description="Ancient doorway backdrop"
+        />
 
-        <text size="large">⏱️ {elapsed}s</text>
-
-        <vstack gap="small" width="100%" maxWidth="560px">
-          <text size="medium" weight="bold">Your Answer</text>
-          <text size="medium">{answerText || 'Tap to enter your answer...'}</text>
-          <hstack gap="small">
-            <button appearance="secondary" onPress={() => setAnswerText(answerText + (answerText ? ' …' : 'My answer'))}>✍️ Edit</button>
-            <button appearance="secondary" onPress={() => setAnswerText('')}>🧹 Clear</button>
+        <vstack width="100%" height="100%" padding="xsmall" alignment="top center" gap="none">
+          <hstack width="100%" alignment="middle start">
+            <image
+              url="back_icon.png"
+              width="120px"
+              height="120px"
+              imageWidth={354}
+              imageHeight={354}
+              resizeMode="fit"
+              description="Go back to home"
+              onPress={() => {
+                console.log('[RoundV2Flow] back icon pressed');
+                onExit();
+              }}
+            />
           </hstack>
-          <text size="small" color="secondary">{answerText.length}/300 characters</text>
-        </vstack>
 
-        <hstack gap="medium" width="100%" maxWidth="560px">
-          <button appearance="secondary" width="50%" onPress={onExit}>← Home</button>
-          <button
-            appearance="primary"
-            width="50%"
-            disabled={!answerText.trim() || isSubmitting}
-            onPress={handleSubmitAnswer}
-          >
-            🚀 Submit Answer
-          </button>
-        </hstack>
-      </vstack>
+          <spacer size="small" />
+
+          <vstack alignment="middle center" gap="small" width="100%">
+            <spacer height="30px" />
+            <zstack width="440px" height="130px">
+              <image
+                url="riddle_flyer.png"
+                width="100%"
+                height="100%"
+                imageWidth={850}
+                imageHeight={260}
+                resizeMode="fit"
+                description="Aged parchment displaying the riddle"
+              />
+              <vstack width="100%" height="100%" alignment="middle center" padding="large">
+                <text size="large" weight="bold" alignment="middle center">
+                  {riddleText}
+                </text>
+              </vstack>
+            </zstack>
+
+            <spacer height="50px" />
+
+            {!isAnswering && (
+              <zstack width="203px" height="106px">
+                <image
+                  url="enter_answer_button.gif"
+                  width="100%"
+                  height="100%"
+                  imageWidth={203}
+                  imageHeight={106}
+                  resizeMode="fit"
+                  description="Animated enter answer button"
+                  onPress={() => {
+                    console.log('[RoundV2Flow] enter answer button pressed');
+                    setIsAnswering(true);
+                  }}
+                />
+              </zstack>
+            )}
+
+            {isAnswering && (
+              <vstack alignment="middle center" gap="medium" width="500px" padding="medium" backgroundColor="rgba(0,0,0,0.35)" cornerRadius="large">
+                <text size="medium" weight="bold" color="white">Your Answer</text>
+                <text size="medium" color="white" alignment="middle center">
+                  {answerText || 'Tap edit to craft your reply…'}
+                </text>
+                <hstack gap="medium">
+                  <button appearance="secondary" onPress={() => setAnswerText(answerText + (answerText ? ' …' : 'My answer'))}>✍️ Edit</button>
+                  <button appearance="secondary" onPress={() => setAnswerText('')}>🧹 Clear</button>
+                </hstack>
+                <text size="small" color="white">{answerText.length}/300 characters</text>
+                <hstack gap="medium" width="100%">
+                  <button appearance="secondary" width="50%" onPress={() => setIsAnswering(false)}>← Back</button>
+                  <button
+                    appearance="primary"
+                    width="50%"
+                    disabled={!answerText.trim() || isSubmitting}
+                    onPress={handleSubmitAnswer}
+                  >
+                    🚀 Submit Answer
+                  </button>
+                </hstack>
+              </vstack>
+            )}
+          </vstack>
+
+          <spacer grow />
+        </vstack>
+      </zstack>
     );
   }
 

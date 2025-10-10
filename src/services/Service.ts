@@ -94,7 +94,7 @@ export class Service {
   async generateRiddleFromAI(theme: string): Promise<{ riddleText: string }> {
     console.log('[Service.generateRiddleFromAI] start', { theme });
     const system = `You are an AI riddle-smith. Write a SINGLE short philosophical riddle aligned to a given theme.
-Rules:\n- 1–3 sentences max.\n- Do NOT include the answer.\n- No leading labels like 'Riddle:'.\n- Avoid clichés.\n- The riddle must clearly relate to the provided theme.\nOutput strictly as JSON: {"riddleText": "..."}`;
+Rules:\n- 150 characters max.\n- Do NOT include the answer.\n- No leading labels like 'Riddle:'.\n- Avoid clichés.\n- The riddle must clearly relate to the provided theme.\nOutput strictly as JSON: {"riddleText": "..."}`;
 
     const user = `Theme: ${theme}`;
 

@@ -51,7 +51,6 @@ Players level up through 7 tiers, each unlocking unique community flairs:
 1. Install the Devvit app in your subreddit
 2. Use the menu items to create:
    - **Create Riddle**: Start a new riddle challenge
-   - **Weekly Collection**: Showcase top riddles and solvers
    - **Community Hub**: Central hub with leaderboards and info
 
 ### **For Players**
@@ -72,8 +71,6 @@ Built with:
 
 ### **Core Components**
 - `Router.tsx` - Main routing and state management
-- `RiddlePost.tsx` - Riddle creation workflow
-- `CollectionPost.tsx` - Weekly collections
 - `PinnedPost.tsx` - Community hub
 - `Service.ts` - Core game logic and data management
 

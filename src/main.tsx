@@ -9,6 +9,7 @@ Devvit.configure({
   redditAPI: true,
   redis: true,
   http: true,
+  media: true,
 });
 
 // Declare settings so they appear in Devvit UI/CLI
@@ -29,24 +30,8 @@ Devvit.addSettings([
 
 // Add custom post types
 Devvit.addCustomPostType({
-  name: 'Riddle Post',
-  height: 'regular',
-  render: (context) => {
-    return <Router context={context} initialView="home" />;
-  },
-});
-
-Devvit.addCustomPostType({
-  name: 'Collection Post',
-  height: 'regular',
-  render: (context) => {
-    return <Router context={context} initialView="collection" />;
-  },
-});
-
-Devvit.addCustomPostType({
-  name: 'Pinned Post',
-  height: 'regular',
+  name: 'Install Game',
+  height: 'tall',
   render: (context) => {
     return <Router context={context} postType="pinned" initialView="home" />;
   },

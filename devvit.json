@@ -8,5 +8,8 @@
   },
   "blocks": {
     "entry": "src/main.tsx"
+  },
+  "media": {
+    "dir": "assets"
   }
 }
