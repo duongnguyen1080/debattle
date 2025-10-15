@@ -113,14 +113,14 @@ export interface PlayerResponse {
   username: string;
   answerText: string;
   elapsedMs: number;      // time-to-answer in ms
-  scores: {
-    time: number;         // 0–4 (20%)
-    clarity: number;      // 0–6 (30%)
-    originality: number;  // 0–6 (30%)
-    aesthetic: number;    // 0–4 (20%)
+  score: {
+    wit: number;          // 0–5
+    logic: number;        // 0–5
+    style: number;        // 0–5
+    total: number;        // 0–15 (sum of the above)
   };
-  total: number;          // 0–20
   feedback: string;       // AI one-liner
+  decision: 'open' | 'ajar' | 'closed';
   postId?: string;        // Reddit post id if posted
   [key: string]: any;
 }

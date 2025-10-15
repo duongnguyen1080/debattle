@@ -24,7 +24,11 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   const [elapsed, setElapsed] = useState<number>(0);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<{ total: number; feedback: string } | null>(null);
+  const [result, setResult] = useState<{
+    score: { wit: number; logic: number; style: number; total: number };
+    feedback: string;
+    decision: 'open' | 'ajar' | 'closed';
+  } | null>(null);
   // Trigger object to kick off async riddle creation via useAsync
   const [riddleRequest, setRiddleRequest] = useState<{ themeId: string; themeName: string; nonce: number } | null>(null);
   const [initializing, setInitializing] = useState(true);
@@ -41,19 +45,20 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
 
   // Keep a steady heartbeat to force re-render and derive elapsed from startedAt.
   useInterval(() => {
+    if (step !== 'answer') {
+      return;
+    }
     const now = Date.now();
-    if (startedAt && step === 'answer') {
-      const secs = Math.max(0, Math.floor((now - startedAt) / 1000));
-      setElapsed(secs);
+    let secs = elapsed;
+    if (startedAt) {
+      secs = Math.max(0, Math.floor((now - startedAt) / 1000));
+      if (secs !== elapsed) {
+        setElapsed(secs);
+      }
     }
 
     // Watchdog: if UI is stuck on the placeholder > 15s, force a visible fallback
-    if (
-      step === 'answer' &&
-      startedAt &&
-      riddleText?.startsWith('⏳ Generating riddle') &&
-      now - startedAt > 15000
-    ) {
+    if (riddleText?.startsWith('⏳ Generating riddle') && secs >= 15) {
       console.warn('[RoundV2Flow] watchdog replacing stuck riddle text with fallback');
       setRiddleText(FALLBACK_RIDDLE_TEXT);
     }
@@ -68,25 +73,42 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       const theme = randomTheme ?? { id: 'mystery', name: 'Mystery', description: 'System generated theme', difficulty: 2 };
       const startTime = Date.now();
       console.log('[RoundV2Flow] initializing round with system-picked theme', { theme: theme.id });
-      setRiddleTheme(theme);
-      setStartedAt(startTime);
-      setElapsed(0);
-      setRiddleText('⏳ Generating riddle…');
-      setRiddleId(null);
-      setAnswerText('');
-      setResult(null);
-      setRiddleRequest({ themeId: theme.id, themeName: theme.name, nonce: startTime });
-      setInitializing(false);
-      return null;
+      return { theme, startTime, nonce: startTime };
     },
-    { depends: [initializing ? 'init' : 'ready'] }
+    {
+      depends: [initializing ? 'init' : 'ready'],
+      finally: (payload, error) => {
+        if (!initializing) {
+          return;
+        }
+        if (!payload?.theme) {
+          if (error) {
+            console.error('[RoundV2Flow] init useAsync error', error);
+          }
+          setInitializing(false);
+          return;
+        }
+        const { theme, startTime, nonce } = payload;
+        setRiddleTheme(theme);
+        setStartedAt(startTime);
+        setElapsed(0);
+        setRiddleText('⏳ Generating riddle…');
+        setRiddleId(null);
+        setAnswerText('');
+        setResult(null);
+        setRiddleRequest({ themeId: theme.id, themeName: theme.name, nonce });
+        setInitializing(false);
+      },
+    }
   );
 
   // Perform async riddle creation driven by state; update UI in finally
   {
     useAsync(
       async () => {
-        if (!riddleRequest) return null;
+        if (!riddleRequest) {
+          return null;
+        }
         console.log('[RoundV2Flow] useAsync(createRiddle) start', { theme: riddleRequest.themeId });
         const service = new Service(
           context.redis,
@@ -96,16 +118,21 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
         const username = currentUser?.username || 'anonymous';
         const t0 = Date.now();
         const riddle = await service.createRiddleFromTheme({ theme: riddleRequest.themeId, playerUsername: username });
-        console.log('[RoundV2Flow] useAsync(createRiddle) done', { id: riddle.id, ms: Date.now() - t0 });
+        console.log('[RoundV2Flow] useAsync(createRiddle) done', { id: riddle?.id ?? null, ms: Date.now() - t0 });
         return riddle;
       },
       {
         depends: [riddleRequest?.nonce ?? ''],
-        finally: (riddle) => {
-          if (!riddleRequest) return;
-          if (riddle) {
+        finally: (riddle, error) => {
+          if (!riddleRequest) {
+            return;
+          }
+          if (error) {
+            console.error('[RoundV2Flow] useAsync(createRiddle) error', error);
+          }
+          if (riddle && riddle.meta?.riddleText) {
             setRiddleId(riddle.id);
-            setRiddleText(riddle.meta?.riddleText ?? '');
+            setRiddleText(riddle.meta.riddleText);
           } else {
             // Fallback text if service failed or returned empty
             setRiddleText(FALLBACK_RIDDLE_TEXT);
@@ -132,9 +159,9 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       );
       const username = currentUser?.username || 'anonymous';
       console.log('[RoundV2Flow] handleSubmitAnswer: submitting');
-      const resp = await service.submitAnswer({ riddleId, username, answerText: answer, elapsedMs: computedElapsed * 1000 });
-      console.log('[RoundV2Flow] handleSubmitAnswer: submitted', { total: resp.total });
-      setResult({ total: resp.total, feedback: resp.feedback });
+      const resp = await service.submitAnswer({ riddleId, playerUsername: username, answerText: answer, elapsed: computedElapsed * 1000 });
+      console.log('[RoundV2Flow] handleSubmitAnswer: submitted', { total: resp.score.total, decision: resp.decision });
+      setResult(resp);
       setStep('result');
     } catch (e) {
       console.error('[RoundV2Flow] handleSubmitAnswer: error', e);
@@ -288,7 +315,8 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
         <text size="xlarge">✅ Round Complete</text>
         {result ? (
           <>
-            <text size="large">Score: {result.total}/20</text>
+            <text size="large">Score: {result.score.total}/15</text>
+            <text size="medium" color="secondary">Decision: {result.decision}</text>
             <text size="medium" color="secondary">Arete: “{result.feedback}”</text>
           </>
         ) : (

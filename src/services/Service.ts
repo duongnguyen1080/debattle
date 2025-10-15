@@ -1,8 +1,8 @@
 import { RedisClient, RedditAPIClient, AppUpgrade, TriggerContext } from '@devvit/public-api';
 import { User, Guess, Theme, LeaderboardEntry } from '../types/index.js';
 import { RiddleV2, PlayerResponse } from '../types/index.js';
-import { calculateLevel, getFlairForLevel, calculateRiddleScore, calculateGuessScore } from '../utils/gameUtils.js';
-import { weightScores, calculatePostBonusFromUpvotes } from '../utils/gameUtils.js';
+import { calculateLevel, getFlairForLevel, calculateGuessScore } from '../utils/gameUtils.js';
+import { calculatePostBonusFromUpvotes } from '../utils/gameUtils.js';
 
 export class Service {
   constructor(
@@ -213,43 +213,39 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
   }
 
   // Riddle Management
-  async createRiddleFromTheme(params: { theme: string; playerUsername: string }): Promise<RiddleV2> {
+  async createRiddleFromTheme(params: { theme: string; playerUsername: string }): Promise<RiddleV2 | null> {
     const { theme, playerUsername } = params;
     console.log('[Service.createRiddleFromTheme] start', { theme, playerUsername });
-    // Use a bare id for the model id; Redis keys will be prefixed via riddleKey().
-    const id = `${Date.now()}:${Math.random().toString(36).slice(2, 11)}`;
-    const now = Date.now();
-    const expiresAt = now + 24 * 60 * 60 * 1000; // 24h
-
-    const ai = await this.generateRiddleFromAI(theme);
-
-    const riddle: RiddleV2 = {
-      id,
-      meta: { theme, riddleText: ai.riddleText },
-      authorUsername: playerUsername,
-      createdAt: now,
-      expiresAt,
-      status: 'active',
-      responses: [],
-    };
-
-    console.log('[Service.createRiddleFromTheme] persisting');
     try {
+      // Use a bare id for the model id; Redis keys will be prefixed via riddleKey().
+      const id = `${Date.now()}:${Math.random().toString(36).slice(2, 11)}`;
+      const now = Date.now();
+      const expiresAt = now + 24 * 60 * 60 * 1000; // 24h
+
+      const ai = await this.generateRiddleFromAI(theme);
+      const riddleText = (ai?.riddleText ?? '').trim() || `On the theme of ${theme}: What do you owe to yourself that cannot be owned?`;
+
+      const riddle: RiddleV2 = {
+        id,
+        meta: { theme, riddleText },
+        authorUsername: playerUsername,
+        createdAt: now,
+        expiresAt,
+        status: 'active',
+        responses: [],
+      };
+
+      console.log('[Service.createRiddleFromTheme] persisting');
       await this.redis.set(this.riddleKey(id), JSON.stringify(riddle));
-      console.log('[Service.createRiddleFromTheme] stored riddle blob');
-    } catch (e) {
-      console.error('[Service.createRiddleFromTheme] failed to store riddle', e);
-    }
-    try {
       const active = await this.getActiveRiddles();
       const next = Array.isArray(active) ? [...active, id] : [id];
       await this.redis.set('riddles:active', JSON.stringify(next));
-      console.log('[Service.createRiddleFromTheme] updated active list', { count: next.length });
+      console.log('[Service.createRiddleFromTheme] done', { id });
+      return riddle;
     } catch (e) {
-      console.error('[Service.createRiddleFromTheme] failed to update active list', e);
+      console.error('[Service.createRiddleFromTheme] error', e);
+      return null;
     }
-    console.log('[Service.createRiddleFromTheme] done', { id });
-    return riddle;
   }
 
   async getRiddle(id: string): Promise<RiddleV2 | null> {
@@ -258,30 +254,55 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
     try { return JSON.parse(raw) as RiddleV2; } catch { return null; }
   }
 
-  async submitAnswer(params: { riddleId: string; username: string; answerText: string; elapsedMs: number }): Promise<PlayerResponse> {
-    const { riddleId, username, answerText, elapsedMs } = params;
+  async submitAnswer(params: { riddleId: string; playerUsername: string; answerText: string; elapsed: number }): Promise<{
+    score: { wit: number; logic: number; style: number; total: number };
+    feedback: string;
+    decision: 'open' | 'ajar' | 'closed';
+  }> {
+    const { riddleId, playerUsername, answerText, elapsed } = params;
     const riddle = await this.getRiddle(riddleId);
-    if (!riddle || riddle.status !== 'active') throw new Error('Riddle not found or inactive');
+    if (!riddle || riddle.status !== 'active') {
+      throw new Error('Riddle not found or inactive');
+    }
 
-    const ai = await this.evaluateAnswerWithAI(answerText);
-    const scored = weightScores({ elapsedMs, clarity: ai.clarity, originality: ai.originality, aesthetic: ai.aesthetic });
+    const trimmed = answerText.trim();
+    const elapsedMs = this.clamp(Number.isFinite(elapsed) ? Math.max(0, Math.floor(elapsed)) : 0, 0, 10 * 60 * 1000);
+    const wordTokens = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
+    const uniqueWords = new Set(trimmed.toLowerCase().match(/\b[a-z']+\b/g) ?? []);
+    const connectors = (trimmed.match(/\b(because|therefore|thus|hence|so|consequently)\b/gi) ?? []).length;
+    const punctuationMarks = (trimmed.match(/[,:;—–-]/g) ?? []).length;
+    const sentenceCount = (trimmed.match(/[.!?]+/g) ?? []).length || (trimmed ? 1 : 0);
+
+    const witBase = uniqueWords.size / Math.max(1, wordTokens.length);
+    const wit = this.clamp(Math.round(witBase * 6), 0, 5);
+    const logic = this.clamp(Math.round(Math.min(5, sentenceCount + connectors)), 0, 5);
+    const style = this.clamp(Math.round(Math.min(5, punctuationMarks + (trimmed.length > 120 ? 2 : trimmed.length > 60 ? 1 : 0))), 0, 5);
+    const total = wit + logic + style;
+
+    const feedback =
+      total >= 12
+        ? 'Insightful answer—keep pushing deeper.'
+        : total >= 7
+          ? 'Good effort; clarify your reasoning to strengthen it.'
+          : 'Try grounding your answer with clearer ideas.';
+    const decision: 'open' | 'ajar' | 'closed' =
+      total >= 12 ? 'open' : total >= 7 ? 'ajar' : 'closed';
 
     const response: PlayerResponse = {
       id: `resp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
-      username,
-      answerText,
+      username: playerUsername,
+      answerText: trimmed,
       elapsedMs,
-      scores: { time: scored.time, clarity: scored.clarity, originality: scored.originality, aesthetic: scored.aesthetic },
-      total: scored.total,
-      feedback: ai.feedback,
+      score: { wit, logic, style, total },
+      feedback,
+      decision,
     };
 
     riddle.responses.push(response);
     await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
 
-    // XP = total points
-    await this.updateUserXp(username, response.total);
-    return response;
+    await this.updateUserXp(playerUsername, total);
+    return { score: response.score, feedback, decision };
   }
 
   // Guess Management
@@ -395,8 +416,11 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
         const answerText = payload.slice(pipeIdx + 1).trim();
         if (!Number.isNaN(elapsed) && answerText) {
           try {
-            const resp = await this.submitAnswer({ riddleId: post.id, username: comment.author, answerText, elapsedMs: elapsed });
-            await context.reddit.submitComment({ id: comment.id, text: `🧠 Answer received. Score: **${resp.total}/20**. Feedback: _${resp.feedback}_` });
+            const resp = await this.submitAnswer({ riddleId: post.id, playerUsername: comment.author, answerText, elapsed });
+            await context.reddit.submitComment({
+              id: comment.id,
+              text: `🧠 Answer received. Score: **${resp.score.total}/15**. Decision: **${resp.decision}**. Feedback: _${resp.feedback}_`,
+            });
           } catch (e) {
             console.error('Error scoring answer:', e);
           }
