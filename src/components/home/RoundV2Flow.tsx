@@ -1,4 +1,4 @@
-import { Devvit, useInterval, useState, useAsync } from '@devvit/public-api';
+import { Devvit, useInterval, useState, useAsync, useForm } from '@devvit/public-api';
 import { Service } from '../../services/Service.js';
 import { User, Theme } from '../../types/index.js';
 import { getRandomThemes } from '../../utils/gameUtils.js';
@@ -28,7 +28,6 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   // Trigger object to kick off async riddle creation via useAsync
   const [riddleRequest, setRiddleRequest] = useState<{ themeId: string; themeName: string; nonce: number } | null>(null);
   const [initializing, setInitializing] = useState(true);
-  const [isAnswering, setIsAnswering] = useState(false);
 
   console.log('[RoundV2Flow] render', {
     step,
@@ -76,7 +75,6 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       setRiddleId(null);
       setAnswerText('');
       setResult(null);
-      setIsAnswering(false);
       setRiddleRequest({ themeId: theme.id, themeName: theme.name, nonce: startTime });
       setInitializing(false);
       return null;
@@ -108,23 +106,23 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
           if (riddle) {
             setRiddleId(riddle.id);
             setRiddleText(riddle.meta?.riddleText ?? '');
-            setIsAnswering(false);
           } else {
             // Fallback text if service failed or returned empty
             setRiddleText(FALLBACK_RIDDLE_TEXT);
-            setIsAnswering(false);
           }
         },
       }
     );
   }
 
-  const handleSubmitAnswer = async () => {
+  const handleSubmitAnswer = async (submittedAnswer?: string) => {
     // Compute latest elapsed defensively from startedAt to avoid any stale state.
     const now = Date.now();
     const computedElapsed = startedAt ? Math.max(0, Math.floor((now - startedAt) / 1000)) : elapsed;
-    console.log('[RoundV2Flow] handleSubmitAnswer: start', { riddleId, hasAnswer: !!answerText.trim(), elapsed: computedElapsed });
-    if (!riddleId || !answerText.trim()) return;
+    const answer = (submittedAnswer ?? answerText).trim();
+    console.log('[RoundV2Flow] handleSubmitAnswer: start', { riddleId, hasAnswer: !!answer, elapsed: computedElapsed });
+    if (!riddleId || !answer) return;
+    setAnswerText(answer);
     try {
       setIsSubmitting(true);
       const service = new Service(
@@ -134,15 +132,58 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       );
       const username = currentUser?.username || 'anonymous';
       console.log('[RoundV2Flow] handleSubmitAnswer: submitting');
-      const resp = await service.submitAnswer({ riddleId, username, answerText: answerText.trim(), elapsedMs: computedElapsed * 1000 });
+      const resp = await service.submitAnswer({ riddleId, username, answerText: answer, elapsedMs: computedElapsed * 1000 });
       console.log('[RoundV2Flow] handleSubmitAnswer: submitted', { total: resp.total });
       setResult({ total: resp.total, feedback: resp.feedback });
       setStep('result');
-      setIsAnswering(false);
     } catch (e) {
       console.error('[RoundV2Flow] handleSubmitAnswer: error', e);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const answerFormKey = useForm(
+    () => ({
+      title: 'Answer the riddle',
+      acceptLabel: 'Submit',
+      cancelLabel: 'Cancel',
+      fields: [
+        {
+          type: 'string',
+          name: 'answer',
+          label: 'Your answer',
+          required: true,
+          placeholder: 'Share your reasoning…',
+          maxLength: 300,
+          defaultValue: answerText,
+        },
+      ],
+    }),
+    async ({ answer }) => {
+      const trimmed = (answer ?? '').trim();
+      if (!trimmed) {
+        console.warn('[RoundV2Flow] answerForm: empty answer submitted');
+        return;
+      }
+      await handleSubmitAnswer(trimmed);
+    }
+  );
+
+  const promptForAnswer = () => {
+    if (isSubmitting) {
+      return;
+    }
+    if (!context?.ui?.showForm) {
+      console.warn('[RoundV2Flow] context.ui.showForm is unavailable');
+      return;
+    }
+
+    try {
+      console.log('[RoundV2Flow] promptForAnswer: showing form');
+      context.ui.showForm(answerFormKey);
+    } catch (err) {
+      console.error('[RoundV2Flow] promptForAnswer: error displaying form', err);
     }
   };
 
@@ -200,47 +241,26 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
 
             <spacer height="50px" />
 
-            {!isAnswering && (
-              <zstack width="203px" height="106px">
-                <image
-                  url="enter_answer_button.gif"
-                  width="100%"
-                  height="100%"
-                  imageWidth={203}
-                  imageHeight={106}
-                  resizeMode="fit"
-                  description="Animated enter answer button"
-                  onPress={() => {
-                    console.log('[RoundV2Flow] enter answer button pressed');
-                    setIsAnswering(true);
-                  }}
-                />
-              </zstack>
-            )}
+            <zstack width="203px" height="106px">
+              <image
+                url="enter_answer_button.gif"
+                width="100%"
+                height="100%"
+                imageWidth={203}
+                imageHeight={106}
+                resizeMode="fit"
+                description="Animated enter answer button"
+                onPress={() => {
+                  console.log('[RoundV2Flow] enter answer button pressed');
+                  promptForAnswer();
+                }}
+              />
+            </zstack>
 
-            {isAnswering && (
-              <vstack alignment="middle center" gap="medium" width="500px" padding="medium" backgroundColor="rgba(0,0,0,0.35)" cornerRadius="large">
-                <text size="medium" weight="bold" color="white">Your Answer</text>
-                <text size="medium" color="white" alignment="middle center">
-                  {answerText || 'Tap edit to craft your reply…'}
-                </text>
-                <hstack gap="medium">
-                  <button appearance="secondary" onPress={() => setAnswerText(answerText + (answerText ? ' …' : 'My answer'))}>✍️ Edit</button>
-                  <button appearance="secondary" onPress={() => setAnswerText('')}>🧹 Clear</button>
-                </hstack>
-                <text size="small" color="white">{answerText.length}/300 characters</text>
-                <hstack gap="medium" width="100%">
-                  <button appearance="secondary" width="50%" onPress={() => setIsAnswering(false)}>← Back</button>
-                  <button
-                    appearance="primary"
-                    width="50%"
-                    disabled={!answerText.trim() || isSubmitting}
-                    onPress={handleSubmitAnswer}
-                  >
-                    🚀 Submit Answer
-                  </button>
-                </hstack>
-              </vstack>
+            {isSubmitting && (
+              <text size="small" color="secondary" alignment="middle center">
+                Submitting your answer…
+              </text>
             )}
           </vstack>
 
@@ -253,20 +273,32 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   // result
   console.log('[RoundV2Flow] rendering result step', { result });
   return (
-    <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
-      <text size="xlarge">✅ Round Complete</text>
-      {result ? (
-        <>
-          <text size="large">Score: {result.total}/20</text>
-          <text size="medium" color="secondary">Arete: “{result.feedback}”</text>
-        </>
-      ) : (
-        <text size="medium">No result available</text>
-      )}
+    <zstack width="100%" height="100%">
+      <image
+        url="background_3.png"
+        width="100%"
+        height="100%"
+        imageWidth={1536}
+        imageHeight={1024}
+        resizeMode="cover"
+        description="Sunlit courtyard backdrop"
+      />
 
-      <hstack gap="medium" width="100%" maxWidth="560px">
-        <button appearance="primary" width="100%" onPress={onExit}>🏠 Back to Home</button>
-      </hstack>
-    </vstack>
+      <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
+        <text size="xlarge">✅ Round Complete</text>
+        {result ? (
+          <>
+            <text size="large">Score: {result.total}/20</text>
+            <text size="medium" color="secondary">Arete: “{result.feedback}”</text>
+          </>
+        ) : (
+          <text size="medium">No result available</text>
+        )}
+
+        <hstack gap="medium" width="100%" maxWidth="560px">
+          <button appearance="primary" width="100%" onPress={onExit}>🏠 Back to Home</button>
+        </hstack>
+      </vstack>
+    </zstack>
   );
 }
