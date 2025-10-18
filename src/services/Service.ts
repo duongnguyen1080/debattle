@@ -3,6 +3,7 @@ import { User, Guess, Theme, LeaderboardEntry } from '../types/index.js';
 import { RiddleV2, PlayerResponse } from '../types/index.js';
 import { calculateLevel, getFlairForLevel, calculateGuessScore } from '../utils/gameUtils.js';
 import { calculatePostBonusFromUpvotes } from '../utils/gameUtils.js';
+import { getRandomQuestion, QuestionBankEntry } from '../utils/questionBank.js';
 
 export class Service {
   constructor(
@@ -213,21 +214,25 @@ Rubric (numerical):\n- clarity: 0â€“6 (precision, coherence)\n- originality: 0â€
   }
 
   // Riddle Management
-  async createRiddleFromTheme(params: { theme: string; playerUsername: string }): Promise<RiddleV2 | null> {
-    const { theme, playerUsername } = params;
-    console.log('[Service.createRiddleFromTheme] start', { theme, playerUsername });
+  async createRiddleFromTheme(params: { theme: string; playerUsername: string; question?: QuestionBankEntry }): Promise<RiddleV2 | null> {
+    const { theme: requestedTheme, playerUsername, question: providedQuestion } = params;
+    console.log('[Service.createRiddleFromTheme] start', { requestedTheme, playerUsername });
     try {
       // Use a bare id for the model id; Redis keys will be prefixed via riddleKey().
       const id = `${Date.now()}:${Math.random().toString(36).slice(2, 11)}`;
       const now = Date.now();
       const expiresAt = now + 24 * 60 * 60 * 1000; // 24h
-
-      const ai = await this.generateRiddleFromAI(theme);
-      const riddleText = (ai?.riddleText ?? '').trim() || `On the theme of ${theme}: What do you owe to yourself that cannot be owned?`;
+      const question = providedQuestion ?? getRandomQuestion();
+      const riddleText = question.question || `On the theme of ${question.theme}: What do you owe to yourself that cannot be owned?`;
 
       const riddle: RiddleV2 = {
         id,
-        meta: { theme, riddleText },
+        meta: {
+          theme: question.theme,
+          riddleText,
+          questionId: question.id,
+          requestedTheme,
+        },
         authorUsername: playerUsername,
         createdAt: now,
         expiresAt,

@@ -1,10 +1,10 @@
 import { Devvit, useInterval, useState, useAsync, useForm } from '@devvit/public-api';
 import { Service } from '../../services/Service.js';
-import { User, Theme } from '../../types/index.js';
-import { getRandomThemes } from '../../utils/gameUtils.js';
+import { User } from '../../types/index.js';
 import { WrappedFontText, measureWrappedText } from './FontText.js';
+import { getRandomQuestion, QuestionBankEntry } from '../../utils/questionBank.js';
 
-const FALLBACK_RIDDLE_TEXT = 'Consider this: What do you owe to yourself that cannot be owned?';
+const FALLBACK_RIDDLE_TEXT = 'What do you owe to yourself that cannot be owned?';
 
 // --- style ---
 const RIDDLE_STYLE = {
@@ -156,29 +156,36 @@ function computeParchmentLayout(text: string) {
 }
 
 export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) {
+  const [initialQuestion] = useState<QuestionBankEntry | null>(() => {
+    try {
+      return getRandomQuestion();
+    } catch (err) {
+      console.error('[RoundV2Flow] failed to fetch initial question from bank', err);
+      return null;
+    }
+  }, []);
+  const initialRiddleText = initialQuestion?.question ?? FALLBACK_RIDDLE_TEXT;
   const [step, setStep] = useState<Step>('answer');
-  const [riddleTheme, setRiddleTheme] = useState<Theme | null>(null);
   const [riddleId, setRiddleId] = useState<string | null>(null);
-  const [riddleText, setRiddleText] = useState<string>('⏳ Generating riddle…');
+  const [riddleText, setRiddleText] = useState<string>(initialRiddleText);
   const [answerText, setAnswerText] = useState<string>('');
   // Elapsed seconds shown in the UI; derived from startedAt via a simple tick.
   // Avoid relying on interval closures capturing stale state.
   const [elapsed, setElapsed] = useState<number>(0);
-  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [startedAt, setStartedAt] = useState<number | null>(() => Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{
     score: { wit: number; logic: number; style: number; total: number };
     feedback: string;
     decision: 'open' | 'ajar' | 'closed';
   } | null>(null);
-  // Trigger object to kick off async riddle creation via useAsync
-  const [riddleRequest, setRiddleRequest] = useState<{ themeId: string; themeName: string; nonce: number } | null>(null);
-  const [initializing, setInitializing] = useState(true);
+  const [roundNonce] = useState<number>(() => Date.now());
 
   console.log('[RoundV2Flow] render', {
     step,
     hasUser: !!currentUser,
-    theme: riddleTheme?.id,
+    roundNonce,
+    questionId: initialQuestion?.id ?? null,
     riddleId,
     startedAt,
     elapsed,
@@ -199,8 +206,8 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       }
     }
 
-    // Watchdog: if UI is stuck on the placeholder > 15s, force a visible fallback
-    if (riddleText?.startsWith('⏳ Generating riddle') && secs >= 15) {
+    // Watchdog: if UI is stuck on the placeholder > 5s, force a visible fallback
+    if (riddleText?.startsWith('⏳ Generating riddle') && secs >= 5) {
       console.warn('[RoundV2Flow] watchdog replacing stuck riddle text with fallback');
       setRiddleText(FALLBACK_RIDDLE_TEXT);
     }
@@ -208,81 +215,51 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
 
   useAsync(
     async () => {
-      if (!initializing) {
+      if (!roundNonce) {
         return null;
       }
-      const [randomTheme] = getRandomThemes(1);
-      const theme = randomTheme ?? { id: 'mystery', name: 'Mystery', description: 'System generated theme', difficulty: 2 };
       const startTime = Date.now();
-      console.log('[RoundV2Flow] initializing round with system-picked theme', { theme: theme.id });
-      return { theme, startTime, nonce: startTime };
+      console.log('[RoundV2Flow] starting round', { nonce: roundNonce, questionId: initialQuestion?.id ?? null });
+      setStartedAt(startTime);
+      setElapsed(0);
+      setRiddleId(null);
+      setAnswerText('');
+      setResult(null);
+
+      const service = new Service(
+        context.redis,
+        context.reddit,
+        { getSetting: context.settings?.get?.bind(context.settings) }
+      );
+      const username = currentUser?.username || 'anonymous';
+      const t0 = Date.now();
+      const riddle = await service.createRiddleFromTheme({
+        theme: 'any',
+        playerUsername: username,
+        question: initialQuestion ?? undefined,
+      });
+      console.log('[RoundV2Flow] createRiddle complete', { id: riddle?.id ?? null, ms: Date.now() - t0 });
+      return riddle;
     },
     {
-      depends: [initializing ? 'init' : 'ready'],
-      finally: (payload, error) => {
-        if (!initializing) {
+      depends: [roundNonce],
+      finally: (riddle, error) => {
+        if (!roundNonce) {
           return;
         }
-        if (!payload?.theme) {
-          if (error) {
-            console.error('[RoundV2Flow] init useAsync error', error);
-          }
-          setInitializing(false);
-          return;
+        if (error) {
+          console.error('[RoundV2Flow] createRiddle error', error);
         }
-        const { theme, startTime, nonce } = payload;
-        setRiddleTheme(theme);
-        setStartedAt(startTime);
-        setElapsed(0);
-        setRiddleText('⏳ Generating riddle…');
-        setRiddleId(null);
-        setAnswerText('');
-        setResult(null);
-        setRiddleRequest({ themeId: theme.id, themeName: theme.name, nonce });
-        setInitializing(false);
+        if (riddle && riddle.meta?.riddleText) {
+          setRiddleId(riddle.id);
+          setRiddleText(riddle.meta.riddleText);
+        } else if (!initialQuestion) {
+          // Fallback text if service failed and no initial question was available
+          setRiddleText(FALLBACK_RIDDLE_TEXT);
+        }
       },
     }
   );
-
-  // Perform async riddle creation driven by state; update UI in finally
-  {
-    useAsync(
-      async () => {
-        if (!riddleRequest) {
-          return null;
-        }
-        console.log('[RoundV2Flow] useAsync(createRiddle) start', { theme: riddleRequest.themeId });
-        const service = new Service(
-          context.redis,
-          context.reddit,
-          { getSetting: context.settings?.get?.bind(context.settings) }
-        );
-        const username = currentUser?.username || 'anonymous';
-        const t0 = Date.now();
-        const riddle = await service.createRiddleFromTheme({ theme: riddleRequest.themeId, playerUsername: username });
-        console.log('[RoundV2Flow] useAsync(createRiddle) done', { id: riddle?.id ?? null, ms: Date.now() - t0 });
-        return riddle;
-      },
-      {
-        depends: [riddleRequest?.nonce ?? ''],
-        finally: (riddle, error) => {
-          if (!riddleRequest) {
-            return;
-          }
-          if (error) {
-            console.error('[RoundV2Flow] useAsync(createRiddle) error', error);
-          }
-          if (riddle && riddle.meta?.riddleText) {
-            setRiddleId(riddle.id);
-            setRiddleText(riddle.meta.riddleText);
-          } else {
-            // Fallback text if service failed or returned empty
-            setRiddleText(FALLBACK_RIDDLE_TEXT);
-          }
-        },
-      }
-    );
-  }
 
   const handleSubmitAnswer = async (submittedAnswer?: string) => {
     // Compute latest elapsed defensively from startedAt to avoid any stale state.
@@ -481,13 +458,13 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
 
               <zstack width="203px" height="106px">
                 <image
-                  url="enter_answer_button.gif"
+                  url="enter_answer_button.png"
                   width="100%"
                   height="100%"
                   imageWidth={203}
                   imageHeight={106}
                   resizeMode="fit"
-                  description="Animated enter answer button"
+                  description="Enter answer button"
                   onPress={() => {
                     console.log('[RoundV2Flow] enter answer button pressed');
                     promptForAnswer();
