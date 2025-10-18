@@ -2,8 +2,48 @@ import { Devvit, useInterval, useState, useAsync, useForm } from '@devvit/public
 import { Service } from '../../services/Service.js';
 import { User, Theme } from '../../types/index.js';
 import { getRandomThemes } from '../../utils/gameUtils.js';
+import { WrappedFontText, measureWrappedText } from './FontText.js';
 
 const FALLBACK_RIDDLE_TEXT = 'Consider this: What do you owe to yourself that cannot be owned?';
+
+// --- style ---
+const RIDDLE_STYLE = {
+  color: '#231414',
+  fontSize: 40,
+  lineGap: 10,
+  letterSpacing: -2,
+  targetLinesMin: 2,
+  targetLinesMax: 5,
+} as const;
+
+// --- parchment + responsive bounds ---
+const PARCHMENT = {
+  minWidth: 560,
+  maxWidth: 860,
+  capTop: 72,
+  capBottom: 72,
+  midTile: 48,
+  padX: 40,
+  padY: 28,
+  minHeight: 140,
+  maxHeight: 300,
+} as const;
+
+const VIEW = {
+  minWidth: 520,
+  maxWidth: 900,
+} as const;
+
+const LAYOUT = {
+  maxParchmentFraction: 0.55,
+  buttonGapFraction: 0.02,
+} as const;
+
+const SLICE_PIXEL_DIMENSIONS = {
+  top: { width: 816, height: 74 },
+  mid: { width: 816, height: 104 },
+  bottom: { width: 811, height: 64 },
+} as const;
 
 interface RoundV2FlowProps {
   context: any;
@@ -12,6 +52,108 @@ interface RoundV2FlowProps {
 }
 
 type Step = 'answer' | 'result';
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(n, max));
+}
+
+function chooseResponsiveWidth(text: string): number {
+  const { minWidth, maxWidth, padX } = PARCHMENT;
+  const { fontSize, letterSpacing, lineGap, targetLinesMin, targetLinesMax } = RIDDLE_STYLE;
+
+  if (maxWidth <= minWidth) {
+    return clamp(minWidth, VIEW.minWidth, VIEW.maxWidth);
+  }
+
+  const candidates: number[] = [];
+  for (let width = minWidth; width <= maxWidth; width += 40) {
+    candidates.push(width);
+  }
+  if (candidates[candidates.length - 1] !== maxWidth) {
+    candidates.push(maxWidth);
+  }
+
+  let bestWidth = maxWidth;
+  let bestDiff = Number.POSITIVE_INFINITY;
+  let sawAbove = false;
+  let sawBelow = false;
+
+  for (const width of candidates) {
+    const contentWidth = Math.max(1, width - padX * 2);
+    const { lineCount } = measureWrappedText({
+      text,
+      maxWidth: contentWidth,
+      fontSize,
+      letterSpacing,
+      lineGap,
+    });
+
+    if (lineCount >= targetLinesMin && lineCount <= targetLinesMax) {
+      return clamp(width, VIEW.minWidth, VIEW.maxWidth);
+    }
+
+    if (lineCount > targetLinesMax) {
+      sawAbove = true;
+      const diff = lineCount - targetLinesMax;
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        bestWidth = width;
+      }
+    } else if (lineCount < targetLinesMin) {
+      sawBelow = true;
+      const diff = targetLinesMin - lineCount;
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        bestWidth = width;
+      }
+    }
+  }
+
+  if (sawAbove && !sawBelow) {
+    return clamp(PARCHMENT.maxWidth, VIEW.minWidth, VIEW.maxWidth);
+  }
+  if (sawBelow && !sawAbove) {
+    return clamp(PARCHMENT.minWidth, VIEW.minWidth, VIEW.maxWidth);
+  }
+
+  return clamp(bestWidth, VIEW.minWidth, VIEW.maxWidth);
+}
+
+function computeParchmentLayout(text: string) {
+  const width = chooseResponsiveWidth(text);
+  const { capTop, capBottom, midTile, padX, padY, minHeight, maxHeight } = PARCHMENT;
+  const { fontSize, letterSpacing, lineGap } = RIDDLE_STYLE;
+
+  const contentWidth = Math.max(1, width - padX * 2);
+
+  const { totalHeight } = measureWrappedText({
+    text,
+    maxWidth: contentWidth,
+    fontSize,
+    letterSpacing,
+    lineGap,
+  });
+
+  const neededInner = totalHeight + padY * 2;
+  const minInner = Math.max(minHeight, capTop + capBottom);
+  const maxInner = Math.max(minInner, maxHeight);
+  const clampedInner = clamp(neededInner, minInner, maxInner);
+  const middleBand = Math.max(0, clampedInner - capTop - capBottom);
+  const tiles = middleBand > 0 ? Math.ceil(middleBand / midTile) : 0;
+  const flyerHeight = capTop + tiles * midTile + capBottom;
+  const extraPadY = Math.max(0, (flyerHeight - neededInner) / 2);
+  const needsScroll = neededInner > flyerHeight;
+
+  return {
+    width,
+    contentWidth,
+    innerHeight: flyerHeight,
+    flyerHeight,
+    tiles,
+    extraPadY,
+    needsScroll,
+  };
+}
 
 export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) {
   const [step, setStep] = useState<Step>('answer');
@@ -216,6 +358,24 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
 
   if (step === 'answer') {
     console.log('[RoundV2Flow] rendering answer step', { elapsed, startedAt });
+    const { color, fontSize, lineGap, letterSpacing } = RIDDLE_STYLE;
+    const viewportHeight = context?.viewportHeight ?? 1024;
+    const maxParchmentHeight = viewportHeight * LAYOUT.maxParchmentFraction;
+    const buttonGap = viewportHeight * LAYOUT.buttonGapFraction;
+    const {
+      width: flyerW,
+      contentWidth,
+      innerHeight,
+      flyerHeight,
+      tiles,
+      extraPadY,
+      needsScroll,
+    } = computeParchmentLayout(riddleText);
+    const padTop = PARCHMENT.padY + extraPadY;
+    const padBottom = PARCHMENT.padY + extraPadY;
+    const clampedFlyerHeight = Math.min(flyerHeight, maxParchmentHeight);
+    const parchmentOffset = Math.max(0, (maxParchmentHeight - clampedFlyerHeight) / 3);
+
     return (
       <zstack width="100%" height="100%">
         <image
@@ -247,48 +407,101 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
 
           <spacer size="small" />
 
-          <vstack alignment="middle center" gap="small" width="100%">
+          <vstack alignment="middle center" gap="none" width="100%" height="100%">
             <spacer height="30px" />
-            <zstack width="440px" height="130px">
-              <image
-                url="riddle_flyer.png"
-                width="100%"
-                height="100%"
-                imageWidth={850}
-                imageHeight={260}
-                resizeMode="fit"
-                description="Aged parchment displaying the riddle"
-              />
-              <vstack width="100%" height="100%" alignment="middle center" padding="large">
-                <text size="large" weight="bold" alignment="middle center">
-                  {riddleText}
+            <vstack
+              width="100%"
+              alignment="top center"
+              gap="none"
+              paddingTop={`${parchmentOffset}px`}
+            >
+              <zstack
+                width={`${flyerW}px`}
+                height={`${clampedFlyerHeight}px`}
+                alignment="top center"
+              >
+                <vstack width="100%" height="100%" alignment="top center" gap="none">
+                  <image
+                    url="riddle_top.png"
+                    width="100%"
+                    height={`${PARCHMENT.capTop}px`}
+                    imageWidth={SLICE_PIXEL_DIMENSIONS.top.width}
+                    imageHeight={SLICE_PIXEL_DIMENSIONS.top.height}
+                    resizeMode="fill"
+                    description="Top parchment edge"
+                  />
+                  {Array.from({ length: tiles }).map((_, index) => (
+                    <image
+                      key={`riddle-mid-${index}`}
+                      url="riddle_mid.png"
+                      width="100%"
+                      height={`${PARCHMENT.midTile}px`}
+                      imageWidth={SLICE_PIXEL_DIMENSIONS.mid.width}
+                      imageHeight={SLICE_PIXEL_DIMENSIONS.mid.height}
+                      resizeMode="fill"
+                      description="Parchment middle texture"
+                    />
+                  ))}
+                  <image
+                    url="riddle_bottom.png"
+                    width="100%"
+                    height={`${PARCHMENT.capBottom}px`}
+                    imageWidth={SLICE_PIXEL_DIMENSIONS.bottom.width}
+                    imageHeight={SLICE_PIXEL_DIMENSIONS.bottom.height}
+                    resizeMode="fill"
+                    description="Bottom parchment edge"
+                  />
+                </vstack>
+
+                <vstack
+                  width="100%"
+                  height={`${innerHeight}px`}
+                  padding={{
+                    top: `${padTop}px`,
+                    bottom: `${padBottom}px`,
+                    left: `${PARCHMENT.padX}px`,
+                    right: `${PARCHMENT.padX}px`,
+                  }}
+                  alignment="middle center"
+                  scroll={needsScroll ? 'vertical' : undefined}
+                >
+                  <WrappedFontText
+                    text={riddleText}
+                    maxWidth={contentWidth}
+                    color={color}
+                    fontSize={fontSize}
+                    letterSpacing={letterSpacing}
+                    lineGap={lineGap}
+                    align="center"
+                  />
+                </vstack>
+              </zstack>
+
+              <spacer height={`${buttonGap}px`} />
+
+              <zstack width="203px" height="106px">
+                <image
+                  url="enter_answer_button.gif"
+                  width="100%"
+                  height="100%"
+                  imageWidth={203}
+                  imageHeight={106}
+                  resizeMode="fit"
+                  description="Animated enter answer button"
+                  onPress={() => {
+                    console.log('[RoundV2Flow] enter answer button pressed');
+                    promptForAnswer();
+                  }}
+                />
+              </zstack>
+
+              {isSubmitting && (
+                <text size="small" color="secondary" alignment="middle center">
+                  Submitting your answer…
                 </text>
-              </vstack>
-            </zstack>
-
-            <spacer height="50px" />
-
-            <zstack width="203px" height="106px">
-              <image
-                url="enter_answer_button.gif"
-                width="100%"
-                height="100%"
-                imageWidth={203}
-                imageHeight={106}
-                resizeMode="fit"
-                description="Animated enter answer button"
-                onPress={() => {
-                  console.log('[RoundV2Flow] enter answer button pressed');
-                  promptForAnswer();
-                }}
-              />
-            </zstack>
-
-            {isSubmitting && (
-              <text size="small" color="secondary" alignment="middle center">
-                Submitting your answer…
-              </text>
-            )}
+              )}
+            </vstack>
+            <spacer grow />
           </vstack>
 
           <spacer grow />

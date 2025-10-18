@@ -1,0 +1,10 @@
+src/components/PinnedPost.tsx(131,7): error TS2322: Type 'void' is not assignable to type 'Element'.
+src/components/PinnedPost.tsx(274,7): error TS2322: Type 'undefined' is not assignable to type 'Element'.
+src/components/PinnedPost.tsx(281,7): error TS2322: Type 'undefined' is not assignable to type 'Element'.
+src/components/Router.tsx(47,42): error TS2344: Type 'HomeSession | null' does not satisfy the constraint 'JSONValue'.
+  Type 'HomeSession' is not assignable to type 'JSONValue'.
+    Type 'HomeSession' is not assignable to type 'JSONObject'.
+      Index signature for type 'string' is missing in type 'HomeSession'.
+src/components/Router.tsx(75,20): error TS2345: Argument of type 'true | { currentUser: User | null; username: string; }' is not assignable to parameter of type 'SetStateAction<boolean>'.
+  Type '{ currentUser: User | null; username: string; }' is not assignable to type 'SetStateAction<boolean>'.
+src/components/Router.tsx(84,31): error TS2339: Property 'currentUser' does not exist on type 'true'.
