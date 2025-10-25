@@ -454,7 +454,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
                 </vstack>
               </zstack>
 
-              <spacer height={`${buttonGap}px`} />
+              <spacer height={`${buttonGap}px`} />i
 
               <zstack width="203px" height="106px">
                 <image
