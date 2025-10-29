@@ -2,6 +2,7 @@ import { Devvit, useInterval, useState, useAsync, useForm } from '@devvit/public
 import { Service } from '../../services/Service.js';
 import { User } from '../../types/index.js';
 import { WrappedFontText, measureWrappedText } from './FontText.js';
+import { WrappedAnswerFontText } from './AnswerFontText.js';
 import { getRandomQuestion, QuestionBankEntry } from '../../utils/questionBank.js';
 
 const FALLBACK_RIDDLE_TEXT = 'What do you owe to yourself that cannot be owned?';
@@ -24,7 +25,7 @@ const PARCHMENT = {
   capBottom: 72,
   midTile: 48,
   padX: 40,
-  padY: 28,
+  padY: 20,
   minHeight: 140,
   maxHeight: 300,
 } as const;
@@ -52,6 +53,14 @@ interface RoundV2FlowProps {
 }
 
 type Step = 'answer' | 'result';
+
+type RoundResult = {
+  score: { wit: number; logic: number; style: number; total: number };
+  feedback: string;
+  decision: 'open' | 'ajar' | 'closed';
+  questionText: string;
+  answerText: string;
+};
 
 function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(n, max));
@@ -174,12 +183,9 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   const [elapsed, setElapsed] = useState<number>(0);
   const [startedAt, setStartedAt] = useState<number | null>(() => Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<{
-    score: { wit: number; logic: number; style: number; total: number };
-    feedback: string;
-    decision: 'open' | 'ajar' | 'closed';
-  } | null>(null);
+  const [result, setResult] = useState<RoundResult | null>(null);
   const [roundNonce] = useState<number>(() => Date.now());
+  const viewportHeight = context?.viewportHeight ?? 1024;
 
   console.log('[RoundV2Flow] render', {
     step,
@@ -278,9 +284,18 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       );
       const username = currentUser?.username || 'anonymous';
       console.log('[RoundV2Flow] handleSubmitAnswer: submitting');
-      const resp = await service.submitAnswer({ riddleId, playerUsername: username, answerText: answer, elapsed: computedElapsed * 1000 });
+      const resp = await service.submitAnswer({
+        riddleId,
+        playerUsername: username,
+        answerText: answer,
+        elapsed: computedElapsed * 1000,
+      });
       console.log('[RoundV2Flow] handleSubmitAnswer: submitted', { total: resp.score.total, decision: resp.decision });
-      setResult(resp);
+      setResult({
+        ...resp,
+        questionText: riddleText,
+        answerText: answer,
+      });
       setStep('result');
     } catch (e) {
       console.error('[RoundV2Flow] handleSubmitAnswer: error', e);
@@ -336,7 +351,6 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   if (step === 'answer') {
     console.log('[RoundV2Flow] rendering answer step', { elapsed, startedAt });
     const { color, fontSize, lineGap, letterSpacing } = RIDDLE_STYLE;
-    const viewportHeight = context?.viewportHeight ?? 1024;
     const maxParchmentHeight = viewportHeight * LAYOUT.maxParchmentFraction;
     const buttonGap = viewportHeight * LAYOUT.buttonGapFraction;
     const {
@@ -454,7 +468,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
                 </vstack>
               </zstack>
 
-              <spacer height={`${buttonGap}px`} />i
+              <spacer height={`${buttonGap}px`} />
 
               <zstack width="203px" height="106px">
                 <image
@@ -487,8 +501,45 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     );
   }
 
-  // result
   console.log('[RoundV2Flow] rendering result step', { result });
+  if (!result) {
+    return (
+      <zstack width="100%" height="100%">
+        <image
+          url="background_3.png"
+          width="100%"
+          height="100%"
+          imageWidth={1536}
+          imageHeight={1024}
+          resizeMode="cover"
+          description="Sunlit courtyard backdrop"
+        />
+        <vstack width="100%" height="100%" alignment="middle center" gap="medium">
+          <text size="large">Gathering your results…</text>
+          <button appearance="secondary" onPress={onExit}>🏠 Back to Home</button>
+        </vstack>
+      </zstack>
+    );
+  }
+
+  const resultQuestion = result.questionText || riddleText;
+  const resultAnswer = result.answerText || 'No answer submitted.';
+  const resultMeasureText = `${resultQuestion}\n${resultAnswer}`;
+  const resultMaxParchmentHeight = viewportHeight * LAYOUT.maxParchmentFraction;
+  const {
+    width: resultFlyerW,
+    contentWidth: resultContentWidth,
+    innerHeight: resultInnerHeight,
+    flyerHeight: resultFlyerHeight,
+    tiles: resultTiles,
+    extraPadY: resultExtraPadY,
+    needsScroll: resultNeedsScroll,
+  } = computeParchmentLayout(resultMeasureText);
+  const resultPadTop = PARCHMENT.padY + resultExtraPadY;
+  const resultPadBottom = PARCHMENT.padY + resultExtraPadY;
+  const resultClampedHeight = Math.min(resultFlyerHeight, resultMaxParchmentHeight);
+  const resultOffset = Math.max(0, (resultMaxParchmentHeight - resultClampedHeight) / 3);
+
   return (
     <zstack width="100%" height="100%">
       <image
@@ -501,21 +552,96 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
         description="Sunlit courtyard backdrop"
       />
 
-      <vstack height="100%" width="100%" alignment="middle center" gap="large" padding="large">
-        <text size="xlarge">✅ Round Complete</text>
-        {result ? (
-          <>
-            <text size="large">Score: {result.score.total}/15</text>
-            <text size="medium" color="secondary">Decision: {result.decision}</text>
-            <text size="medium" color="secondary">Arete: “{result.feedback}”</text>
-          </>
-        ) : (
-          <text size="medium">No result available</text>
-        )}
+      <vstack width="100%" height="100%" padding="large" alignment="top center" gap="large">
+        <spacer size="small" />
+        <vstack width="100%" alignment="top center" gap="none" paddingTop={`${resultOffset}px`}>
+          <zstack
+            width={`${resultFlyerW}px`}
+            height={`${resultClampedHeight}px`}
+            alignment="top center"
+          >
+            <vstack width="100%" height="100%" alignment="top center" gap="none">
+              <image
+                url="riddle_top.png"
+                width="100%"
+                height={`${PARCHMENT.capTop}px`}
+                imageWidth={SLICE_PIXEL_DIMENSIONS.top.width}
+                imageHeight={SLICE_PIXEL_DIMENSIONS.top.height}
+                resizeMode="fill"
+                description="Top parchment edge"
+              />
+              {Array.from({ length: resultTiles }).map((_, index) => (
+                <image
+                  key={`result-mid-${index}`}
+                  url="riddle_mid.png"
+                  width="100%"
+                  height={`${PARCHMENT.midTile}px`}
+                  imageWidth={SLICE_PIXEL_DIMENSIONS.mid.width}
+                  imageHeight={SLICE_PIXEL_DIMENSIONS.mid.height}
+                  resizeMode="fill"
+                  description="Parchment middle texture"
+                />
+              ))}
+              <image
+                url="riddle_bottom.png"
+                width="100%"
+                height={`${PARCHMENT.capBottom}px`}
+                imageWidth={SLICE_PIXEL_DIMENSIONS.bottom.width}
+                imageHeight={SLICE_PIXEL_DIMENSIONS.bottom.height}
+                resizeMode="fill"
+                description="Bottom parchment edge"
+              />
+            </vstack>
 
-        <hstack gap="medium" width="100%" maxWidth="560px">
-          <button appearance="primary" width="100%" onPress={onExit}>🏠 Back to Home</button>
-        </hstack>
+            <vstack
+              width="100%"
+              height={`${resultInnerHeight}px`}
+              padding={{
+                top: `${resultPadTop}px`,
+                bottom: `${resultPadBottom}px`,
+                left: `${PARCHMENT.padX}px`,
+                right: `${PARCHMENT.padX}px`,
+              }}
+              alignment="middle center"
+              scroll={resultNeedsScroll ? 'vertical' : undefined}
+              gap="medium"
+            >
+              <text size="large" color="#4b2d15">
+                Nice expression!
+              </text>
+              <WrappedFontText
+                text={resultQuestion}
+                maxWidth={resultContentWidth}
+                color={RIDDLE_STYLE.color}
+                fontSize={RIDDLE_STYLE.fontSize}
+                letterSpacing={RIDDLE_STYLE.letterSpacing}
+                lineGap={RIDDLE_STYLE.lineGap}
+                align="center"
+              />
+              <WrappedAnswerFontText
+                text={`“${resultAnswer}”`}
+                maxWidth={resultContentWidth}
+                fontSize={24}
+                letterSpacing={-1.2}
+                lineGap={30}
+                color="#2b1e12"
+                align="center"
+              />
+            </vstack>
+          </zstack>
+        </vstack>
+
+        <vstack alignment="middle center" gap="xsmall">
+          <text size="large">Score: {result.score.total}/15</text>
+          <text size="medium" color="secondary">Decision: {result.decision}</text>
+          <text size="small" color="secondary">Arete: “{result.feedback}”</text>
+        </vstack>
+
+        <spacer grow />
+
+        <button appearance="primary" width="60%" onPress={onExit}>
+          🏠 Back to Home
+        </button>
       </vstack>
     </zstack>
   );

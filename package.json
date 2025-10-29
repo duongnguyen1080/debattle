@@ -17,6 +17,8 @@
   "scripts": {
     "dev": "devvit playtest",
     "build": "devvit upload",
-    "deploy": "devvit publish"
+    "deploy": "devvit publish",
+    "icons:build": "node scripts/generate-icons.mjs",
+    "glyphs:answer": "node scripts/generate-answer-font-metrics.mjs"
   }
 }
