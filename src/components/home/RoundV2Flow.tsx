@@ -621,7 +621,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
               <WrappedAnswerFontText
                 text={`“${resultAnswer}”`}
                 maxWidth={resultContentWidth}
-                fontSize={24}
+                fontSize={20}
                 letterSpacing={-1.2}
                 lineGap={30}
                 color="#2b1e12"
