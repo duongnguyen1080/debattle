@@ -27,6 +27,10 @@ export function RoundAnswerView({
   const padBottom = PARCHMENT.padY + layout.extraPadY;
   const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
   const parchmentOffset = Math.max(0, (maxParchmentHeight - clampedHeight) / 3);
+  const navContentGap = Math.round(Math.max(8, Math.min(18, viewportHeight * 0.012)));
+  const parchmentTopSpacer = Math.round(Math.max(10, Math.min(24, viewportHeight * 0.02)));
+  const navContentGapSize = `${navContentGap}px` as Devvit.Blocks.SizeString;
+  const parchmentTopSpacerSize = `${parchmentTopSpacer}px` as Devvit.Blocks.SizeString;
 
   return (
     <zstack width="100%" height="100%">
@@ -42,16 +46,17 @@ export function RoundAnswerView({
 
       <vstack width="100%" height="100%" padding="xsmall" alignment="top center" gap="none">
         <RoundNavBar
+          viewportHeight={viewportHeight}
           onBack={() => {
             console.log('[RoundAnswerView] back icon pressed');
             onBack();
           }}
         />
 
-        <spacer size="small" />
+        <spacer height={navContentGapSize} />
 
         <vstack alignment="middle center" gap="none" width="100%" height="100%">
-          <spacer height="30px" />
+          <spacer height={parchmentTopSpacerSize} />
           <vstack
             width="100%"
             alignment="top center"

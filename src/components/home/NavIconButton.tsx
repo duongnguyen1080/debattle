@@ -5,11 +5,11 @@ type NavIconType = 'back' | 'profile' | 'info';
 interface NavIconButtonProps {
   icon: NavIconType;
   onPress?: () => void;
-  size?: string;
+  size?: Devvit.Blocks.SizeString;
   description?: string;
 }
 
-const NAV_ICON_META: Record<NavIconType, { url: string; imageWidth: number; imageHeight: number; defaultSize: string; defaultDescription: string }> = {
+const NAV_ICON_META: Record<NavIconType, { url: string; imageWidth: number; imageHeight: number; defaultSize: Devvit.Blocks.SizeString; defaultDescription: string }> = {
   back: {
     url: 'back_icon.png',
     imageWidth: 354,

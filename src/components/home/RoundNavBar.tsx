@@ -4,36 +4,57 @@ import { NavIconButton } from './NavIconButton.js';
 type RightIconType = 'profile' | 'info';
 
 interface RoundNavBarProps {
+  viewportHeight: number;
   onBack: () => void;
   rightIcons?: Array<{
     icon: RightIconType;
     onPress?: () => void;
-    size?: string;
+    size?: Devvit.Blocks.SizeString;
     description?: string;
   }>;
 }
 
-export function RoundNavBar({ onBack, rightIcons = [] }: RoundNavBarProps) {
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(value, max));
+}
+
+export function RoundNavBar({ onBack, rightIcons = [], viewportHeight }: RoundNavBarProps) {
+  const iconSizePx = Math.round(clamp(viewportHeight * 0.089, 90, 90));
+  const iconSize = `${iconSizePx}px` as Devvit.Blocks.SizeString;
+  const backIconSizePx = Math.round(clamp(viewportHeight * 0.089, 90, 90));
+  const backIconSize = `${backIconSizePx}px` as Devvit.Blocks.SizeString;
+  const verticalPadding = Math.round(clamp(viewportHeight * 0.015, 8, 24));
+  const horizontalPadding = Math.round(clamp(viewportHeight * 0.02, 12, 32));
+  const sideInset = `${horizontalPadding}px` as Devvit.Blocks.SizeString;
+  const topInset = `${verticalPadding}px` as Devvit.Blocks.SizeString;
+
   return (
-    <hstack width="100%" alignment="middle start" gap="none">
-      <NavIconButton
-        icon="back"
-        onPress={onBack}
-      />
-      <spacer grow />
-      {rightIcons.length > 0 && (
-        <hstack alignment="middle end" gap="small">
-          {rightIcons.map((cfg, index) => (
-            <NavIconButton
-              key={`${cfg.icon}-${index}`}
-              icon={cfg.icon}
-              onPress={cfg.onPress}
-              size={cfg.size}
-              description={cfg.description}
-            />
-          ))}
+    <vstack width="100%" gap="none">
+      <spacer height={topInset} />
+      <hstack width="100%" alignment="middle start" gap="none">
+        <spacer width={sideInset} />
+        <hstack alignment="middle start" gap="none" grow>
+          <NavIconButton
+            icon="back"
+            onPress={onBack}
+            size={backIconSize}
+          />
+          <spacer grow />
+          {rightIcons.length > 0 && (
+            <hstack alignment="middle end" gap="small">
+              {rightIcons.map((cfg, index) => (
+                <NavIconButton
+                  icon={cfg.icon}
+                  onPress={cfg.onPress}
+                  size={cfg.size ?? iconSize}
+                  description={cfg.description}
+                />
+              ))}
+            </hstack>
+          )}
         </hstack>
-      )}
-    </hstack>
+        <spacer width={sideInset} />
+      </hstack>
+    </vstack>
   );
 }
