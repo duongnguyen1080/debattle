@@ -19,9 +19,9 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 export function RoundNavBar({ onBack, rightIcons = [], viewportHeight }: RoundNavBarProps) {
-  const iconSizePx = Math.round(clamp(viewportHeight * 0.089, 90, 90));
+  const iconSizePx = Math.round(clamp(viewportHeight * 0.062, 40, 52));
   const iconSize = `${iconSizePx}px` as Devvit.Blocks.SizeString;
-  const backIconSizePx = Math.round(clamp(viewportHeight * 0.089, 90, 90));
+  const backIconSizePx = Math.round(clamp(viewportHeight * 0.085, 72, 90));
   const backIconSize = `${backIconSizePx}px` as Devvit.Blocks.SizeString;
   const verticalPadding = Math.round(clamp(viewportHeight * 0.015, 8, 24));
   const horizontalPadding = Math.round(clamp(viewportHeight * 0.02, 12, 32));
@@ -42,7 +42,7 @@ export function RoundNavBar({ onBack, rightIcons = [], viewportHeight }: RoundNa
           <spacer grow />
           {rightIcons.length > 0 && (
             <hstack alignment="middle end" gap="small">
-              {rightIcons.map((cfg, index) => (
+              {rightIcons.map((cfg) => (
                 <NavIconButton
                   icon={cfg.icon}
                   onPress={cfg.onPress}

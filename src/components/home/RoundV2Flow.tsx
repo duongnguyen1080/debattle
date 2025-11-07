@@ -16,6 +16,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     riddleText,
     result,
     isSubmitting,
+    isSharing,
     viewportHeight,
     promptForAnswer,
     elapsed,
@@ -23,6 +24,8 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     roundNonce,
     riddleId,
     initialQuestionId,
+    shareToSubreddit,
+    hasShared,
   } = useRoundFlow({ context, currentUser });
 
   console.log('[RoundV2Flow] render', {
@@ -76,6 +79,9 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       fallbackQuestionText={riddleText}
       viewportHeight={viewportHeight}
       onExit={onExit}
+      onShare={shareToSubreddit}
+      isSharing={isSharing}
+      hasShared={hasShared}
     />
   );
 }

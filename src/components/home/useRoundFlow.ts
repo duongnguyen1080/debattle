@@ -14,6 +14,7 @@ interface UseRoundFlowResult {
   riddleText: string;
   result: RoundResult | null;
   isSubmitting: boolean;
+  isSharing: boolean;
   viewportHeight: number;
   promptForAnswer: () => void;
   elapsed: number;
@@ -21,6 +22,9 @@ interface UseRoundFlowResult {
   roundNonce: number;
   riddleId: string | null;
   initialQuestionId: string | null;
+  shareToSubreddit: () => Promise<void>;
+  hasShared: boolean;
+  sharePermalink: string | null;
 }
 
 export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): UseRoundFlowResult {
@@ -43,6 +47,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
   const [startedAt, setStartedAt] = useState<number | null>(() => Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<RoundResult | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
   const [roundNonce] = useState<number>(() => Date.now());
   const viewportHeight = context?.viewportHeight ?? 1024;
 
@@ -149,9 +154,12 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         decision: resp.decision,
       });
       setResult({
-        ...resp,
+        score: resp.score,
+        feedback: resp.feedback,
+        decision: resp.decision,
         questionText: riddleText,
         answerText: answer,
+        responseId: resp.responseId,
       });
       setStep('result');
     } catch (e) {
@@ -205,11 +213,82 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     }
   };
 
+  const shareToSubreddit = async () => {
+    if (!result || !riddleId) {
+      console.warn('[useRoundFlow] shareToSubreddit: missing result or riddleId');
+      return;
+    }
+    if (isSharing) {
+      return;
+    }
+    if (result.sharePostId) {
+      console.log('[useRoundFlow] shareToSubreddit: already shared');
+      if (context?.ui?.showToast) {
+        try {
+          await context.ui.showToast('Already shared to the subreddit');
+        } catch (err) {
+          console.warn('[useRoundFlow] shareToSubreddit: toast failed', err);
+        }
+      }
+      return;
+    }
+
+    try {
+      setIsSharing(true);
+      const service = new Service(
+        context.redis,
+        context.reddit,
+        { getSetting: context.settings?.get?.bind(context.settings) }
+      );
+      const username = currentUser?.username || 'anonymous';
+      console.log('[useRoundFlow] shareToSubreddit: submitting post');
+      const resp = await service.shareResponseToSubreddit({
+        riddleId,
+        responseId: result.responseId,
+        questionText: result.questionText,
+        answerText: result.answerText,
+        playerUsername: username,
+        totalScore: result.score.total,
+        decision: result.decision,
+        feedback: result.feedback,
+      });
+      setResult((prev) => {
+        if (!prev) {
+          return prev;
+        }
+        return {
+          ...prev,
+          sharePostId: resp.postId,
+          sharePermalink: resp.permalink ?? prev.sharePermalink,
+        };
+      });
+      if (context?.ui?.showToast) {
+        try {
+          await context.ui.showToast('Shared to the community!');
+        } catch (err) {
+          console.warn('[useRoundFlow] shareToSubreddit: success toast failed', err);
+        }
+      }
+    } catch (err) {
+      console.error('[useRoundFlow] shareToSubreddit: error', err);
+      if (context?.ui?.showToast) {
+        try {
+          await context.ui.showToast('Failed to share to the subreddit');
+        } catch (toastErr) {
+          console.warn('[useRoundFlow] shareToSubreddit: error toast failed', toastErr);
+        }
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   return {
     step,
     riddleText,
     result,
     isSubmitting,
+    isSharing,
     viewportHeight,
     promptForAnswer,
     elapsed,
@@ -217,5 +296,8 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     roundNonce,
     riddleId,
     initialQuestionId: initialQuestion?.id ?? null,
+    shareToSubreddit,
+    hasShared: !!result?.sharePostId,
+    sharePermalink: result?.sharePermalink ?? null,
   };
 }

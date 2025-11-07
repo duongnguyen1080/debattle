@@ -1,15 +1,39 @@
 import { measureWrappedText } from './FontText.js';
 
-export const RIDDLE_STYLE = {
+export type RiddleLayoutStyle = {
+  color: string;
+  fontSize: number;
+  lineGap: number;
+  letterSpacing: number;
+  targetLinesMin: number;
+  targetLinesMax: number;
+};
+
+export const RIDDLE_STYLE: RiddleLayoutStyle = {
   color: '#231414',
   fontSize: 40,
   lineGap: 10,
   letterSpacing: -2,
   targetLinesMin: 2,
   targetLinesMax: 5,
-} as const;
+};
+export type RiddleLayoutStyleOverrides = Partial<
+  Pick<RiddleLayoutStyle, 'fontSize' | 'letterSpacing' | 'lineGap' | 'targetLinesMin' | 'targetLinesMax'>
+>;
 
-export const PARCHMENT = {
+type ParchmentConfig = {
+  minWidth: number;
+  maxWidth: number;
+  capTop: number;
+  capBottom: number;
+  midTile: number;
+  padX: number;
+  padY: number;
+  minHeight: number;
+  maxHeight: number;
+};
+
+export const PARCHMENT: ParchmentConfig = {
   minWidth: 560,
   maxWidth: 860,
   capTop: 72,
@@ -19,17 +43,27 @@ export const PARCHMENT = {
   padY: 20,
   minHeight: 140,
   maxHeight: 300,
-} as const;
+};
 
-export const VIEW = {
+type ViewConfig = {
+  minWidth: number;
+  maxWidth: number;
+};
+
+export const VIEW: ViewConfig = {
   minWidth: 520,
   maxWidth: 900,
-} as const;
+};
 
-export const LAYOUT = {
-  maxParchmentFraction: 0.55,
+type LayoutConfig = {
+  maxParchmentFraction: number;
+  buttonGapFraction: number;
+};
+
+export const LAYOUT: LayoutConfig = {
+  maxParchmentFraction: 0.43,
   buttonGapFraction: 0.02,
-} as const;
+};
 
 export const SLICE_PIXEL_DIMENSIONS = {
   top: { width: 816, height: 74 },
@@ -41,9 +75,12 @@ function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(n, max));
 }
 
-export function chooseResponsiveWidth(text: string): number {
+export function chooseResponsiveWidth(
+  text: string,
+  style: RiddleLayoutStyle = RIDDLE_STYLE
+): number {
   const { minWidth, maxWidth, padX } = PARCHMENT;
-  const { fontSize, letterSpacing, lineGap, targetLinesMin, targetLinesMax } = RIDDLE_STYLE;
+  const { fontSize, letterSpacing, lineGap, targetLinesMin, targetLinesMax } = style;
 
   if (maxWidth <= minWidth) {
     return clamp(minWidth, VIEW.minWidth, VIEW.maxWidth);
@@ -103,10 +140,14 @@ export function chooseResponsiveWidth(text: string): number {
   return clamp(bestWidth, VIEW.minWidth, VIEW.maxWidth);
 }
 
-export function computeParchmentLayout(text: string) {
-  const width = chooseResponsiveWidth(text);
+export function computeParchmentLayout(
+  text: string,
+  styleOverrides?: RiddleLayoutStyleOverrides
+) {
+  const textStyle: RiddleLayoutStyle = { ...RIDDLE_STYLE, ...styleOverrides };
+  const width = chooseResponsiveWidth(text, textStyle);
   const { capTop, capBottom, midTile, padX, padY, minHeight, maxHeight } = PARCHMENT;
-  const { fontSize, letterSpacing, lineGap } = RIDDLE_STYLE;
+  const { fontSize, letterSpacing, lineGap } = textStyle;
 
   const contentWidth = Math.max(1, width - padX * 2);
 

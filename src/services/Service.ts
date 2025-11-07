@@ -263,6 +263,7 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
     score: { wit: number; logic: number; style: number; total: number };
     feedback: string;
     decision: 'open' | 'ajar' | 'closed';
+    responseId: string;
   }> {
     const { riddleId, playerUsername, answerText, elapsed } = params;
     const riddle = await this.getRiddle(riddleId);
@@ -307,7 +308,118 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
     await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
 
     await this.updateUserXp(playerUsername, total);
-    return { score: response.score, feedback, decision };
+    return { score: response.score, feedback, decision, responseId: response.id };
+  }
+
+  private async resolveSubredditName(explicit?: string): Promise<string> {
+    if (explicit) {
+      return explicit;
+    }
+
+    try {
+      const raw = await this.redis.get('debattle:settings');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.subredditName && typeof parsed.subredditName === 'string') {
+          return parsed.subredditName;
+        }
+      }
+    } catch (err) {
+      console.warn('[Service.resolveSubredditName] failed to parse cached settings', err);
+    }
+
+    try {
+      return await this.reddit.getCurrentSubredditName();
+    } catch (err) {
+      console.error('[Service.resolveSubredditName] fallback to getCurrentSubredditName failed', err);
+      throw new Error('Unable to determine subreddit name for sharing');
+    }
+  }
+
+  private decisionSummary(decision: 'open' | 'ajar' | 'closed'): { label: string; emoji: string } {
+    switch (decision) {
+      case 'open':
+        return { label: 'Door opens to wisdom', emoji: '🟢' };
+      case 'ajar':
+        return { label: 'Door is ajar', emoji: '🟡' };
+      default:
+        return { label: 'Door stays closed', emoji: '🔴' };
+    }
+  }
+
+  async shareResponseToSubreddit(params: {
+    riddleId: string;
+    responseId: string;
+    questionText: string;
+    answerText: string;
+    playerUsername: string;
+    totalScore: number;
+    decision: 'open' | 'ajar' | 'closed';
+    feedback: string;
+    subredditName?: string;
+  }): Promise<{ postId: string; permalink?: string }> {
+    const {
+      riddleId,
+      responseId,
+      questionText,
+      answerText,
+      playerUsername,
+      totalScore,
+      decision,
+      feedback,
+      subredditName,
+    } = params;
+
+    const riddle = await this.getRiddle(riddleId);
+    if (!riddle) {
+      throw new Error('Riddle not found');
+    }
+
+    const response = riddle.responses.find((resp) => resp.id === responseId);
+    if (!response) {
+      throw new Error('Response not found');
+    }
+
+    if (response.postId) {
+      try {
+        const existing = await this.reddit.getPostById(response.postId);
+        return { postId: response.postId, permalink: existing?.permalink };
+      } catch (err) {
+        console.warn('[Service.shareResponseToSubreddit] response already shared but lookup failed', err);
+        return { postId: response.postId };
+      }
+    }
+
+    const resolvedSubreddit = await this.resolveSubredditName(subredditName);
+    const { label, emoji } = this.decisionSummary(decision);
+    const title = `${emoji} Debattle · ${totalScore}/15 — ${label}`;
+    const sanitizedUsername = playerUsername || 'anonymous';
+
+    // Follow Devvit "share to subreddit" guidance: create a self-post with markdown payload.
+    const bodyLines = [
+      `**Riddle:** ${questionText}`,
+      '',
+      `**Answer by u/${sanitizedUsername}:** ${answerText}`,
+      '',
+      `**Score:** ${totalScore}/15 · **Decision:** ${decision.toUpperCase()}`,
+      `**Feedback:** ${feedback}`,
+      '',
+      '_Shared from the Debattle experience._',
+    ];
+    const post = await this.reddit.submitPost({
+      subredditName: resolvedSubreddit,
+      title,
+      text: bodyLines.join('\n'),
+    });
+
+    response.postId = post.id;
+    try {
+      await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
+    } catch (err) {
+      console.error('[Service.shareResponseToSubreddit] failed to persist postId', err);
+    }
+
+    return { postId: post.id, permalink: post.permalink };
   }
 
   // Guess Management
