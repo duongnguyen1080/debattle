@@ -9,77 +9,63 @@ Your task is to evaluate the wanderer’s answer to decide if the gate shall ope
 
 Read the question and the answer carefully.
 Then evaluate based on the five criteria below.
+
 1. Relevance (Yes / No — STRICT)
 Does the answer clearly respond to the idea or subject of the question?
-
 Does it share a logical or thematic connection to the question?
-
-Would a reasonable reader say, “Yes, this directly answers that question”?
-
-If the answer merely sounds philosophical but does not logically or semantically relate to the question, mark “No.”
-
-If the answer reuses memorized or generic moral statements without touching the question’s topic, mark “No.”
-
+Would a reasonable reader say, "Yes, this directly answers that question"?
+If the answer merely sounds philosophical but does not logically or semantically relate to the question, mark "No."
+If the answer reuses memorized or generic moral statements without touching the question’s topic, mark "No."
 When judging Relevance, compare meanings directly. If the answer does not clearly engage with the question’s idea, score No even if it sounds deep or poetic.
 Profound tone ≠ relevance; logical connection is required.
-If Yes:
-→ Award 50 points and continue to the next criteria.
-If No:
-→ Award 0 points and return only this feedback: "Stay concise".
+If Yes → award 50 points and continue to the next criteria.
+If No → award 0 points and return only this feedback: "Stay Concise".
 
 2. Completeness (1–10)
-
 How fully does the answer explore and satisfy the question?
+1–2: Extremely incomplete or fragmentary; gives no real reasoning or insight.
+3–4: Touches part of the question but leaves most unaddressed; lacks development.
+5–6: Addresses the main idea but misses depth or supporting reasoning.
+7–8: Covers most aspects clearly, with good supporting thought; minor gaps.
+9–10: Thorough, well-reasoned, and leaves the reader feeling fully satisfied.
 
-Score	Description
-1–2	Extremely incomplete or fragmentary; gives no real reasoning or insight.
-3–4	Touches part of the question but leaves most unaddressed; lacks development.
-5–6	Addresses the main idea but misses depth or supporting reasoning.
-7–8	Covers most aspects clearly, with good supporting thought; minor gaps.
-9–10	Thorough, well-reasoned, and leaves the reader feeling fully satisfied.
 3. Clarity (1–10)
-
 How easy is it to understand?
+1–2: Disorganized, confusing, or grammatically broken.
+3–4: Roughly understandable but with unclear logic or phrasing.
+5–6: Generally clear but has awkward structure or minor confusion.
+7–8: Smooth, logically structured, easy to follow.
+9–10: Exceptionally clear, elegant, and effortless to read.
 
-Score	Description
-1–2	Disorganized, confusing, or grammatically broken.
-3–4	Roughly understandable but with unclear logic or phrasing.
-5–6	Generally clear but has awkward structure or minor confusion.
-7–8	Smooth, logically structured, easy to follow.
-9–10	Exceptionally clear, elegant, and effortless to read.
 4. Originality (1–10)
-
 How unique or authentic is the thought?
+1–2: Cliché, copied, or entirely generic.
+3–4: Predictable or derivative; minimal personal thinking.
+5–6: Some individuality, but familiar reasoning.
+7–8: Fresh and personal perspective with clear insight.
+9–10: Deeply original; feels like a new way of seeing the question.
 
-Score	Description
-1–2	Cliché, copied, or entirely generic.
-3–4	Predictable or derivative; minimal personal thinking.
-5–6	Some individuality, but familiar reasoning.
-7–8	Fresh and personal perspective with clear insight.
-9–10	Deeply original; feels like a new way of seeing the question.
 5. Aesthetic (1–10)
-
 How beautifully or expressively is it written?
+1–2: Flat or clumsy language; no emotional tone.
+3–4: Simple phrasing; functional but dull.
+5–6: Some rhythm or imagery but uneven expression.
+7–8: Graceful style; pleasing flow or subtle emotion.
+9–10: Lyrical, poetic, or literary; evokes beauty or depth of feeling.
 
-Score	Description
-1–2	Flat or clumsy language; no emotional tone.
-3–4	Simple phrasing; functional but dull.
-5–6	Some rhythm or image but uneven expression.
-7–8	Graceful style; pleasing flow or subtle emotion.
-9–10	Lyrical, poetic, or literary; evokes beauty or depth of feeling.
 Scoring & Feedback
-
 Max score: 90 points (50 + 10 + 10 + 10 + 10).
+If Relevance = No → return only feedback "Stay Concise" and set totalPoints to 0.
+Otherwise, return the sum of all points and a short praise based on which criterion (2–5) has the highest score (tie-break priority: Completeness > Clarity > Originality > Aesthetic):
+Completeness → "Impeccably detailed!"
+Clarity → "Perfectly lucid!"
+Originality → "Brilliantly unique!"
+Aesthetic → "Beautiful expression!"
 
-If Relevance = No → return only feedback “Stay concise!”
-
-Otherwise, return the sum of all points and a short praise based on which criterion (2–5) has the highest score:
-
-Highest Criterion	Feedback:
-Completeness	“Impeccably detailed!”
-Clarity	“Perfectly lucid!”
-Originality	“Brilliantly unique!”
-Aesthetic	“Beautiful expression!”`;
+Output Requirements
+- Always respond with minified JSON only (no markdown or prose).
+- When relevance is "Yes", include the keys relevance, completeness, clarity, originality, aesthetic, totalPoints, and feedback.
+- When relevance is "No", respond exactly with {"relevance":"No","totalPoints":0,"feedback":"Stay Concise"}.`;
 
 export class Service {
   constructor(
@@ -153,7 +139,7 @@ export class Service {
             ...messages.map((m) => ({ role: m.role, content: m.content })),
           ],
           max_tokens: 512,
-          temperature: 0.7,
+          temperature: 0,
           response_format: { type: 'json_object' },
         }),
         signal: controller.signal,
@@ -170,33 +156,27 @@ export class Service {
   // Evaluate an answer using the Arete Gate rubric (relevance + four criteria + praise)
   async evaluateAnswerWithAI(questionText: string, answerText: string): Promise<AreteEvaluation> {
     const system = ARETE_SYSTEM_PROMPT;
-    const evaluationMessages = [
-      { role: 'user' as const, content: questionText },
-      { role: 'assistant' as const, content: answerText },
-      {
-        role: 'user' as const,
-        content: 'Evaluate the assistant reply above using the rubric. Respond with the mandated JSON only.',
-      },
-    ];
+    const evaluationPrompt = `Question:\n${questionText}\n\nAnswer:\n${answerText}\n\nEvaluate the answer using the Arete Gate rubric and return only the required JSON.`;
+    const evaluationMessages = [{ role: 'user' as const, content: evaluationPrompt }];
     const defaultResult: AreteEvaluation = {
-      relevance: 'Yes',
-      completeness: 5,
-      clarity: 5,
-      originality: 5,
-      aesthetic: 5,
-      totalPoints: 50 + 5 * 4,
-      feedback: 'Beautiful expression!',
+      relevance: 'No',
+      completeness: 0,
+      clarity: 0,
+      originality: 0,
+      aesthetic: 0,
+      totalPoints: 0,
+      feedback: 'Stay Concise',
     };
 
     try {
       const raw = await this.callOpenAI(evaluationMessages, system, 20000);
 
       const obj = this.extractJSON(raw);
-      const relevanceRaw = typeof obj.relevance === 'string' ? obj.relevance.trim() : 'Yes';
-      const isRelevant = /^y(es)?$/i.test(relevanceRaw || 'Yes');
-      const cleanFeedback = (objFeedback?: unknown, fallback?: string) => {
-        const text = String(objFeedback || '').trim();
-        return text || fallback || 'Beautiful expression!';
+      const relevanceRaw = typeof obj.relevance === 'string' ? obj.relevance.trim() : 'No';
+      const isRelevant = /^y(es)?$/i.test(relevanceRaw);
+      const cleanFeedback = (value: unknown, fallback: string) => {
+        const text = typeof value === 'string' ? value.trim() : '';
+        return text || fallback;
       };
 
       if (!isRelevant) {
@@ -207,20 +187,20 @@ export class Service {
           originality: 0,
           aesthetic: 0,
           totalPoints: 0,
-          feedback: cleanFeedback(obj.feedback, 'Be more direct!'),
+          feedback: cleanFeedback(obj.feedback, 'Stay Concise'),
         };
       }
 
-      const clampScore = (value: unknown, fallback: number) => {
+      const clampScore = (value: unknown) => {
         const num = Number(value);
-        if (!Number.isFinite(num)) return fallback;
+        if (!Number.isFinite(num)) return 0;
         return Math.round(this.clamp(num, 0, 10));
       };
 
-      const completeness = clampScore(obj.completeness, 5);
-      const clarity = clampScore(obj.clarity, 5);
-      const originality = clampScore(obj.originality, 5);
-      const aesthetic = clampScore(obj.aesthetic, 5);
+      const completeness = clampScore(obj.completeness);
+      const clarity = clampScore(obj.clarity);
+      const originality = clampScore(obj.originality);
+      const aesthetic = clampScore(obj.aesthetic);
       const totalPoints = Math.round(this.clamp(50 + completeness + clarity + originality + aesthetic, 0, 90));
       const praiseOrder = [
         { score: completeness, phrase: 'Impeccably detailed!' },
