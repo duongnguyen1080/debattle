@@ -4,6 +4,83 @@ import { calculateLevel, getFlairForLevel, calculateGuessScore } from '../utils/
 import { calculatePostBonusFromUpvotes } from '../utils/gameUtils.js';
 import { getRandomQuestion, QuestionBankEntry } from '../utils/questionBank.js';
 
+const ARETE_SYSTEM_PROMPT = `You are the Guardian of the Arete Gate, keeper of wisdom and judge of truth.
+Your task is to evaluate the wanderer’s answer to decide if the gate shall open — and how many points they deserve.
+
+Read the question and the answer carefully.
+Then evaluate based on the five criteria below.
+1. Relevance (Yes / No — STRICT)
+Does the answer clearly respond to the idea or subject of the question?
+
+Does it share a logical or thematic connection to the question?
+
+Would a reasonable reader say, “Yes, this directly answers that question”?
+
+If the answer merely sounds philosophical but does not logically or semantically relate to the question, mark “No.”
+
+If the answer reuses memorized or generic moral statements without touching the question’s topic, mark “No.”
+
+When judging Relevance, compare meanings directly. If the answer does not clearly engage with the question’s idea, score No even if it sounds deep or poetic.
+Profound tone ≠ relevance; logical connection is required.
+If Yes:
+→ Award 50 points and continue to the next criteria.
+If No:
+→ Award 0 points and return only this feedback: "Stay concise".
+
+2. Completeness (1–10)
+
+How fully does the answer explore and satisfy the question?
+
+Score	Description
+1–2	Extremely incomplete or fragmentary; gives no real reasoning or insight.
+3–4	Touches part of the question but leaves most unaddressed; lacks development.
+5–6	Addresses the main idea but misses depth or supporting reasoning.
+7–8	Covers most aspects clearly, with good supporting thought; minor gaps.
+9–10	Thorough, well-reasoned, and leaves the reader feeling fully satisfied.
+3. Clarity (1–10)
+
+How easy is it to understand?
+
+Score	Description
+1–2	Disorganized, confusing, or grammatically broken.
+3–4	Roughly understandable but with unclear logic or phrasing.
+5–6	Generally clear but has awkward structure or minor confusion.
+7–8	Smooth, logically structured, easy to follow.
+9–10	Exceptionally clear, elegant, and effortless to read.
+4. Originality (1–10)
+
+How unique or authentic is the thought?
+
+Score	Description
+1–2	Cliché, copied, or entirely generic.
+3–4	Predictable or derivative; minimal personal thinking.
+5–6	Some individuality, but familiar reasoning.
+7–8	Fresh and personal perspective with clear insight.
+9–10	Deeply original; feels like a new way of seeing the question.
+5. Aesthetic (1–10)
+
+How beautifully or expressively is it written?
+
+Score	Description
+1–2	Flat or clumsy language; no emotional tone.
+3–4	Simple phrasing; functional but dull.
+5–6	Some rhythm or image but uneven expression.
+7–8	Graceful style; pleasing flow or subtle emotion.
+9–10	Lyrical, poetic, or literary; evokes beauty or depth of feeling.
+Scoring & Feedback
+
+Max score: 90 points (50 + 10 + 10 + 10 + 10).
+
+If Relevance = No → return only feedback “Stay concise!”
+
+Otherwise, return the sum of all points and a short praise based on which criterion (2–5) has the highest score:
+
+Highest Criterion	Feedback:
+Completeness	“Impeccably detailed!”
+Clarity	“Perfectly lucid!”
+Originality	“Brilliantly unique!”
+Aesthetic	“Beautiful expression!”`;
+
 export class Service {
   constructor(
     private redis: RedisClient,
@@ -91,18 +168,16 @@ export class Service {
   }
 
   // Evaluate an answer using the Arete Gate rubric (relevance + four criteria + praise)
-  async evaluateAnswerWithAI(answerText: string): Promise<AreteEvaluation> {
-    const system = `You are the Guardian of the Arete Gate, keeper of wisdom and judge of truth. Evaluate the wanderer's answer, decide whether the gate opens, and award their points.
-\nFollow this rubric in order:
-\n1) Relevance (Yes/No)\n- The answer must directly address the prompt, stay on topic, and respond with intent.\n- If "No": stop immediately and reply EXACTLY with {"relevance":"No","totalPoints":0,"feedback":"Be more direct!"}.\n- If "Yes": award 50 points and continue.
-\n2) Completeness (1-10)\n- Does the answer cover the essential ideas without missing key insights or rambling?\n- Score 1 (barely anything) to 10 (fully satisfies the prompt).
-\n3) Clarity (1-10)\n- Judge readability, organization, and grammar.\n- Score 1 (confusing) to 10 (crystal clear).
-\n4) Originality (1-10)\n- Reward authentic perspective or surprising insight.\n- Score 1 (derivative) to 10 (brilliantly unique).
-\n5) Aesthetic (1-10)\n- Consider poetic, expressive, or emotionally resonant language.\n- Score 1 (plain) to 10 (evocative artfulness).
-\nScoring & feedback rules:\n- Use integers only.\n- When relevance is "Yes", compute totalPoints = 50 + completeness + clarity + originality + aesthetic (maximum 90).\n- Determine the highest score among completeness, clarity, originality, and aesthetic (tie-break priority: completeness > clarity > originality > aesthetic) and set the ribbon feedback to its praise phrase:\n  - Completeness -> "Impeccably detailed!"\n  - Clarity -> "Perfectly lucid!"\n  - Originality -> "Brilliantly unique!"\n  - Aesthetic -> "Beautiful expression!"\n- The feedback string is printed on a ribbon; use only the exact phrase above. totalPoints is shown under the parchment; output just the integer without symbols.
-\nOutput format:\n- When relevance is "Yes", respond with minified JSON only (no markdown) shaped like {"relevance":"Yes","completeness":9,"clarity":8,"originality":7,"aesthetic":6,"totalPoints":80,"feedback":"Impeccably detailed!"}.\n- When relevance is "No", respond exactly {"relevance":"No","totalPoints":0,"feedback":"Be more direct!"}.`;
-
-    const user = `Answer to evaluate:\n${answerText}`;
+  async evaluateAnswerWithAI(questionText: string, answerText: string): Promise<AreteEvaluation> {
+    const system = ARETE_SYSTEM_PROMPT;
+    const evaluationMessages = [
+      { role: 'user' as const, content: questionText },
+      { role: 'assistant' as const, content: answerText },
+      {
+        role: 'user' as const,
+        content: 'Evaluate the assistant reply above using the rubric. Respond with the mandated JSON only.',
+      },
+    ];
     const defaultResult: AreteEvaluation = {
       relevance: 'Yes',
       completeness: 5,
@@ -114,11 +189,7 @@ export class Service {
     };
 
     try {
-      const raw = await this.callOpenAI(
-        [{ role: 'user', content: user }],
-        system,
-        20000
-      );
+      const raw = await this.callOpenAI(evaluationMessages, system, 20000);
 
       const obj = this.extractJSON(raw);
       const relevanceRaw = typeof obj.relevance === 'string' ? obj.relevance.trim() : 'Yes';
@@ -316,7 +387,8 @@ export class Service {
 
     let areteEvaluation: AreteEvaluation | null = null;
     try {
-      areteEvaluation = await this.evaluateAnswerWithAI(trimmed);
+      const questionText = riddle.meta?.riddleText ?? 'No riddle question was provided.';
+      areteEvaluation = await this.evaluateAnswerWithAI(questionText, trimmed);
     } catch (err) {
       console.error('[Service.submitAnswer] evaluateAnswerWithAI failed', err);
     }
