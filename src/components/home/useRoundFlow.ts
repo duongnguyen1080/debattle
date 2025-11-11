@@ -160,6 +160,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         questionText: riddleText,
         answerText: answer,
         responseId: resp.responseId,
+        areteEvaluation: resp.areteEvaluation,
       });
       setStep('result');
     } catch (e) {

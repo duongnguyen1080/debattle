@@ -73,6 +73,16 @@ export interface LeaderboardEntry {
   [key: string]: any;
 }
 
+export interface AreteEvaluation {
+  relevance: 'Yes' | 'No';
+  completeness: number;
+  clarity: number;
+  originality: number;
+  aesthetic: number;
+  totalPoints: number;
+  feedback: string;
+}
+
 // =============================
 // Level Tiers (XP → Levels/Flair)
 // =============================
@@ -122,6 +132,7 @@ export interface PlayerResponse {
   feedback: string;       // AI one-liner
   decision: 'open' | 'ajar' | 'closed';
   postId?: string;        // Reddit post id if posted
+  areteEvaluation?: AreteEvaluation;
   [key: string]: any;
 }
 

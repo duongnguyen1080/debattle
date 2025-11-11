@@ -1,6 +1,5 @@
 import { RedisClient, RedditAPIClient, AppUpgrade, TriggerContext } from '@devvit/public-api';
-import { User, Guess, Theme, LeaderboardEntry } from '../types/index.js';
-import { RiddleV2, PlayerResponse } from '../types/index.js';
+import { User, Guess, Theme, LeaderboardEntry, RiddleV2, PlayerResponse, AreteEvaluation } from '../types/index.js';
 import { calculateLevel, getFlairForLevel, calculateGuessScore } from '../utils/gameUtils.js';
 import { calculatePostBonusFromUpvotes } from '../utils/gameUtils.js';
 import { getRandomQuestion, QuestionBankEntry } from '../utils/questionBank.js';
@@ -91,41 +90,28 @@ export class Service {
     }
   }
 
-  // Generate a philosophical riddle from theme
-  async generateRiddleFromAI(theme: string): Promise<{ riddleText: string }> {
-    console.log('[Service.generateRiddleFromAI] start', { theme });
-    const system = `You are an AI riddle-smith. Write a SINGLE short philosophical riddle aligned to a given theme.
-Rules:\n- 150 characters max.\n- Do NOT include the answer.\n- No leading labels like 'Riddle:'.\n- Avoid clichés.\n- The riddle must clearly relate to the provided theme.\nOutput strictly as JSON: {"riddleText": "..."}`;
-
-    const user = `Theme: ${theme}`;
-
-    try {
-      const raw = await this.callOpenAI(
-        [{ role: 'user', content: user }],
-        system,
-        20000
-      );
-
-      // Parse JSON
-      const obj = this.extractJSON(raw);
-      if (!obj || typeof obj.riddleText !== 'string') throw new Error('Invalid riddle JSON');
-      const riddleText = obj.riddleText.trim();
-      if (riddleText.length < 10) throw new Error('Riddle too short');
-      console.log('[Service.generateRiddleFromAI] success');
-      return { riddleText };
-    } catch (err) {
-      console.error('[Service.generateRiddleFromAI] failed; using fallback', err);
-      // graceful fallback to keep the game running
-      return { riddleText: `On the theme of ${theme}: What do you owe to yourself that cannot be owned?` };
-    }
-  }
-
-  // Evaluate an answer using rubric → return clarity/originality/aesthetic + feedback
-  async evaluateAnswerWithAI(answerText: string): Promise<{ clarity: number; originality: number; aesthetic: number; feedback: string; }> {
-    const system = `You are a strict grader following a fixed rubric. Score ONLY the user's answer text.
-Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0–6 (novelty, insight)\n- aesthetic: 0–4 (style, elegance)\nReturn JSON only: {"clarity":0-6, "originality":0-6, "aesthetic":0-4, "feedback":"one short sentence"}.`;
+  // Evaluate an answer using the Arete Gate rubric (relevance + four criteria + praise)
+  async evaluateAnswerWithAI(answerText: string): Promise<AreteEvaluation> {
+    const system = `You are the Guardian of the Arete Gate, keeper of wisdom and judge of truth. Evaluate the wanderer's answer, decide whether the gate opens, and award their points.
+\nFollow this rubric in order:
+\n1) Relevance (Yes/No)\n- The answer must directly address the prompt, stay on topic, and respond with intent.\n- If "No": stop immediately and reply EXACTLY with {"relevance":"No","totalPoints":0,"feedback":"Be more direct!"}.\n- If "Yes": award 50 points and continue.
+\n2) Completeness (1-10)\n- Does the answer cover the essential ideas without missing key insights or rambling?\n- Score 1 (barely anything) to 10 (fully satisfies the prompt).
+\n3) Clarity (1-10)\n- Judge readability, organization, and grammar.\n- Score 1 (confusing) to 10 (crystal clear).
+\n4) Originality (1-10)\n- Reward authentic perspective or surprising insight.\n- Score 1 (derivative) to 10 (brilliantly unique).
+\n5) Aesthetic (1-10)\n- Consider poetic, expressive, or emotionally resonant language.\n- Score 1 (plain) to 10 (evocative artfulness).
+\nScoring & feedback rules:\n- Use integers only.\n- When relevance is "Yes", compute totalPoints = 50 + completeness + clarity + originality + aesthetic (maximum 90).\n- Determine the highest score among completeness, clarity, originality, and aesthetic (tie-break priority: completeness > clarity > originality > aesthetic) and set the ribbon feedback to its praise phrase:\n  - Completeness -> "Impeccably detailed!"\n  - Clarity -> "Perfectly lucid!"\n  - Originality -> "Brilliantly unique!"\n  - Aesthetic -> "Beautiful expression!"\n- The feedback string is printed on a ribbon; use only the exact phrase above. totalPoints is shown under the parchment; output just the integer without symbols.
+\nOutput format:\n- When relevance is "Yes", respond with minified JSON only (no markdown) shaped like {"relevance":"Yes","completeness":9,"clarity":8,"originality":7,"aesthetic":6,"totalPoints":80,"feedback":"Impeccably detailed!"}.\n- When relevance is "No", respond exactly {"relevance":"No","totalPoints":0,"feedback":"Be more direct!"}.`;
 
     const user = `Answer to evaluate:\n${answerText}`;
+    const defaultResult: AreteEvaluation = {
+      relevance: 'Yes',
+      completeness: 5,
+      clarity: 5,
+      originality: 5,
+      aesthetic: 5,
+      totalPoints: 50 + 5 * 4,
+      feedback: 'Beautiful expression!',
+    };
 
     try {
       const raw = await this.callOpenAI(
@@ -135,16 +121,49 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
       );
 
       const obj = this.extractJSON(raw);
-      let clarity = this.clamp(Number(obj.clarity), 0, 6);
-      let originality = this.clamp(Number(obj.originality), 0, 6);
-      let aesthetic = this.clamp(Number(obj.aesthetic), 0, 4);
-      let feedback = String(obj.feedback || '').trim();
-      if (!feedback) feedback = 'Thoughtful, but push for sharper focus.';
-      return { clarity, originality, aesthetic, feedback };
+      const relevanceRaw = typeof obj.relevance === 'string' ? obj.relevance.trim() : 'Yes';
+      const isRelevant = /^y(es)?$/i.test(relevanceRaw || 'Yes');
+      const cleanFeedback = (objFeedback?: unknown, fallback?: string) => {
+        const text = String(objFeedback || '').trim();
+        return text || fallback || 'Beautiful expression!';
+      };
+
+      if (!isRelevant) {
+        return {
+          relevance: 'No',
+          completeness: 0,
+          clarity: 0,
+          originality: 0,
+          aesthetic: 0,
+          totalPoints: 0,
+          feedback: cleanFeedback(obj.feedback, 'Be more direct!'),
+        };
+      }
+
+      const clampScore = (value: unknown, fallback: number) => {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return fallback;
+        return Math.round(this.clamp(num, 0, 10));
+      };
+
+      const completeness = clampScore(obj.completeness, 5);
+      const clarity = clampScore(obj.clarity, 5);
+      const originality = clampScore(obj.originality, 5);
+      const aesthetic = clampScore(obj.aesthetic, 5);
+      const totalPoints = Math.round(this.clamp(50 + completeness + clarity + originality + aesthetic, 0, 90));
+      const praiseOrder = [
+        { score: completeness, phrase: 'Impeccably detailed!' },
+        { score: clarity, phrase: 'Perfectly lucid!' },
+        { score: originality, phrase: 'Brilliantly unique!' },
+        { score: aesthetic, phrase: 'Beautiful expression!' },
+      ];
+      const bestPraise = praiseOrder.reduce((best, current) => (current.score > best.score ? current : best), praiseOrder[0]);
+      const feedback = cleanFeedback(obj.feedback, bestPraise.phrase);
+
+      return { relevance: 'Yes', completeness, clarity, originality, aesthetic, totalPoints, feedback };
     } catch (err) {
       console.error('evaluateAnswerWithAI failed:', err);
-      // graceful fallback mid-range
-      return { clarity: 4, originality: 4, aesthetic: 2, feedback: 'Thoughtful, but push for sharper focus.' };
+      return defaultResult;
     }
   }
   // --- end AI integration ---
@@ -264,6 +283,7 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
     feedback: string;
     decision: 'open' | 'ajar' | 'closed';
     responseId: string;
+    areteEvaluation?: AreteEvaluation;
   }> {
     const { riddleId, playerUsername, answerText, elapsed } = params;
     const riddle = await this.getRiddle(riddleId);
@@ -285,7 +305,7 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
     const style = this.clamp(Math.round(Math.min(5, punctuationMarks + (trimmed.length > 120 ? 2 : trimmed.length > 60 ? 1 : 0))), 0, 5);
     const total = wit + logic + style;
 
-    const feedback =
+    const fallbackFeedback =
       total >= 12
         ? 'Insightful answer—keep pushing deeper.'
         : total >= 7
@@ -294,21 +314,36 @@ Rubric (numerical):\n- clarity: 0–6 (precision, coherence)\n- originality: 0�
     const decision: 'open' | 'ajar' | 'closed' =
       total >= 12 ? 'open' : total >= 7 ? 'ajar' : 'closed';
 
+    let areteEvaluation: AreteEvaluation | null = null;
+    try {
+      areteEvaluation = await this.evaluateAnswerWithAI(trimmed);
+    } catch (err) {
+      console.error('[Service.submitAnswer] evaluateAnswerWithAI failed', err);
+    }
+    const finalFeedback = areteEvaluation?.feedback || fallbackFeedback;
+
     const response: PlayerResponse = {
       id: `resp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
       username: playerUsername,
       answerText: trimmed,
       elapsedMs,
       score: { wit, logic, style, total },
-      feedback,
+      feedback: finalFeedback,
       decision,
+      areteEvaluation: areteEvaluation ?? undefined,
     };
 
     riddle.responses.push(response);
     await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
 
     await this.updateUserXp(playerUsername, total);
-    return { score: response.score, feedback, decision, responseId: response.id };
+    return {
+      score: response.score,
+      feedback: response.feedback,
+      decision,
+      responseId: response.id,
+      areteEvaluation: areteEvaluation ?? undefined,
+    };
   }
 
   private async resolveSubredditName(explicit?: string): Promise<string> {

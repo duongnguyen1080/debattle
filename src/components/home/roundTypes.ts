@@ -1,3 +1,5 @@
+import type { AreteEvaluation } from '../../types/index.js';
+
 export type Step = 'answer' | 'result';
 
 export type RoundResult = {
@@ -9,6 +11,7 @@ export type RoundResult = {
   responseId: string;
   sharePostId?: string;
   sharePermalink?: string;
+  areteEvaluation?: AreteEvaluation;
 };
 
 export const FALLBACK_RIDDLE_TEXT = 'What do you owe to yourself that cannot be owned?';

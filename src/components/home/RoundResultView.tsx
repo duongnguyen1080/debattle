@@ -22,6 +22,28 @@ const ARETE_RIBBON = {
   maxGapPx: 14,
 } as const;
 
+const ARETE_RIBBON_TEXT_STYLE = {
+  fontSize: 32,
+  letterSpacing: -1.2,
+  lineGap: 4,
+  color: '#3b1f0c',
+} as const;
+
+const ARETE_POINTS_TEXT_STYLE = {
+  fontSize: 44,
+  letterSpacing: -1.6,
+  lineGap: 6,
+  color: '#f8e7bb',
+} as const;
+
+const ARETE_POINTS_ICON = {
+  url: 'Arete_coin.png',
+  displaySizePx: 52,
+  imageWidth: 250,
+  imageHeight: 245,
+  description: 'Arete coin reward',
+} as const;
+
 const SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES: RiddleLayoutStyleOverrides = {
   fontSize: 34,
   letterSpacing: -1.6,
@@ -50,6 +72,11 @@ export function RoundResultView({
   const resultQuestion = result.questionText || fallbackQuestionText;
   const resultAnswer = result.answerText || 'No answer submitted.';
   const resultMeasureText = `${resultQuestion}\n${resultAnswer}`;
+  const ribbonFeedback = result.areteEvaluation?.feedback || result.feedback || 'Nice expression!';
+  const aretePoints =
+    typeof result.areteEvaluation?.totalPoints === 'number'
+      ? result.areteEvaluation.totalPoints
+      : null;
   const maxParchmentHeight = viewportHeight * LAYOUT.maxParchmentFraction;
   const showAnswerRiddleStyle = { ...RIDDLE_STYLE, ...SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES };
   const layout = computeParchmentLayout(resultMeasureText, SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES);
@@ -87,6 +114,9 @@ export function RoundResultView({
   const areteRibbonWidth = `${areteRibbonWidthPx}px` as Devvit.Blocks.SizeString;
   const areteRibbonHeightPx = Math.round(areteRibbonWidthPx * ARETE_RIBBON.heightRatio);
   const areteRibbonHeight = `${areteRibbonHeightPx}px` as Devvit.Blocks.SizeString;
+  const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.78));
+  const pointsTextMaxWidth = Math.max(140, Math.round(layout.width * 0.45));
+  const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
   return (
     <zstack width="100%" height="100%">
       <image
@@ -117,9 +147,15 @@ export function RoundResultView({
                   description="Arete feedback scroll"
                 />
                 <vstack width="80%" alignment="middle center" gap="none">
-                  <text size="medium" color="#3b1f0c">
-                    Nice expression!
-                  </text>
+                  <WrappedFontText
+                    text={ribbonFeedback}
+                    maxWidth={ribbonTextMaxWidth}
+                    color={ARETE_RIBBON_TEXT_STYLE.color}
+                    fontSize={ARETE_RIBBON_TEXT_STYLE.fontSize}
+                    letterSpacing={ARETE_RIBBON_TEXT_STYLE.letterSpacing}
+                    lineGap={ARETE_RIBBON_TEXT_STYLE.lineGap}
+                    align="center"
+                  />
                 </vstack>
               </zstack>
               <spacer width="100%" height={`${ribbonToParchmentGapPx}px`} />
@@ -154,6 +190,31 @@ export function RoundResultView({
                 align="center"
               />
             </ParchmentPanel>
+
+            {aretePoints !== null && (
+              <vstack width="100%" alignment="middle center" padding={{ top: 'small', bottom: 'small' }}>
+                <hstack alignment="middle center" gap="small">
+                  <WrappedFontText
+                    text={`+ ${aretePoints}`}
+                    maxWidth={pointsTextMaxWidth}
+                    color={ARETE_POINTS_TEXT_STYLE.color}
+                    fontSize={ARETE_POINTS_TEXT_STYLE.fontSize}
+                    letterSpacing={ARETE_POINTS_TEXT_STYLE.letterSpacing}
+                    lineGap={ARETE_POINTS_TEXT_STYLE.lineGap}
+                    align="center"
+                  />
+                  <image
+                    url={ARETE_POINTS_ICON.url}
+                    width={pointsIconSize}
+                    height={pointsIconSize}
+                    imageWidth={ARETE_POINTS_ICON.imageWidth}
+                    imageHeight={ARETE_POINTS_ICON.imageHeight}
+                    resizeMode="fit"
+                    description={ARETE_POINTS_ICON.description}
+                  />
+                </hstack>
+              </vstack>
+            )}
 
             <spacer width="100%" height={`${debattleButtonTopGapPx}px`} />
 
