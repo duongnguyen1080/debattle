@@ -1,8 +1,9 @@
 import { Devvit } from '@devvit/public-api';
 import { WrappedFontText } from './FontText.js';
 import { ParchmentPanel } from './ParchmentPanel.js';
-import { RoundNavBar } from './RoundNavBar.js';
+import { NavIconButton } from './NavIconButton.js';
 import { computeParchmentLayout, LAYOUT, PARCHMENT, RIDDLE_STYLE } from './roundLayout.js';
+import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from './uiConstants.js';
 
 interface RoundAnswerViewProps {
   riddleText: string;
@@ -26,11 +27,12 @@ export function RoundAnswerView({
   const padTop = PARCHMENT.padY + layout.extraPadY;
   const padBottom = PARCHMENT.padY + layout.extraPadY;
   const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
-  const parchmentOffset = Math.max(0, (maxParchmentHeight - clampedHeight) / 3);
-  const navContentGap = Math.round(Math.max(8, Math.min(18, viewportHeight * 0.012)));
   const parchmentTopSpacer = Math.round(Math.max(10, Math.min(24, viewportHeight * 0.02)));
-  const navContentGapSize = `${navContentGap}px` as Devvit.Blocks.SizeString;
   const parchmentTopSpacerSize = `${parchmentTopSpacer}px` as Devvit.Blocks.SizeString;
+  const ctaButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
+  const ctaButtonHeight = `${CTA_BUTTON_HEIGHT_PX}px` as Devvit.Blocks.SizeString;
+  const ctaBottomInset = `${CTA_BOTTOM_INSET_PX}px` as Devvit.Blocks.SizeString;
+  const topSafeSpacer = '32px' as Devvit.Blocks.SizeString;
 
   return (
     <zstack width="100%" height="100%">
@@ -45,24 +47,11 @@ export function RoundAnswerView({
       />
 
       <vstack width="100%" height="100%" padding="xsmall" alignment="top center" gap="none">
-        <RoundNavBar
-          viewportHeight={viewportHeight}
-          onBack={() => {
-            console.log('[RoundAnswerView] back icon pressed');
-            onBack();
-          }}
-        />
-
-        <spacer height={navContentGapSize} />
-
-        <vstack alignment="middle center" gap="none" width="100%" height="100%">
-          <spacer height={parchmentTopSpacerSize} />
-          <vstack
-            width="100%"
-            alignment="top center"
-            gap="none"
-            paddingTop={`${parchmentOffset}px`}
-          >
+        <spacer height={topSafeSpacer} />
+        <vstack alignment="middle center" gap="none" width="100%" grow>
+          <spacer grow />
+          <vstack width="100%" alignment="middle center" gap="none">
+            <spacer height={parchmentTopSpacerSize} />
             <ParchmentPanel
               widthPx={layout.width}
               heightPx={clampedHeight}
@@ -85,7 +74,7 @@ export function RoundAnswerView({
 
             <spacer height={`${buttonGap}px`} />
 
-            <zstack width="203px" height="106px">
+            <zstack width={ctaButtonWidth} height={ctaButtonHeight}>
               <image
                 url="enter_answer_button.png"
                 width="100%"
@@ -99,19 +88,37 @@ export function RoundAnswerView({
                   onPromptAnswer();
                 }}
               />
+              {isSubmitting && (
+                <vstack
+                  width="100%"
+                  height="100%"
+                  alignment="middle center"
+                  backgroundColor="rgba(0,0,0,0.35)"
+                >
+                  <text size="small" color="white">
+                    Submitting your answer…
+                  </text>
+                </vstack>
+              )}
             </zstack>
-
-            {isSubmitting && (
-              <text size="small" color="secondary" alignment="middle center">
-                Submitting your answer…
-              </text>
-            )}
           </vstack>
           <spacer grow />
         </vstack>
 
-        <spacer grow />
+        <spacer height={ctaBottomInset} />
       </vstack>
+
+      <hstack width="100%" padding="large" gap="small" alignment="middle center">
+        <spacer grow />
+        <NavIconButton
+          icon="close"
+          onPress={() => {
+            console.log('[RoundAnswerView] close icon pressed');
+            onBack();
+          }}
+          description="Close and return home"
+        />
+      </hstack>
     </zstack>
   );
 }

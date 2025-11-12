@@ -1,4 +1,5 @@
 import { Devvit } from '@devvit/public-api';
+import { NAV_ICON_SIZE_PX } from './uiConstants.js';
 
 type NavIconType = 'back' | 'profile' | 'info' | 'close';
 
@@ -9,6 +10,8 @@ interface NavIconButtonProps {
   description?: string;
 }
 
+const NAV_ICON_SIZE = `${NAV_ICON_SIZE_PX}px` as Devvit.Blocks.SizeString;
+
 const NAV_ICON_META: Record<
   NavIconType,
   { url: string; imageWidth: number; imageHeight: number; defaultSize: Devvit.Blocks.SizeString; defaultDescription: string }
@@ -17,28 +20,28 @@ const NAV_ICON_META: Record<
     url: 'back_icon.png',
     imageWidth: 354,
     imageHeight: 354,
-    defaultSize: '120px',
+    defaultSize: NAV_ICON_SIZE,
     defaultDescription: 'Go back to home',
   },
   profile: {
     url: 'profile_icon.png',
     imageWidth: 1080,
     imageHeight: 1080,
-    defaultSize: '80px',
+    defaultSize: NAV_ICON_SIZE,
     defaultDescription: 'View profile',
   },
   info: {
     url: 'info_icon.png',
     imageWidth: 1080,
     imageHeight: 1080,
-    defaultSize: '80px',
+    defaultSize: NAV_ICON_SIZE,
     defaultDescription: 'How to play',
   },
   close: {
     url: 'close_button.png',
     imageWidth: 305,
     imageHeight: 302,
-    defaultSize: '120px',
+    defaultSize: NAV_ICON_SIZE,
     defaultDescription: 'Close and return home',
   },
 };

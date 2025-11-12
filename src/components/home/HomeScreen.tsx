@@ -1,5 +1,7 @@
 import { Devvit } from '@devvit/public-api';
 import { User } from '../../types/index.js';
+import { NavIconButton } from './NavIconButton.js';
+import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from './uiConstants.js';
 
 interface HomeScreenProps {
   currentUser: User | null;
@@ -12,6 +14,9 @@ interface HomeScreenProps {
 export function HomeScreen({ currentUser, onStart, onLeaderboard, onHowToPlay, onProgress }: HomeScreenProps) {
   console.log('HomeScreen render');
   console.log('[HomeScreen] render', { hasUser: !!currentUser, level: currentUser?.level, flair: currentUser?.flair });
+  const ctaButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
+  const ctaButtonHeight = `${CTA_BUTTON_HEIGHT_PX}px` as Devvit.Blocks.SizeString;
+  const ctaBottomInset = `${CTA_BOTTOM_INSET_PX}px` as Devvit.Blocks.SizeString;
 
   return (
     <zstack width="100%" height="100%">
@@ -26,10 +31,9 @@ export function HomeScreen({ currentUser, onStart, onLeaderboard, onHowToPlay, o
       />
 
       <vstack width="100%" height="100%" padding="large" gap="medium">
-        <spacer grow />
-
-        <vstack alignment="middle center" gap="medium">
-          <zstack width="203px" height="106px">
+        <vstack alignment="middle center" gap="medium" width="100%" grow>
+          <spacer grow />
+          <zstack width={ctaButtonWidth} height={ctaButtonHeight}>
             <image
               url="knock button.gif"
               width="100%"
@@ -45,29 +49,24 @@ export function HomeScreen({ currentUser, onStart, onLeaderboard, onHowToPlay, o
             />
           </zstack>
         </vstack>
+        <spacer height={ctaBottomInset} />
       </vstack>
 
       <hstack width="100%" padding="large" gap="small">
         <spacer grow />
-        <image
-          url="info_icon.png"
-          imageWidth={1080}
-          imageHeight={1080}
-          width="40px"
-          height="40px"
-          resizeMode="fit"
-          description="How to play"
-          onPress={() => { console.log('[HomeScreen] info icon pressed'); onHowToPlay(); }}
+        <NavIconButton
+          icon="info"
+          onPress={() => {
+            console.log('[HomeScreen] info icon pressed');
+            onHowToPlay();
+          }}
         />
-        <image
-          url="profile_icon.png"
-          imageWidth={1080}
-          imageHeight={1080}
-          width="40px"
-          height="40px"
-          resizeMode="fit"
-          description="View profile"
-          onPress={() => { console.log('[HomeScreen] profile icon pressed'); onProgress(); }}
+        <NavIconButton
+          icon="profile"
+          onPress={() => {
+            console.log('[HomeScreen] profile icon pressed');
+            onProgress();
+          }}
         />
       </hstack>
     </zstack>
