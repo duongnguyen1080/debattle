@@ -6,48 +6,60 @@ import { ParchmentPanel } from './ParchmentPanel.js';
 import { NavIconButton } from './NavIconButton.js';
 import {
   computeParchmentLayout,
-  LAYOUT,
   PARCHMENT,
   RIDDLE_STYLE,
   type RiddleLayoutStyleOverrides,
 } from './roundLayout.js';
 
 const ARETE_RIBBON = {
-  widthRatio: 0.44,
-  minWidthPx: 280,
-  maxWidthPx: 500,
-  heightRatio: 0.27,
-  gapFraction: 0.02,
+  widthRatio: 0.38,
+  minWidthPx: 250,
+  maxWidthPx: 460,
+  heightRatio: 0.23,
+  gapFraction: 0.015,
   minGapPx: 6,
-  maxGapPx: 14,
+  maxGapPx: 12,
 } as const;
 
 const ARETE_RIBBON_TEXT_STYLE = {
-  fontSize: 32,
-  letterSpacing: -1.2,
-  lineGap: 4,
+  fontSize: 28,
+  letterSpacing: -1.1,
+  lineGap: 3,
   color: '#3b1f0c',
 } as const;
 
 const ARETE_POINTS_TEXT_STYLE = {
-  fontSize: 44,
-  letterSpacing: -1.6,
-  lineGap: 6,
+  fontSize: 36,
+  letterSpacing: -1.4,
+  lineGap: 4,
   color: '#f8e7bb',
 } as const;
 
 const ARETE_POINTS_ICON = {
   url: 'Arete_coin.png',
-  displaySizePx: 52,
+  displaySizePx: 44,
   imageWidth: 250,
   imageHeight: 245,
   description: 'Arete coin reward',
 } as const;
 
 const SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES: RiddleLayoutStyleOverrides = {
-  fontSize: 34,
+  fontSize: 32,
   letterSpacing: -1.6,
-  lineGap: 8,
+  lineGap: 6,
+};
+
+const SHOW_ANSWER_LAYOUT = {
+  maxParchmentFraction: 0.32,
+  horizontalPaddingFraction: 0.03,
+  maxHorizontalPaddingPx: 48,
+  minHorizontalPaddingPx: 20,
+  topSafeFraction: 0.06,
+  bottomSafeFraction: 0.08,
+  maxTopSafePx: 96,
+  maxBottomSafePx: 112,
+  buttonTargetWidthRatio: 0.24,
+  buttonMaxHeightFraction: 0.12,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -81,22 +93,40 @@ export function RoundResultView({
     typeof result.areteEvaluation?.totalPoints === 'number'
       ? result.areteEvaluation.totalPoints
       : null;
-  const maxParchmentHeight = viewportHeight * LAYOUT.maxParchmentFraction;
+  const maxParchmentHeight = viewportHeight * SHOW_ANSWER_LAYOUT.maxParchmentFraction;
   const showAnswerRiddleStyle = { ...RIDDLE_STYLE, ...SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES };
   const layout = computeParchmentLayout(resultMeasureText, SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES);
   const padTop = PARCHMENT.padY + layout.extraPadY;
   const padBottom = PARCHMENT.padY + layout.extraPadY;
   const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
-  const horizontalPadding = Math.round(Math.max(16, Math.min(36, viewportHeight * 0.02)));
+  const horizontalPadding = Math.round(
+    clamp(
+      viewportHeight * SHOW_ANSWER_LAYOUT.horizontalPaddingFraction,
+      SHOW_ANSWER_LAYOUT.minHorizontalPaddingPx,
+      SHOW_ANSWER_LAYOUT.maxHorizontalPaddingPx,
+    ),
+  );
   const approxViewWidthPx = layout.width + horizontalPadding * 2;
   const horizontalInset = `${horizontalPadding}px` as Devvit.Blocks.SizeString;
-  const topSafeSpacerPx = Math.round(Math.max(24, Math.min(72, viewportHeight * 0.04)));
-  const bottomSafeSpacerPx = Math.round(Math.max(32, Math.min(80, viewportHeight * 0.06)));
+  const topSafeSpacerPx = Math.round(
+    clamp(
+      viewportHeight * SHOW_ANSWER_LAYOUT.topSafeFraction,
+      32,
+      SHOW_ANSWER_LAYOUT.maxTopSafePx,
+    ),
+  );
+  const bottomSafeSpacerPx = Math.round(
+    clamp(
+      viewportHeight * SHOW_ANSWER_LAYOUT.bottomSafeFraction,
+      40,
+      SHOW_ANSWER_LAYOUT.maxBottomSafePx,
+    ),
+  );
   const topSafeSpacer = `${topSafeSpacerPx}px` as Devvit.Blocks.SizeString;
   const bottomSafeSpacer = `${bottomSafeSpacerPx}px` as Devvit.Blocks.SizeString;
-  const targetButtonWidthPx = approxViewWidthPx * 0.3;
+  const targetButtonWidthPx = approxViewWidthPx * SHOW_ANSWER_LAYOUT.buttonTargetWidthRatio;
   const buttonAspectRatio = 181 / 481;
-  const maxButtonHeightPx = Math.max(1, viewportHeight * 0.2);
+  const maxButtonHeightPx = Math.max(1, viewportHeight * SHOW_ANSWER_LAYOUT.buttonMaxHeightFraction);
   let debattleButtonWidthPx = Math.max(1, targetButtonWidthPx);
   let debattleButtonHeightPx = debattleButtonWidthPx * buttonAspectRatio;
   if (debattleButtonHeightPx > maxButtonHeightPx) {
@@ -107,8 +137,16 @@ export function RoundResultView({
   debattleButtonHeightPx = Math.round(debattleButtonHeightPx);
   const debattleButtonWidth = `${debattleButtonWidthPx}px` as Devvit.Blocks.SizeString;
   const debattleButtonHeight = `${debattleButtonHeightPx}px` as Devvit.Blocks.SizeString;
-  const debattleButtonTopGapPx = Math.round(Math.max(12, Math.min(layout.flyerHeight * 0.085, 36)));
-  const ribbonToParchmentGapPx = 2;
+  const debattleButtonTopGapPx = Math.round(
+    clamp(layout.flyerHeight * 0.06, 10, 26),
+  );
+  const ribbonToParchmentGapPx = Math.round(
+    clamp(
+      viewportHeight * ARETE_RIBBON.gapFraction,
+      ARETE_RIBBON.minGapPx,
+      ARETE_RIBBON.maxGapPx,
+    ),
+  );
   const areteRibbonWidthPx = Math.round(
     Math.max(
       ARETE_RIBBON.minWidthPx,
@@ -118,8 +156,8 @@ export function RoundResultView({
   const areteRibbonWidth = `${areteRibbonWidthPx}px` as Devvit.Blocks.SizeString;
   const areteRibbonHeightPx = Math.round(areteRibbonWidthPx * ARETE_RIBBON.heightRatio);
   const areteRibbonHeight = `${areteRibbonHeightPx}px` as Devvit.Blocks.SizeString;
-  const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.78));
-  const pointsTextMaxWidth = Math.max(140, Math.round(layout.width * 0.45));
+  const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.76));
+  const pointsTextMaxWidth = Math.max(140, Math.round(layout.width * 0.38));
   const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
   const closeButtonSizePx = Math.round(
     clamp(Math.min(layout.width * 0.08, viewportHeight * 0.06), 48, 72),
@@ -204,7 +242,11 @@ export function RoundResultView({
             </ParchmentPanel>
 
             {aretePoints !== null && (
-              <vstack width="100%" alignment="middle center" padding={{ top: 'small', bottom: 'small' }}>
+              <vstack
+                width="100%"
+                alignment="middle center"
+                padding={{ top: 'xsmall', bottom: 'xsmall' }}
+              >
                 <hstack alignment="middle center" gap="small">
                   <WrappedFontText
                     text={`+ ${aretePoints}`}
