@@ -11,8 +11,8 @@ const tsOutputPath = path.join(projectRoot, 'src', 'icons.ts');
 const jsOutputPath = path.join(projectRoot, 'dist', 'icons.js');
 
 const FONT_SOURCES = [
-  { prefix: 'Merriweather_Regular', dir: 'Merriweather_Regular' },
-  { prefix: 'Pirata_One', dir: 'Pirata_One' },
+  { prefix: 'Merriweather_Regular', dir: 'Merriweather_Regular', preferHexNames: true },
+  { prefix: 'Pirata_One', dir: 'Pirata_One', preferHexNames: false },
 ];
 
 function ensureSvgRoot(body) {
@@ -56,12 +56,20 @@ async function collectGlyphs() {
       const basename = path.basename(fileName, '.svg');
       let keyName = fileName;
 
-      if (DECIMAL_NAME_RE.test(basename) && !/^0[0-9]+$/.test(basename)) {
+      const isDecimalCandidate = DECIMAL_NAME_RE.test(basename) && !/^0[0-9]+$/.test(basename);
+      const isHexCandidate = HEX_NAME_RE.test(basename);
+
+      if (isHexCandidate && (source.preferHexNames || !isDecimalCandidate)) {
+        const codePoint = Number.parseInt(basename, 16);
+        if (!Number.isNaN(codePoint)) {
+          keyName = `${codePoint}.svg`;
+        }
+      } else if (isDecimalCandidate) {
         const decimalValue = Number.parseInt(basename, 10);
         if (!Number.isNaN(decimalValue)) {
           keyName = `${decimalValue}.svg`;
         }
-      } else if (HEX_NAME_RE.test(basename)) {
+      } else if (isHexCandidate) {
         const codePoint = Number.parseInt(basename, 16);
         if (!Number.isNaN(codePoint)) {
           keyName = `${codePoint}.svg`;

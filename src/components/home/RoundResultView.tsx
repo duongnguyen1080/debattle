@@ -3,7 +3,7 @@ import type { RoundResult } from './roundTypes.js';
 import { WrappedFontText } from './FontText.js';
 import { WrappedAnswerFontText } from './AnswerFontText.js';
 import { ParchmentPanel } from './ParchmentPanel.js';
-import { RoundNavBar } from './RoundNavBar.js';
+import { NavIconButton } from './NavIconButton.js';
 import {
   computeParchmentLayout,
   LAYOUT,
@@ -49,6 +49,10 @@ const SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES: RiddleLayoutStyleOverrides = {
   letterSpacing: -1.6,
   lineGap: 8,
 };
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(value, max));
+}
 
 interface RoundResultViewProps {
   result: RoundResult;
@@ -117,6 +121,14 @@ export function RoundResultView({
   const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.78));
   const pointsTextMaxWidth = Math.max(140, Math.round(layout.width * 0.45));
   const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
+  const closeButtonSizePx = Math.round(
+    clamp(Math.min(layout.width * 0.08, viewportHeight * 0.06), 48, 72),
+  );
+  const closeButtonSize = `${closeButtonSizePx}px` as Devvit.Blocks.SizeString;
+  const closeButtonHorizontalInsetPx = Math.round(clamp(viewportHeight * 0.02, 12, 32));
+  const closeButtonHorizontalInset = `${closeButtonHorizontalInsetPx}px` as Devvit.Blocks.SizeString;
+  const closeButtonTopInsetPx = Math.round(clamp(viewportHeight * 0.015, 8, 24));
+  const closeButtonTopInset = `${closeButtonTopInsetPx}px` as Devvit.Blocks.SizeString;
   return (
     <zstack width="100%" height="100%">
       <image
@@ -259,27 +271,21 @@ export function RoundResultView({
       </vstack>
 
       <vstack width="100%" height="100%" alignment="top center" gap="none">
-        <RoundNavBar
-          viewportHeight={viewportHeight}
-          onBack={() => {
-            console.log('[RoundResultView] back icon pressed');
-            onExit();
-          }}
-          rightIcons={[
-            {
-              icon: 'profile',
-              onPress: () => {
-                console.log('[RoundResultView] profile icon pressed');
-              },
-            },
-            {
-              icon: 'info',
-              onPress: () => {
-                console.log('[RoundResultView] info icon pressed');
-              },
-            },
-          ]}
-        />
+        <spacer height={closeButtonTopInset} />
+        <hstack width="100%" alignment="middle center" gap="none">
+          <spacer width={closeButtonHorizontalInset} />
+          <spacer grow />
+          <NavIconButton
+            icon="close"
+            onPress={() => {
+              console.log('[RoundResultView] close icon pressed');
+              onExit();
+            }}
+            size={closeButtonSize}
+            description="Close results and return home"
+          />
+          <spacer width={closeButtonHorizontalInset} />
+        </hstack>
       </vstack>
     </zstack>
   );

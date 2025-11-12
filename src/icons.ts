@@ -4165,34 +4165,34 @@ c156 0 190 138 296 138c64 0 96 -45 118 -114l88 42c-29 125 -100 202 -214 202z" />
 d="M256 2101c-36 0 -72 -6 -88 -14v-151c16 8 56 12 92 12c96 0 204 -40 314 -348h-88l-382 -1002l-94 -26v-82h442v82l-162 24l210 612l104 326l100 -328l188 -610l-140 -24v-82h384v82l-104 24c-238 730 -314 958 -348 1036c-124 308 -206 469 -428 469zM748 280
 c-156 0 -190 -138 -296 -138c-64 0 -96 45 -118 114l-88 -42c29 -125 100 -202 214 -202c156 0 190 138 296 138c64 0 96 -45 118 -114l88 42c-29 125 -100 202 -214 202z" />
 </svg>`,
-  "Merriweather_Regular/2000.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1010 2000">
+  "Merriweather_Regular/8192.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1010 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2001.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2010 2000">
+  "Merriweather_Regular/8193.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2010 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2002.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1010 2000">
+  "Merriweather_Regular/8194.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1010 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2003.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2010 2000">
+  "Merriweather_Regular/8195.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2010 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2004.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 610 2000">
+  "Merriweather_Regular/8196.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 610 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2005.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 510 2000">
+  "Merriweather_Regular/8197.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 510 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2006.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 344 2000">
+  "Merriweather_Regular/8198.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 344 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2007.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1260 2000">
+  "Merriweather_Regular/8199.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1260 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2008.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 484 2000">
+  "Merriweather_Regular/8200.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 484 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2009.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 310 2000">
+  "Merriweather_Regular/8201.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 310 2000">
    <g  />
 </svg>`,
   "Merriweather_Regular/8202.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 130 2000">
@@ -4207,31 +4207,31 @@ c-156 0 -190 -138 -296 -138c-64 0 -96 45 -118 114l-88 -42c29 -125 100 -202 214 -
   "Merriweather_Regular/8205.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 20 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2010.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1176 2000">
+  "Merriweather_Regular/8208.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1176 2000">
    <path fill="currentColor"
 d="M986 1018h-806v-120h806v120z" />
 </svg>`,
-  "Merriweather_Regular/2012.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1176 2000">
+  "Merriweather_Regular/8210.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1176 2000">
    <path fill="currentColor"
 d="M986 1018h-806v-120h806v120z" />
 </svg>`,
-  "Merriweather_Regular/2013.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1606 2000">
+  "Merriweather_Regular/8211.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1606 2000">
    <path fill="currentColor"
 d="M1416 1018h-1236v-120h1236v120z" />
 </svg>`,
-  "Merriweather_Regular/2014.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2268 2000">
+  "Merriweather_Regular/8212.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2268 2000">
    <path fill="currentColor"
 d="M2078 1018h-1898v-120h1898v120z" />
 </svg>`,
-  "Merriweather_Regular/2015.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2268 2000">
+  "Merriweather_Regular/8213.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2268 2000">
    <path fill="currentColor"
 d="M2078 1018h-1898v-120h1898v120z" />
 </svg>`,
-  "Merriweather_Regular/2018.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 766 2000">
+  "Merriweather_Regular/8216.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 766 2000">
    <path fill="currentColor"
 d="M418 676c-94 0 -184 -148 -184 -310c0 -234 154 -402 232 -440l46 44v18c-44 30 -140 190 -140 366c0 102 134 140 134 232c0 60 -36 90 -88 90z" />
 </svg>`,
-  "Merriweather_Regular/2019.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 766 2000">
+  "Merriweather_Regular/8217.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 766 2000">
    <path fill="currentColor"
 d="M290 694l-46 -46v-16c44 -30 140 -226 140 -404c0 -62 -134 -102 -134 -194c0 -62 36 -92 88 -92c94 0 184 106 184 268c0 234 -154 446 -232 484z" />
 </svg>`,
@@ -4258,19 +4258,19 @@ c0 234 -154 446 -232 484z" />
 d="M798 2046l-46 -46v-16c44 -30 140 -226 140 -404c0 -62 -134 -102 -134 -194c0 -62 36 -92 88 -92c94 0 184 106 184 268c0 234 -154 446 -232 484zM290 2046l-46 -46v-16c44 -30 140 -226 140 -404c0 -62 -134 -102 -134 -194c0 -62 36 -92 88 -92c94 0 184 106 184 268
 c0 234 -154 446 -232 484z" />
 </svg>`,
-  "Merriweather_Regular/2020.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1052 2000">
+  "Merriweather_Regular/8224.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1052 2000">
    <path fill="currentColor"
 d="M566 1486h-88l-32 -784l18 -210l-304 4v-124l304 6l-16 -220v-168h146v168l-16 220l304 -6v124l-304 -4l18 210z" />
 </svg>`,
-  "Merriweather_Regular/2021.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1056 2000">
+  "Merriweather_Regular/8225.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1056 2000">
    <path fill="currentColor"
 d="M566 1600h-86l-30 -480l18 -210l-308 4v-122l308 4l-16 -196l18 -108l-310 4v-124l308 6l-18 -220v-168h146v168l-18 220l308 -6v124l-310 -4l20 108l-18 196l308 -4v122l-308 -4l19 210z" />
 </svg>`,
-  "Merriweather_Regular/2022.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 832 2000">
+  "Merriweather_Regular/8226.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 832 2000">
    <path fill="currentColor"
 d="M404 1100c-92 0 -158 -84 -160 -176c0 -102 84 -176 176 -176c90 0 158 74 158 174c0 98 -84 178 -174 178z" />
 </svg>`,
-  "Merriweather_Regular/2026.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1486 2000">
+  "Merriweather_Regular/8230.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1486 2000">
    <path fill="currentColor"
 d="M1218 1622c-58 0 -108 -44 -108 -112c0 -76 64 -132 130 -132c76 0 108 54 108 112c0 78 -60 132 -130 132zM728 1622c-60 0 -108 -44 -108 -112c0 -76 64 -132 128 -132c78 0 110 54 110 112c0 78 -62 132 -130 132zM238 1622c-60 0 -110 -44 -110 -112
 c0 -76 64 -132 130 -132c78 0 108 54 108 112c0 78 -62 132 -128 132z" />
@@ -4278,21 +4278,21 @@ c0 -76 64 -132 130 -132c78 0 108 54 108 112c0 78 -62 132 -128 132z" />
   "Merriweather_Regular/8239.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 310 2000">
    <g  />
 </svg>`,
-  "Merriweather_Regular/2030.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2908 2000">
+  "Merriweather_Regular/8240.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2908 2000">
    <path fill="currentColor"
 d="M2414 1456c132 0 216 -116 216 -308c0 -186 -68 -316 -204 -316c-134 0 -216 120 -216 310c0 174 74 314 204 314zM1552 1456c132 0 218 -118 218 -308c0 -184 -70 -316 -206 -316c-134 0 -216 120 -216 310c0 174 74 314 204 314zM2404 1552c-214 0 -348 -184 -348 -400
 c0 -266 182 -416 380 -416c240 0 348 180 348 404c0 266 -186 412 -380 412zM1542 1552c-214 0 -346 -184 -346 -400c0 -266 180 -416 380 -416c238 0 346 180 346 404c0 266 -186 412 -380 412zM472 856c132 0 216 -118 216 -308c0 -186 -70 -316 -206 -316
 c-132 0 -214 120 -214 312c0 172 72 312 204 312zM460 952c-212 0 -346 -184 -346 -400c0 -266 180 -416 380 -416c240 0 346 178 346 404c0 266 -184 412 -380 412zM764 1600h-132l642 -1502h130z" />
 </svg>`,
-  "Merriweather_Regular/2032.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 676 2000">
+  "Merriweather_Regular/8242.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 676 2000">
    <path fill="currentColor"
 d="M306 580h-114l106 -730h188z" />
 </svg>`,
-  "Merriweather_Regular/2033.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1036 2000">
+  "Merriweather_Regular/8243.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1036 2000">
    <path fill="currentColor"
 d="M666 580h-114l106 -730h188zM306 580h-114l106 -730h188z" />
 </svg>`,
-  "Merriweather_Regular/2039.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 804 2000">
+  "Merriweather_Regular/8249.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 804 2000">
    <path fill="currentColor"
 d="M662 1414l-90 72l-460 -418v-132l460 -430l90 66l-360 428z" />
 </svg>`,
@@ -4305,85 +4305,85 @@ d="M682 1068l-460 418l-90 -72l360 -414l-360 -428l90 -66l460 430v132z" />
 d="M845 1622c-58 0 -112 -42 -112 -110c0 -74 68 -130 132 -130c80 0 114 52 114 110c0 78 -64 130 -134 130zM272 1622c-58 0 -112 -42 -112 -110c0 -74 68 -130 132 -130c80 0 114 52 114 110c0 78 -64 130 -134 130zM899 1140h-102l-50 -1338h194zM326 1140h-102
 l-50 -1338h194z" />
 </svg>`,
-  "Merriweather_Regular/2044.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-300 0 992 2000">
+  "Merriweather_Regular/8260.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-300 0 992 2000">
    <path fill="currentColor"
 d="M-166 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2052.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1190 2000">
+  "Merriweather_Regular/8274.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1190 2000">
    <path fill="currentColor"
 d="M784 1497c-92 0 -158 -84 -160 -176c0 -102 84 -176 176 -176c90 0 158 74 158 174c0 98 -84 178 -174 178zM356 577c-92 0 -158 -84 -160 -176c0 -102 84 -176 176 -176c90 0 158 74 158 174c0 98 -84 178 -174 178zM228 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2070.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 900 2000">
+  "Merriweather_Regular/8304.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 900 2000">
    <path fill="currentColor"
 d="M444 699c154 0 206 -118 206 -404c0 -312 -62 -424 -204 -424c-144 0 -208 102 -208 408c0 284 64 420 206 420zM432 773c-256 0 -374 -188 -374 -486c0 -326 170 -490 402 -490c258 0 372 178 372 482c0 324 -158 494 -400 494z" />
 </svg>`,
-  "Merriweather_Regular/2074.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 824 2000">
+  "Merriweather_Regular/8308.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 824 2000">
    <path fill="currentColor"
 d="M632 755h-151v-202h-414l-48 -72c112 -207 260 -504 342 -696h45l139 50l-327 561l-60 72l323 -17l16 -251l135 -8v252l152 -10v119h-152v202z" />
 </svg>`,
-  "Merriweather_Regular/2075.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 768 2000">
+  "Merriweather_Regular/8309.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 768 2000">
    <path fill="currentColor"
 d="M168 769c-28 0 -71 -2 -101 -8l1 -79c30 3 63 4 86 4c223 0 377 -110 377 -246c0 -127 -74 -179 -206 -179c-65 0 -165 19 -216 38l-43 -27l73 -462h431l15 -25h91l-27 144h-394l-59 267c33 -10 125 -38 218 -38c192 0 294 91 294 253c0 215 -214 358 -540 358z" />
 </svg>`,
-  "Merriweather_Regular/2076.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 841 2000">
+  "Merriweather_Regular/8310.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 841 2000">
    <path fill="currentColor"
 d="M431 693c112 0 189 -84 189 -225c0 -173 -69 -239 -172 -239c-123 0 -190 64 -213 91c-2 22 -4 40 -4 87c0 179 69 286 200 286zM429 769c-197 0 -371 -135 -371 -374c0 -320 237 -567 555 -612l36 66c-253 67 -341 204 -400 378c73 -63 140 -88 261 -88
 c161 0 277 125 277 296c0 207 -158 334 -358 334z" />
 </svg>`,
-  "Merriweather_Regular/2077.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 765 2000">
+  "Merriweather_Regular/8311.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 765 2000">
    <path fill="currentColor"
 d="M414 755l-195 -1c118 -287 293 -693 374 -843l-388 7l-63 189l-102 -18l34 -278h641l30 37c-121 269 -258 679 -331 907z" />
 </svg>`,
-  "Merriweather_Regular/2078.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 880 2000">
+  "Merriweather_Regular/8312.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 880 2000">
    <path fill="currentColor"
 d="M444 700c84 0 173 -50 173 -161c0 -102 -111 -140 -251 -208c-82 32 -140 96 -140 184c0 121 90 185 218 185zM501 203c65 -39 115 -95 115 -185c0 -96 -80 -156 -175 -156c-83 0 -164 42 -164 132c0 102 120 153 224 209zM435 769c-146 0 -347 -63 -347 -247
 c0 -91 67 -185 211 -229c-99 -55 -168 -135 -168 -256c0 -161 164 -244 314 -244c165 0 295 84 295 216c0 95 -61 175 -181 233c129 67 223 149 223 272c0 155 -168 255 -347 255z" />
 </svg>`,
-  "Merriweather_Regular/2079.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 837 2000">
+  "Merriweather_Regular/8313.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 837 2000">
    <path fill="currentColor"
 d="M387 334c119 0 186 -65 209 -89c2 -24 4 -42 4 -89c0 -179 -71 -286 -202 -286c-112 0 -191 84 -191 225c0 173 61 239 180 239zM246 781l-37 -67c253 -67 314 -204 373 -378c-41 35 -107 88 -241 88c-183 0 -297 -125 -297 -296c0 -207 176 -334 356 -334
 c197 0 369 135 369 364c0 330 -206 577 -523 623z" />
 </svg>`,
-  "Merriweather_Regular/2080.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 900 2000">
+  "Merriweather_Regular/8320.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 900 2000">
    <path fill="currentColor"
 d="M444 1840c154 0 206 -118 206 -404c0 -312 -62 -424 -204 -424c-144 0 -208 102 -208 408c0 284 64 420 206 420zM432 1914c-256 0 -374 -188 -374 -486c0 -326 170 -490 402 -490c258 0 372 178 372 482c0 324 -158 494 -400 494z" />
 </svg>`,
-  "Merriweather_Regular/2081.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 639 2000">
+  "Merriweather_Regular/8321.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 639 2000">
    <path fill="currentColor"
 d="M619 1896h-539v-70l193 -11v-721c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70z" />
 </svg>`,
-  "Merriweather_Regular/2082.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 854 2000">
+  "Merriweather_Regular/8322.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 854 2000">
    <path fill="currentColor"
 d="M748 1896h-684l-24 -64c250 -132 500 -386 500 -588c0 -118 -78 -186 -194 -186c-128 0 -184 72 -224 114l-68 -64c58 -84 164 -172 338 -172c194 0 316 120 316 278c0 200 -218 456 -470 588l422 -38l48 -112l78 16z" />
 </svg>`,
-  "Merriweather_Regular/2083.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 780 2000">
+  "Merriweather_Regular/8323.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 780 2000">
    <path fill="currentColor"
 d="M220 1910c-52 0 -116 -8 -156 -18v-88c30 8 80 14 122 14c242 0 352 -93 352 -215c0 -102 -58 -167 -232 -151c-16 4 -80 16 -94 20l-34 -90c42 -6 86 -18 124 -32c120 -44 188 -101 188 -185c0 -83 -81 -121 -177 -121c-94 0 -177 34 -229 68l-44 -74
 c52 -42 178 -104 320 -104c172 0 302 66 302 205c0 132 -154 223 -294 265c232 -56 342 56 344 182c2 184 -160 324 -492 324z" />
 </svg>`,
-  "Merriweather_Regular/2084.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 824 2000">
+  "Merriweather_Regular/8324.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 824 2000">
    <path fill="currentColor"
 d="M632 1896h-151v-202h-414l-48 -72c112 -207 260 -504 342 -696h45l139 50l-327 561l-60 72l323 -17l16 -251l135 -8v252l152 -10v119h-152v202z" />
 </svg>`,
-  "Merriweather_Regular/2085.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 768 2000">
+  "Merriweather_Regular/8325.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 768 2000">
    <path fill="currentColor"
 d="M168 1910c-28 0 -71 -2 -101 -8l1 -79c30 3 63 4 86 4c223 0 377 -110 377 -246c0 -127 -74 -179 -206 -179c-65 0 -165 19 -216 38l-43 -27l73 -462h431l15 -25h91l-27 144h-394l-59 267c33 -10 125 -38 218 -38c192 0 294 91 294 253c0 215 -214 358 -540 358z" />
 </svg>`,
-  "Merriweather_Regular/2086.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 841 2000">
+  "Merriweather_Regular/8326.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 841 2000">
    <path fill="currentColor"
 d="M431 1834c112 0 189 -84 189 -225c0 -173 -69 -239 -172 -239c-123 0 -190 64 -213 91c-2 22 -4 40 -4 87c0 179 69 286 200 286zM429 1910c-197 0 -371 -135 -371 -374c0 -320 237 -567 555 -612l36 66c-253 67 -341 204 -400 378c73 -63 140 -88 261 -88
 c161 0 277 125 277 296c0 207 -158 334 -358 334z" />
 </svg>`,
-  "Merriweather_Regular/2087.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 765 2000">
+  "Merriweather_Regular/8327.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 765 2000">
    <path fill="currentColor"
 d="M414 1896l-195 -1c118 -287 293 -693 374 -843l-388 7l-63 189l-102 -18l34 -278h641l30 37c-121 269 -258 679 -331 907z" />
 </svg>`,
-  "Merriweather_Regular/2088.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 880 2000">
+  "Merriweather_Regular/8328.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 880 2000">
    <path fill="currentColor"
 d="M444 1841c84 0 173 -50 173 -161c0 -102 -111 -140 -251 -208c-82 32 -140 96 -140 184c0 121 90 185 218 185zM501 1344c65 -39 115 -95 115 -185c0 -96 -80 -156 -175 -156c-83 0 -164 42 -164 132c0 102 120 153 224 209zM435 1910c-146 0 -347 -63 -347 -247
 c0 -91 67 -185 211 -229c-99 -55 -168 -135 -168 -256c0 -161 164 -244 314 -244c165 0 295 84 295 216c0 95 -61 175 -181 233c129 67 223 149 223 272c0 155 -168 255 -347 255z" />
 </svg>`,
-  "Merriweather_Regular/2089.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 837 2000">
+  "Merriweather_Regular/8329.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 837 2000">
    <path fill="currentColor"
 d="M387 1475c119 0 186 -65 209 -89c2 -24 4 -42 4 -89c0 -179 -71 -286 -202 -286c-112 0 -191 84 -191 225c0 173 61 239 180 239zM246 1922l-37 -67c253 -67 314 -204 373 -378c-41 35 -107 88 -241 88c-183 0 -297 -125 -297 -296c0 -207 176 -334 356 -334
 c197 0 369 135 369 364c0 330 -206 577 -523 623z" />
@@ -4488,44 +4488,44 @@ d="M622 1516c310 0 424 -126 424 -330c0 -212 -106 -306 -364 -306c-72 0 -226 -2 -2
 h-246v-86l172 -18v-1274l-168 -22v-86h250c36 0 69 -1 101 -3v-249h110v240c34 -2 67 -4 101 -4c37 0 71 1 103 4v-240h110v256c200 42 281 154 281 316c0 180 -102 336 -296 374c254 -8 402 136 402 348c0 193 -95 377 -387 437v267h-110v-252c-33 3 -68 4 -105 4
 c-35 0 -66 -2 -99 -4v252z" />
 </svg>`,
-  "Merriweather_Regular/2100.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2036 2000">
+  "Merriweather_Regular/8448.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2036 2000">
    <path fill="currentColor"
 d="M1634 1553c-217 0 -354 -172 -354 -394c-2 -220 146 -422 406 -422c88 0 176 24 214 40l-4 244h-98l-22 -144c-24 -28 -69 -44 -120 -44c-129 0 -216 105 -222 282c-6 176 69 330 238 330c91 0 162 -45 196 -74l44 80c-64 56 -166 102 -278 102zM431 862
 c70 0 130 -38 200 -90v-227c-236 2 -331 66 -331 186c0 93 60 131 131 131zM385 952c-145 0 -239 -85 -239 -211c0 -159 161 -262 485 -268v-50c0 -75 0 -166 -161 -166c-114 0 -204 46 -250 70l-32 -84c40 -31 165 -102 326 -102c255 0 255 179 255 272v457h89v57
 c-34 10 -97 22 -145 22c-71 0 -71 -28 -71 -58v-53c-37 31 -115 114 -257 114zM846 1600h-132l642 -1502h130z" />
 </svg>`,
-  "Merriweather_Regular/2101.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2023 2000">
+  "Merriweather_Regular/8449.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2023 2000">
    <path fill="currentColor"
 d="M1596 1549c-113 0 -224 -35 -278 -58v-196h94l25 128c20 26 86 52 167 52c110 0 157 -47 157 -113c0 -84 -75 -120 -210 -169c-145 -47 -228 -123 -228 -236c0 -143 134 -225 302 -225c112 0 195 35 226 45v198h-90l-31 -131c-11 -18 -71 -30 -119 -30
 c-89 0 -150 40 -150 111c0 89 90 118 181 159c130 48 257 101 257 240s-127 225 -303 225zM431 862c70 0 130 -38 200 -90v-227c-236 2 -331 66 -331 186c0 93 60 131 131 131zM385 952c-145 0 -239 -85 -239 -211c0 -159 161 -262 485 -268v-50c0 -75 0 -166 -161 -166
 c-114 0 -204 46 -250 70l-32 -84c40 -31 165 -102 326 -102c255 0 255 179 255 272v457h89v57c-34 10 -97 22 -145 22c-71 0 -71 -28 -71 -58v-53c-37 31 -115 114 -257 114zM846 1600h-132l642 -1502h130z" />
 </svg>`,
-  "Merriweather_Regular/2105.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2046 2000">
+  "Merriweather_Regular/8453.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2046 2000">
    <path fill="currentColor"
 d="M1552 1456c132 0 218 -118 218 -308c0 -184 -70 -316 -206 -316c-134 0 -216 120 -216 310c0 174 74 314 204 314zM1542 1552c-214 0 -346 -184 -346 -400c0 -266 180 -416 380 -416c238 0 346 180 346 404c0 266 -186 412 -380 412zM506 952c-226 0 -360 -172 -360 -394
 c-2 -220 146 -422 406 -422c88 0 176 24 214 40l-4 244h-98l-22 -144c-24 -28 -68 -44 -122 -44c-124 0 -220 110 -220 282c-2 226 104 330 230 330c98 0 160 -38 204 -74l44 80c-58 52 -166 102 -272 102zM762 1600h-132l642 -1502h130z" />
 </svg>`,
-  "Merriweather_Regular/2113.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1322 2000">
+  "Merriweather_Regular/8467.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1322 2000">
    <path fill="currentColor"
 d="M520 1100v56c344 -328 448 -680 448 -950c0 -86 -34 -130 -78 -130c-224 0 -370 626 -370 1024zM694 1622c-104 0 -216 -56 -282 -184c-60 50 -112 86 -174 128l-130 -98c102 -62 186 -120 268 -186c-8 -50 -10 -106 -12 -166c-18 -556 252 -1138 570 -1138
 c128 0 194 100 194 248c0 384 -248 820 -582 1098c40 126 110 164 172 164c120 0 246 -154 288 -340l86 18c-34 176 -130 456 -398 456z" />
 </svg>`,
-  "Merriweather_Regular/2116.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2591 2000">
+  "Merriweather_Regular/8470.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2591 2000">
    <path fill="currentColor"
 d="M2315 1600h-858v-106h858v106zM1885 966c186 2 276 -130 276 -388c0 -228 -84 -384 -270 -388c-180 -4 -282 126 -282 366c0 228 84 406 276 410zM517 1600h-448v-84l156 -20v-1274l-156 -24v-84h322l600 1054l110 250l-2 -1196l-166 -24v-84h446v84l-162 24v1378h-150
 l-594 -1026l-132 -268v1190l176 20v84zM1879 1064c-300 0 -430 -232 -428 -502c4 -298 224 -472 450 -472c278 0 422 212 420 476c-2 300 -206 498 -442 498z" />
 </svg>`,
-  "Merriweather_Regular/2117.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2090 2000">
+  "Merriweather_Regular/8471.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2090 2000">
    <path fill="currentColor"
 d="M1066 686c136 0 216 -124 216 -230c0 -130 -80 -216 -228 -216c-44 0 -84 0 -144 10v430c32 6 112 6 156 6zM1044 1094h-364v-74l94 -22v-742l-94 -20v-82h148c104 0 150 -4 252 -6c250 0 356 132 356 282c0 206 -108 356 -394 356l-132 -2v214l134 22v74zM1040 1384
 c418 0 740 -348 740 -764c0 -414 -322 -762 -740 -762c-420 0 -742 348 -742 762c0 416 322 764 742 764zM1040 1480c-476 0 -850 -384 -850 -860c0 -474 374 -856 850 -856c474 0 850 382 850 856c0 476 -376 860 -850 860z" />
 </svg>`,
-  "Merriweather_Regular/2122.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2202 2000">
+  "Merriweather_Regular/8482.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2202 2000">
    <path fill="currentColor"
 d="M1536 848h-88l-202 -534l-66 -166l-4 172l-26 432l98 12v76h-300v-76l112 -12l38 -580l-112 -8v-82h312l154 416l60 186l208 -602h296v82l-114 8l52 580l104 12v76h-336v-76l94 -12l-24 -378l-12 -222l-32 104zM714 840h-418v-76l136 -12v-592l-186 8l-38 132l-68 2
 l20 -220h690v218l-64 4l-22 -136l-190 -10v594l140 12v76z" />
 </svg>`,
-  "Merriweather_Regular/2126.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1894 2000">
+  "Merriweather_Regular/8486.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1894 2000">
    <path fill="currentColor"
 d="M828 1600h-666l-40 -384h104l62 252l402 10c-174 -96 -426 -438 -422 -748c8 -458 334 -634 680 -634c402 0 652 216 646 624c-4 282 -210 630 -398 756l390 -8l70 -252h106l-54 384h-650v-114c200 -120 364 -428 364 -746c0 -362 -178 -536 -474 -536
 c-310 0 -508 156 -508 562c0 316 222 632 388 720v114z" />
@@ -4535,49 +4535,49 @@ c-310 0 -508 156 -508 562c0 316 222 632 388 720v114z" />
 d="M375 827h963c30 0 35 -9 35 -35v-359c0 -118 -283 -277 -516 -277c-294 0 -514 196 -514 262v389c0 13 8 20 32 20zM859 1600c-479 0 -819 -292 -819 -747c0 -448 340 -749 819 -749c483 0 797 272 819 769h-1303c-19 0 -32 2 -32 39v366c0 76 207 263 516 263
 c207 0 401 -104 518 -237h153c-194 213 -364 296 -671 296z" />
 </svg>`,
-  "Merriweather_Regular/2150.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1825 2000">
+  "Merriweather_Regular/8528.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1825 2000">
    <path fill="currentColor"
 d="M1474 1600l-195 -1c118 -287 293 -693 374 -843l-388 7l-63 189l-102 -18l34 -278h641l30 37c-121 269 -258 679 -331 907zM619 975h-539v-70l193 -11v-721c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70zM462 1702h-124l848 -1732h124z
 " />
 </svg>`,
-  "Merriweather_Regular/2151.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1857 2000">
+  "Merriweather_Regular/8529.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1857 2000">
    <path fill="currentColor"
 d="M1407 1179c119 0 186 -65 209 -89c2 -24 4 -42 4 -89c0 -179 -71 -286 -202 -286c-112 0 -191 84 -191 225c0 173 61 239 180 239zM1266 1626l-37 -67c253 -67 314 -204 373 -378c-41 35 -107 88 -241 88c-183 0 -297 -125 -297 -296c0 -207 176 -334 356 -334
 c197 0 369 135 369 364c0 330 -206 577 -523 623zM619 975h-539v-70l193 -11v-721c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70zM462 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2152.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2548 2000">
+  "Merriweather_Regular/8530.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2548 2000">
    <path fill="currentColor"
 d="M2092 1544c154 0 206 -118 206 -404c0 -312 -62 -424 -204 -424c-144 0 -208 102 -208 408c0 284 64 420 206 420zM2080 1618c-256 0 -374 -188 -374 -486c0 -326 170 -490 402 -490c258 0 372 178 372 482c0 324 -158 494 -400 494zM1639 1600h-539v-70l193 -11v-721
 c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70zM619 975h-539v-70l193 -11v-721c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70zM462 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2153.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1800 2000">
+  "Merriweather_Regular/8531.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1800 2000">
    <path fill="currentColor"
 d="M1240 1614c-52 0 -116 -8 -156 -18v-88c30 8 80 14 122 14c242 0 352 -93 352 -215c0 -102 -58 -167 -232 -151c-16 4 -80 16 -94 20l-34 -90c42 -6 86 -18 124 -32c120 -44 188 -101 188 -185c0 -83 -81 -121 -177 -121c-94 0 -177 34 -229 68l-44 -74
 c52 -42 178 -104 320 -104c172 0 302 66 302 205c0 132 -154 223 -294 265c232 -56 342 56 344 182c2 184 -160 324 -492 324zM619 975h-539v-70l193 -11v-721c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70zM462 1702h-124l848 -1732h124z
 " />
 </svg>`,
-  "Merriweather_Regular/2154.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2016 2000">
+  "Merriweather_Regular/8532.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2016 2000">
    <path fill="currentColor"
 d="M1456 1614c-52 0 -116 -8 -156 -18v-88c30 8 80 14 122 14c242 0 352 -93 352 -215c0 -102 -58 -167 -232 -151c-16 4 -80 16 -94 20l-34 -90c42 -6 86 -18 124 -32c120 -44 188 -101 188 -185c0 -83 -81 -121 -177 -121c-94 0 -177 34 -229 68l-44 -74
 c52 -42 178 -104 320 -104c172 0 302 66 302 205c0 132 -154 223 -294 265c232 -56 342 56 344 182c2 184 -160 324 -492 324zM748 975h-684l-24 -64c250 -132 500 -386 500 -588c0 -118 -78 -186 -194 -186c-128 0 -184 72 -224 114l-68 -64c58 -84 164 -172 338 -172
 c194 0 316 120 316 278c0 200 -218 456 -470 588l422 -38l48 -112l78 16zM678 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2155.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1788 2000">
+  "Merriweather_Regular/8533.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1788 2000">
    <path fill="currentColor"
 d="M1188 1614c-28 0 -71 -2 -101 -8l1 -79c30 3 63 4 86 4c223 0 377 -110 377 -246c0 -127 -74 -179 -206 -179c-65 0 -165 19 -216 38l-43 -27l73 -462h431l15 -25h91l-27 144h-394l-59 267c33 -10 125 -38 218 -38c192 0 294 91 294 253c0 215 -214 358 -540 358z
 M619 975h-539v-70l193 -11v-721c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70zM462 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2156.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2004 2000">
+  "Merriweather_Regular/8534.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2004 2000">
    <path fill="currentColor"
 d="M1404 1614c-28 0 -71 -2 -101 -8l1 -79c30 3 63 4 86 4c223 0 377 -110 377 -246c0 -127 -74 -179 -206 -179c-65 0 -165 19 -216 38l-43 -27l73 -462h431l15 -25h91l-27 144h-394l-59 267c33 -10 125 -38 218 -38c192 0 294 91 294 253c0 215 -214 358 -540 358z
 M748 975h-684l-24 -64c250 -132 500 -386 500 -588c0 -118 -78 -186 -194 -186c-128 0 -184 72 -224 114l-68 -64c58 -84 164 -172 338 -172c194 0 316 120 316 278c0 200 -218 456 -470 588l422 -38l48 -112l78 16zM678 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2158.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1974 2000">
+  "Merriweather_Regular/8536.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1974 2000">
    <path fill="currentColor"
 d="M1374 1614c-28 0 -71 -2 -101 -8l1 -79c30 3 63 4 86 4c223 0 377 -110 377 -246c0 -127 -74 -179 -206 -179c-65 0 -165 19 -216 38l-43 -27l73 -462h431l15 -25h91l-27 144h-394l-59 267c33 -10 125 -38 218 -38c192 0 294 91 294 253c0 215 -214 358 -540 358z
 M632 975h-151v-202h-414l-48 -72c112 -207 260 -504 342 -696h45l139 50l-327 561l-60 72l323 -17l16 -251l135 -8v252l152 -10v119h-152v202zM648 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2159.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1801 2000">
+  "Merriweather_Regular/8537.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1801 2000">
    <path fill="currentColor"
 d="M1391 1538c112 0 189 -84 189 -225c0 -173 -69 -239 -172 -239c-123 0 -190 64 -213 91c-2 22 -4 40 -4 87c0 179 69 286 200 286zM1389 1614c-197 0 -371 -135 -371 -374c0 -320 237 -567 555 -612l36 66c-253 67 -341 204 -400 378c73 -63 140 -88 261 -88
 c161 0 277 125 277 296c0 207 -158 334 -358 334zM619 975h-539v-70l193 -11v-721c-34 10 -163 38 -209 41l-18 -84c110 -21 223 -78 289 -122l97 13v872l187 12v70zM462 1702h-124l848 -1732h124z" />
@@ -4613,57 +4613,57 @@ d="M1442 1545c84 0 173 -50 173 -161c0 -102 -111 -140 -251 -208c-82 32 -140 96 -1
 c0 -91 67 -185 211 -229c-99 -55 -168 -135 -168 -256c0 -161 164 -244 314 -244c165 0 295 84 295 216c0 95 -61 175 -181 233c129 67 223 149 223 272c0 155 -168 255 -347 255zM414 975l-195 -1c118 -287 293 -693 374 -843l-388 7l-63 189l-102 -18l34 -278h641l30 37
 c-121 269 -258 679 -331 907zM440 1702h-124l848 -1732h124z" />
 </svg>`,
-  "Merriweather_Regular/2190.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1394 2000">
+  "Merriweather_Regular/8592.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1394 2000">
    <path fill="currentColor"
 d="M726 1336l-90 92l-576 -576l576 -576l90 92l-432 428l102 -10h938l-2 132h-936l-102 -12z" />
 </svg>`,
-  "Merriweather_Regular/2191.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1282 2000">
+  "Merriweather_Regular/8593.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1282 2000">
    <path fill="currentColor"
 d="M702 1460h-132v-938l12 -100l-430 430l-92 -88l576 -578l576 578l-92 88l-428 -430l10 100v938z" />
 </svg>`,
-  "Merriweather_Regular/2192.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1394 2000">
+  "Merriweather_Regular/8594.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1394 2000">
    <path fill="currentColor"
 d="M1324 852l-576 576l-90 -92l432 -430l-102 12h-936l-2 -132h938l102 10l-432 -428l90 -92z" />
 </svg>`,
-  "Merriweather_Regular/2193.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1282 2000">
+  "Merriweather_Regular/8595.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1282 2000">
    <path fill="currentColor"
 d="M1212 904l-576 578l-576 -578l92 -88l430 430l-12 -100v-938h132v938l-10 100l428 -430z" />
 </svg>`,
-  "Merriweather_Regular/2194.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2248 2000">
+  "Merriweather_Regular/8596.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 2248 2000">
    <path fill="currentColor"
 d="M726 1336l-90 92l-576 -576l576 -576l90 92l-432 428l102 -10h1446l102 10l-430 -428l88 -92l576 576l-576 576l-88 -92l432 -430l-104 12h-1446l-102 -12z" />
 </svg>`,
-  "Merriweather_Regular/2195.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1282 2000">
+  "Merriweather_Regular/8597.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1282 2000">
    <path fill="currentColor"
 d="M1212 1272l-574 576l-578 -576l92 -88l432 434l-12 -100v-1158l12 -100l-432 434l-92 -88l578 -578l574 578l-90 88l-432 -436l10 102v1158l-10 102l432 -436z" />
 </svg>`,
-  "Merriweather_Regular/2196.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1208 2000">
+  "Merriweather_Regular/8598.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1208 2000">
    <path fill="currentColor"
 d="M1078 1157l-94 92l-662 -662l-64 -82l2 610l-130 2v-814h816l-2 128l-608 -2l78 64z" />
 </svg>`,
-  "Merriweather_Regular/2197.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1208 2000">
+  "Merriweather_Regular/8599.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1208 2000">
    <path fill="currentColor"
 d="M876 586l-662 664l-94 -94l664 -664l78 -62h-608l-2 -126l816 -2l-2 816l-128 -2l2 -608z" />
 </svg>`,
-  "Merriweather_Regular/2198.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1206 2000">
+  "Merriweather_Regular/8600.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1206 2000">
    <path fill="currentColor"
 d="M1066 1250h-816l2 -128h610l-80 -62l-662 -662l92 -96l662 664l66 78l-4 -608h130v814z" />
 </svg>`,
-  "Merriweather_Regular/2199.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1206 2000">
+  "Merriweather_Regular/8601.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1206 2000">
    <path fill="currentColor"
 d="M946 1248l-816 2v-816l128 4v608l62 -80l664 -664l92 94l-662 664l-78 62h606z" />
 </svg>`,
-  "Merriweather_Regular/2202.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1133 2000">
+  "Merriweather_Regular/8706.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1133 2000">
    <path fill="currentColor"
 d="M516 1500c262 0 356 -294 384 -504c8 -56 14 -106 16 -158c-80 -72 -192 -128 -320 -128c-184 0 -384 140 -384 442c0 204 122 348 304 348zM464 1624c-240 0 -412 -176 -412 -428c0 -366 266 -598 582 -598c124 0 218 50 284 88c-8 -326 -100 -608 -476 -608
 c-112 0 -202 24 -294 88l-38 -80c106 -78 242 -126 382 -126c438 0 578 324 578 716c0 418 -130 948 -606 948z" />
 </svg>`,
-  "Merriweather_Regular/2205.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1479 2000">
+  "Merriweather_Regular/8709.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1479 2000">
    <path fill="currentColor"
 d="M735 1514c249 0 446 -213 446 -463c0 -127 -51 -244 -134 -329l-569 707c72 53 161 85 257 85zM421 1380l569 -707c-72 -53 -160 -84 -255 -84c-250 0 -447 213 -447 462c0 127 51 244 133 329zM409 1515l-151 187l-56 -49l149 -186c-110 -103 -178 -251 -178 -416
 c0 -313 248 -567 562 -567c121 0 233 38 324 103l148 -184l58 49l-148 183c111 104 179 252 179 416c0 314 -248 568 -561 568c-122 0 -235 -39 -326 -104z" />
 </svg>`,
-  "Merriweather_Regular/2206.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1388 2000">
+  "Merriweather_Regular/8710.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1388 2000">
    <path fill="currentColor"
 d="M650 414l-416 1100h878l-420 -1106l-21 -52zM1274 1600h-1168l-36 -40l578 -1460h64l596 1460z" />
 </svg>`,
@@ -4671,19 +4671,19 @@ d="M650 414l-416 1100h878l-420 -1106l-21 -52zM1274 1600h-1168l-36 -40l578 -1460h
    <path fill="currentColor"
 d="M550 1772h-518v-82l174 -22v-1456l-170 -22v-76h1324v76l-170 24v1454l174 22v82h-514v-82l174 -22v-1454h-650v1454l176 22v82z" />
 </svg>`,
-  "Merriweather_Regular/2211.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1564 2000">
+  "Merriweather_Regular/8721.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1564 2000">
    <path fill="currentColor"
 d="M1300 1776h-1060l-20 -48l590 -778l-582 -784l24 -52h1012l32 320h-94l-54 -206l-702 -10l538 708l-550 732l740 -16l88 -202l82 12z" />
 </svg>`,
-  "Merriweather_Regular/2212.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1234 2000">
+  "Merriweather_Regular/8722.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1234 2000">
    <path fill="currentColor"
 d="M1044 1018h-864v-120h864v120z" />
 </svg>`,
-  "Merriweather_Regular/2215.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 872 2000">
+  "Merriweather_Regular/8725.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 872 2000">
    <path fill="currentColor"
 d="M226 1954h-150l560 -1916h150z" />
 </svg>`,
-  "Merriweather_Regular/2219.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 608 2000">
+  "Merriweather_Regular/8729.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 608 2000">
    <path fill="currentColor"
 d="M290 979c-60 0 -110 -44 -110 -112c0 -76 64 -132 130 -132c76 0 108 54 108 112c0 78 -62 132 -128 132z" />
 </svg>`,
@@ -4701,24 +4701,24 @@ c-172 0 -326 -150 -426 -288c-94 134 -248 284 -420 286c-236 0 -378 -182 -378 -372
 d="M438 2104c-66 0 -230 -12 -330 -116l88 -106c38 54 130 110 226 110c142 0 244 -118 244 -266c0 -488 -426 -846 -426 -1332c0 -230 188 -440 408 -440c72 0 210 2 294 124l-92 88c-34 -66 -128 -102 -212 -102c-142 0 -250 118 -250 262c0 490 428 842 428 1330
 c0 234 -154 448 -378 448z" />
 </svg>`,
-  "Merriweather_Regular/2236.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 696 2000">
+  "Merriweather_Regular/8758.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 696 2000">
    <path fill="currentColor"
 d="M334 1622c-60 0 -110 -44 -110 -112c0 -76 64 -132 130 -132c76 0 108 54 108 112c0 78 -62 132 -128 132zM334 790c-60 0 -110 -44 -110 -112c0 -76 64 -132 130 -132c76 0 108 54 108 112c0 78 -62 132 -128 132z" />
 </svg>`,
-  "Merriweather_Regular/2248.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1308 2000">
+  "Merriweather_Regular/8776.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1308 2000">
    <path fill="currentColor"
 d="M820 1398c-172 0 -230 -164 -362 -164c-98 0 -168 62 -210 118l-68 -76c48 -82 160 -172 300 -172c172 0 234 164 362 164c96 0 166 -60 208 -116l68 74c-50 86 -162 172 -298 172zM820 809c-172 0 -230 -164 -362 -164c-98 0 -168 62 -210 118l-68 -76
 c48 -82 160 -172 300 -172c172 0 234 164 362 164c96 0 166 -60 208 -116l68 74c-50 86 -162 172 -298 172z" />
 </svg>`,
-  "Merriweather_Regular/2260.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1264 2000">
+  "Merriweather_Regular/8800.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1264 2000">
    <path fill="currentColor"
 d="M490 1516h-144l83 -220h-249v-124h295l162 -430h-457v-124h504l82 -218h142l-82 218h248v124h-294l-161 430h455v124h-502z" />
 </svg>`,
-  "Merriweather_Regular/2264.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1348 2000">
+  "Merriweather_Regular/8804.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1348 2000">
    <path fill="currentColor"
 d="M1112 1600h-950v-124h950v124zM1112 1132v142l-950 -428v-66l950 -424v144l-746 314z" />
 </svg>`,
-  "Merriweather_Regular/2265.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1348 2000">
+  "Merriweather_Regular/8805.svg": svg`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-10 0 1348 2000">
    <path fill="currentColor"
 d="M1176 1600h-950v-124h950v124zM1176 846l-950 428v-142l746 -318l-746 -314v-144l950 424v66z" />
 </svg>`,

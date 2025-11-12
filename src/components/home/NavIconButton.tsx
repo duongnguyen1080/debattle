@@ -1,6 +1,6 @@
 import { Devvit } from '@devvit/public-api';
 
-type NavIconType = 'back' | 'profile' | 'info';
+type NavIconType = 'back' | 'profile' | 'info' | 'close';
 
 interface NavIconButtonProps {
   icon: NavIconType;
@@ -9,7 +9,10 @@ interface NavIconButtonProps {
   description?: string;
 }
 
-const NAV_ICON_META: Record<NavIconType, { url: string; imageWidth: number; imageHeight: number; defaultSize: Devvit.Blocks.SizeString; defaultDescription: string }> = {
+const NAV_ICON_META: Record<
+  NavIconType,
+  { url: string; imageWidth: number; imageHeight: number; defaultSize: Devvit.Blocks.SizeString; defaultDescription: string }
+> = {
   back: {
     url: 'back_icon.png',
     imageWidth: 354,
@@ -30,6 +33,13 @@ const NAV_ICON_META: Record<NavIconType, { url: string; imageWidth: number; imag
     imageHeight: 1080,
     defaultSize: '80px',
     defaultDescription: 'How to play',
+  },
+  close: {
+    url: 'close_button.png',
+    imageWidth: 305,
+    imageHeight: 302,
+    defaultSize: '120px',
+    defaultDescription: 'Close and return home',
   },
 };
 
