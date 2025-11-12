@@ -27,6 +27,27 @@ interface UseRoundFlowResult {
   sharePermalink: string | null;
 }
 
+const MAX_MEANINGFUL_ANSWER_LENGTH = 100;
+const ANSWER_LENGTH_LIMIT_MESSAGE =
+  'Answers are limited to 100 characters (spaces and punctuation excluded).';
+
+const createIgnoredCharRegex = (): RegExp => {
+  try {
+    return new RegExp('[\\s\\p{P}]', 'gu');
+  } catch {
+    return /[\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/g;
+  }
+};
+
+const IGNORED_ANSWER_CHAR_REGEX = createIgnoredCharRegex();
+
+const getMeaningfulAnswerLength = (value: string): number => {
+  if (!value) {
+    return 0;
+  }
+  return value.replace(IGNORED_ANSWER_CHAR_REGEX, '').length;
+};
+
 export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): UseRoundFlowResult {
   const [initialQuestion] = useState<QuestionBankEntry | null>(() => {
     try {
@@ -179,9 +200,9 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         {
           type: 'string',
           name: 'answer',
-          label: 'Your answer',
+          label: 'Your answer (max 100 characters, spaces & punctuation excluded)',
           required: true,
-          placeholder: 'Share your reasoning…',
+          placeholder: 'Share your reasoning (100 char max, spaces/punctuation excluded)...',
           maxLength: 300,
           defaultValue: answerText,
         },
@@ -191,6 +212,21 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       const trimmed = (answer ?? '').trim();
       if (!trimmed) {
         console.warn('[useRoundFlow] answerForm: empty answer submitted');
+        return;
+      }
+      const meaningfulLength = getMeaningfulAnswerLength(trimmed);
+      if (meaningfulLength > MAX_MEANINGFUL_ANSWER_LENGTH) {
+        console.warn('[useRoundFlow] answerForm: answer exceeds length limit', {
+          trimmedLength: trimmed.length,
+          meaningfulLength,
+        });
+        if (context?.ui?.showToast) {
+          try {
+            await context.ui.showToast(ANSWER_LENGTH_LIMIT_MESSAGE);
+          } catch (toastErr) {
+            console.warn('[useRoundFlow] answerForm: limit toast failed', toastErr);
+          }
+        }
         return;
       }
       await handleSubmitAnswer(trimmed);
