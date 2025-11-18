@@ -362,7 +362,7 @@ export class Service {
         : total >= 7
           ? 'Good effort; clarify your reasoning to strengthen it.'
           : 'Try grounding your answer with clearer ideas.';
-    const decision: 'open' | 'ajar' | 'closed' =
+    const fallbackDecision: 'open' | 'ajar' | 'closed' =
       total >= 12 ? 'open' : total >= 7 ? 'ajar' : 'closed';
 
     let areteEvaluation: AreteEvaluation | null = null;
@@ -372,7 +372,9 @@ export class Service {
     } catch (err) {
       console.error('[Service.submitAnswer] evaluateAnswerWithAI failed', err);
     }
-    const finalFeedback = areteEvaluation?.feedback || fallbackFeedback;
+    const areteDecision = this.decisionFromArete(areteEvaluation ?? undefined);
+    const decision: 'open' | 'ajar' | 'closed' = areteDecision ?? fallbackDecision;
+    const finalFeedback = areteEvaluation?.feedback ?? fallbackFeedback;
 
     const response: PlayerResponse = {
       id: `resp:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
@@ -426,12 +428,26 @@ export class Service {
   private decisionSummary(decision: 'open' | 'ajar' | 'closed'): { label: string; emoji: string } {
     switch (decision) {
       case 'open':
-        return { label: 'Door opens to wisdom', emoji: '🟢' };
+        return { label: 'Door swings open', emoji: '🟢' };
       case 'ajar':
-        return { label: 'Door is ajar', emoji: '🟡' };
+        return { label: 'Door stands ajar', emoji: '🟡' };
       default:
-        return { label: 'Door stays closed', emoji: '🔴' };
+        return { label: 'Door remains sealed', emoji: '🔴' };
     }
+  }
+
+  private decisionFromArete(arete?: AreteEvaluation | null): ('open' | 'ajar' | 'closed') | null {
+    if (!arete) {
+      return null;
+    }
+    const totalPoints = typeof arete.totalPoints === 'number' ? arete.totalPoints : 0;
+    if (arete.relevance !== 'Yes' || totalPoints <= 0) {
+      return 'closed';
+    }
+    if (totalPoints <= 55) {
+      return 'ajar';
+    }
+    return 'open';
   }
 
   async shareResponseToSubreddit(params: {
@@ -478,9 +494,17 @@ export class Service {
     }
 
     const resolvedSubreddit = await this.resolveSubredditName(subredditName);
-    const { label, emoji } = this.decisionSummary(decision);
-    const title = `${emoji} Debattle · ${totalScore}/15 — ${label}`;
+    const shareDecision = response.decision ?? decision;
+    const { label, emoji } = this.decisionSummary(shareDecision);
+    const areteShareScore = typeof response.areteEvaluation?.totalPoints === 'number'
+      ? Math.round(response.areteEvaluation.totalPoints)
+      : null;
+    const shareScoreValue = areteShareScore ?? totalScore;
+    const shareScoreMax = areteShareScore !== null ? 90 : 15;
+    const scoreDisplay = `${shareScoreValue}/${shareScoreMax}`;
+    const title = `${emoji} Debattle · ${scoreDisplay} — ${label}`;
     const sanitizedUsername = playerUsername || 'anonymous';
+    const resolvedFeedback = feedback || response.feedback || 'Feedback unavailable.';
 
     // Follow Devvit "share to subreddit" guidance: create a self-post with markdown payload.
     const bodyLines = [
@@ -488,8 +512,8 @@ export class Service {
       '',
       `**Answer by u/${sanitizedUsername}:** ${answerText}`,
       '',
-      `**Score:** ${totalScore}/15 · **Decision:** ${decision.toUpperCase()}`,
-      `**Feedback:** ${feedback}`,
+      `**Score:** ${scoreDisplay} · **Decision:** ${label}`,
+      `**Feedback:** ${resolvedFeedback}`,
       '',
       '_Shared from the Debattle experience._',
     ];
@@ -621,9 +645,15 @@ export class Service {
         if (!Number.isNaN(elapsed) && answerText) {
           try {
             const resp = await this.submitAnswer({ riddleId: post.id, playerUsername: comment.author, answerText, elapsed });
+            const hasAreteScore = typeof resp.areteEvaluation?.totalPoints === 'number';
+            const areteScoreValue = hasAreteScore
+              ? Math.round(resp.areteEvaluation!.totalPoints)
+              : resp.score.total;
+            const areteScoreMax = hasAreteScore ? 90 : 15;
+            const decisionLabel = this.decisionSummary(resp.decision).label;
             await context.reddit.submitComment({
               id: comment.id,
-              text: `🧠 Answer received. Score: **${resp.score.total}/15**. Decision: **${resp.decision}**. Feedback: _${resp.feedback}_`,
+              text: `🧠 Answer received. Score: **${areteScoreValue}/${areteScoreMax}**. Decision: **${decisionLabel}**. Feedback: _${resp.feedback}_`,
             });
           } catch (e) {
             console.error('Error scoring answer:', e);

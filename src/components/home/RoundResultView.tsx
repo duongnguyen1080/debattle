@@ -44,6 +44,21 @@ const ARETE_POINTS_ICON = {
   description: 'Arete coin reward',
 } as const;
 
+const DECISION_BACKGROUNDS: Record<RoundResult['decision'], { url: string; description: string }> = {
+  open: {
+    url: 'background_3.png',
+    description: 'Sunlit courtyard backdrop',
+  },
+  ajar: {
+    url: 'background_4.png',
+    description: 'Door standing slightly open',
+  },
+  closed: {
+    url: 'background_2.png',
+    description: 'Sealed door bathed in moonlight',
+  },
+};
+
 const SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES: RiddleLayoutStyleOverrides = {
   fontSize: 32,
   letterSpacing: -1.6,
@@ -137,16 +152,17 @@ export function RoundResultView({
   const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.76));
   const pointsTextMaxWidth = Math.max(140, Math.round(layout.width * 0.38));
   const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
+  const background = DECISION_BACKGROUNDS[result.decision];
   return (
     <zstack width="100%" height="100%">
       <image
-        url="background_3.png"
+        url={background.url}
         width="100%"
         height="100%"
         imageWidth={1536}
         imageHeight={1024}
         resizeMode="cover"
-        description="Sunlit courtyard backdrop"
+        description={background.description}
       />
 
       <vstack width="100%" height="100%" alignment="top center" gap="none">

@@ -49,6 +49,24 @@ const getMeaningfulAnswerLength = (value: string): number => {
 };
 
 export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): UseRoundFlowResult {
+  const fireToast = (message: string, logScope: string): void => {
+    const toastFn = context?.ui?.showToast;
+    if (!toastFn) {
+      return;
+    }
+    const warnPrefix = `[useRoundFlow] ${logScope}`;
+    try {
+      const maybePromise = toastFn(message) as Promise<void> | void;
+      if (maybePromise && typeof (maybePromise as Promise<void>).catch === 'function') {
+        (maybePromise as Promise<void>).catch((err: unknown) => {
+          console.warn(warnPrefix, err);
+        });
+      }
+    } catch (err) {
+      console.warn(warnPrefix, err);
+    }
+  };
+
   const [initialQuestion] = useState<QuestionBankEntry | null>(() => {
     try {
       return getRandomQuestion();
@@ -220,13 +238,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
           trimmedLength: trimmed.length,
           meaningfulLength,
         });
-        if (context?.ui?.showToast) {
-          try {
-            await context.ui.showToast(ANSWER_LENGTH_LIMIT_MESSAGE);
-          } catch (toastErr) {
-            console.warn('[useRoundFlow] answerForm: limit toast failed', toastErr);
-          }
-        }
+        fireToast(ANSWER_LENGTH_LIMIT_MESSAGE, 'answerForm: limit toast failed');
         return;
       }
       await handleSubmitAnswer(trimmed);
@@ -260,13 +272,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     }
     if (result.sharePostId) {
       console.log('[useRoundFlow] shareToSubreddit: already shared');
-      if (context?.ui?.showToast) {
-        try {
-          await context.ui.showToast('Already shared to the subreddit');
-        } catch (err) {
-          console.warn('[useRoundFlow] shareToSubreddit: toast failed', err);
-        }
-      }
+      fireToast('Already shared to the subreddit', 'shareToSubreddit: toast failed');
       return;
     }
 
@@ -279,15 +285,17 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       );
       const username = currentUser?.username || 'anonymous';
       console.log('[useRoundFlow] shareToSubreddit: submitting post');
+      const shareScoreValue = result.areteEvaluation?.totalPoints ?? result.score.total;
+      const shareFeedback = result.areteEvaluation?.feedback ?? result.feedback;
       const resp = await service.shareResponseToSubreddit({
         riddleId,
         responseId: result.responseId,
         questionText: result.questionText,
         answerText: result.answerText,
         playerUsername: username,
-        totalScore: result.score.total,
+        totalScore: shareScoreValue,
         decision: result.decision,
-        feedback: result.feedback,
+        feedback: shareFeedback,
       });
       setResult((prev) => {
         if (!prev) {
@@ -299,22 +307,10 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
           sharePermalink: resp.permalink ?? prev.sharePermalink,
         };
       });
-      if (context?.ui?.showToast) {
-        try {
-          await context.ui.showToast('Shared to the community!');
-        } catch (err) {
-          console.warn('[useRoundFlow] shareToSubreddit: success toast failed', err);
-        }
-      }
+      fireToast('Shared to the community!', 'shareToSubreddit: success toast failed');
     } catch (err) {
       console.error('[useRoundFlow] shareToSubreddit: error', err);
-      if (context?.ui?.showToast) {
-        try {
-          await context.ui.showToast('Failed to share to the subreddit');
-        } catch (toastErr) {
-          console.warn('[useRoundFlow] shareToSubreddit: error toast failed', toastErr);
-        }
-      }
+      fireToast('Failed to share to the subreddit', 'shareToSubreddit: error toast failed');
     } finally {
       setIsSharing(false);
     }
