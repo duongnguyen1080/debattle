@@ -63,6 +63,12 @@ interface MeasureWrappedTextResult {
   totalHeight: number;
 }
 
+interface MeasureTextWidthOptions {
+  text: string;
+  fontSize?: number;
+  letterSpacing?: number;
+}
+
 type GlyphMeasurement = {
   codePoint: number;
   intrinsicWidth: number;
@@ -351,6 +357,20 @@ export function measureWrappedText({
     lineCount,
     totalHeight,
   };
+}
+
+export function measureTextWidth({
+  text,
+  fontSize = DEFAULT_FONT_SIZE,
+  letterSpacing = DEFAULT_LETTER_SPACING,
+}: MeasureTextWidthOptions): number {
+  const normalized = normalizeText(text);
+  const glyphs = Array.from(normalized);
+  return glyphs.reduce((sum, char) => {
+    const codePoint = char.codePointAt(0) ?? 32;
+    const measurement = measureGlyph(codePoint, fontSize, letterSpacing);
+    return sum + measurement.renderedWidth;
+  }, 0);
 }
 
 export function FontText({

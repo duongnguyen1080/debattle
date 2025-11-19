@@ -1,9 +1,9 @@
-import { Devvit } from '@devvit/public-api';
+import { Devvit, useState } from '@devvit/public-api';
 import type { RoundResult } from './roundTypes.js';
-import { WrappedFontText } from './FontText.js';
-import { WrappedAnswerFontText } from './AnswerFontText.js';
+import { WrappedFontText, measureTextWidth } from './FontText.js';
 import { ParchmentPanel } from './ParchmentPanel.js';
 import { NavIconButton } from './NavIconButton.js';
+import { RoundSharePreview } from './RoundSharePreview.js';
 import {
   computeParchmentLayout,
   PARCHMENT,
@@ -13,9 +13,9 @@ import {
 import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from './uiConstants.js';
 
 const ARETE_RIBBON = {
-  widthRatio: 0.38,
-  minWidthPx: 250,
-  maxWidthPx: 460,
+  widthRatio: 0.48,
+  minWidthPx: 280,
+  maxWidthPx: 540,
   heightRatio: 0.23,
   gapFraction: 0.015,
   minGapPx: 6,
@@ -23,8 +23,8 @@ const ARETE_RIBBON = {
 } as const;
 
 const ARETE_RIBBON_TEXT_STYLE = {
-  fontSize: 28,
-  letterSpacing: -1.1,
+  fontSize: 26,
+  letterSpacing: -0.9,
   lineGap: 3,
   color: '#3b1f0c',
 } as const;
@@ -43,19 +43,66 @@ const ARETE_POINTS_ICON = {
   imageHeight: 245,
   description: 'Arete coin reward',
 } as const;
+const FEEDBACK_ICON = {
+  url: 'eagle_icon.png',
+  displaySizePx: 72,
+  imageWidth: 435,
+  imageHeight: 422,
+  description: 'Eagle crest feedback icon',
+} as const;
+const FEEDBACK_ICON_TEXT_GAP_PX = 12;
+const FEEDBACK_TEXT_STYLE = {
+  fontSize: 30,
+  letterSpacing: -1.6,
+  lineGap: 12,
+  color: '#2b1e12',
+} as const;
+const FEEDBACK_PARCHMENT_MIN_WIDTH_PX = 420;
+const FEEDBACK_PARCHMENT_MAX_WIDTH_PX = 760;
+const FEEDBACK_INLINE_MIN_CONTENT_PX = 300;
 
-const DECISION_BACKGROUNDS: Record<RoundResult['decision'], { url: string; description: string }> = {
+const CTA_IMAGES = {
+  debattle: {
+    url: 'debattle_button.png',
+    imageWidth: 481,
+    imageHeight: 181,
+    description: 'Review and share your answer',
+  },
+  tryAgain: {
+    url: 'try_again_button.png',
+    imageWidth: 1181,
+    imageHeight: 442,
+    description: 'Try another riddle',
+  },
+} as const;
+
+const DECISION_DETAILS: Record<
+  RoundResult['decision'],
+  { label: string; shareable: boolean; background: { url: string; description: string } }
+> = {
   open: {
-    url: 'background_3.png',
-    description: 'Sunlit courtyard backdrop',
+    label: 'Door swings open',
+    shareable: true,
+    background: {
+      url: 'background_3.png',
+      description: 'Sunlit courtyard backdrop',
+    },
   },
   ajar: {
-    url: 'background_4.png',
-    description: 'Door standing slightly open',
+    label: 'Door stands ajar',
+    shareable: true,
+    background: {
+      url: 'background_4.png',
+      description: 'Door standing slightly open',
+    },
   },
   closed: {
-    url: 'background_2.png',
-    description: 'Sealed door bathed in moonlight',
+    label: 'Door remains sealed',
+    shareable: false,
+    background: {
+      url: 'background_2.png',
+      description: 'Sealed door bathed in moonlight',
+    },
   },
 };
 
@@ -97,16 +144,53 @@ export function RoundResultView({
   isSharing,
   hasShared,
 }: RoundResultViewProps) {
+  const decisionMeta = DECISION_DETAILS[result.decision];
+  const isShareable = decisionMeta.shareable;
+  const [previewingResponseId, setPreviewingResponseId] = useState<string | null>(null);
+  const isPreviewingShare = isShareable && previewingResponseId === result.responseId;
   const resultQuestion = result.questionText || fallbackQuestionText;
   const resultAnswer = result.answerText || 'No answer submitted.';
-  const resultMeasureText = `${resultQuestion}\n${resultAnswer}`;
-  const ribbonFeedback = result.areteEvaluation?.feedback || result.feedback || 'Nice expression!';
+
+  if (isShareable && isPreviewingShare) {
+    return (
+      <RoundSharePreview
+        question={resultQuestion}
+        answer={resultAnswer}
+        background={decisionMeta.background}
+        viewportHeight={viewportHeight}
+        onShare={onShare}
+        onClose={onExit}
+        isSharing={isSharing}
+        hasShared={hasShared}
+      />
+    );
+  }
+
+  const feedbackText = result.areteEvaluation?.feedback || result.feedback || 'Nice expression!';
+  const feedbackQuote = `“${feedbackText}”`;
+  const layoutMeasureText = feedbackQuote;
+  const feedbackTextWidth = measureTextWidth({
+    text: feedbackQuote,
+    fontSize: FEEDBACK_TEXT_STYLE.fontSize,
+    letterSpacing: FEEDBACK_TEXT_STYLE.letterSpacing,
+  });
+  const feedbackInlineContentWidth = Math.max(
+    FEEDBACK_INLINE_MIN_CONTENT_PX,
+    FEEDBACK_ICON.displaySizePx + FEEDBACK_ICON_TEXT_GAP_PX + feedbackTextWidth,
+  );
   const aretePoints =
     typeof result.areteEvaluation?.totalPoints === 'number'
       ? result.areteEvaluation.totalPoints
       : null;
-  const showAnswerRiddleStyle = { ...RIDDLE_STYLE, ...SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES };
-  const layout = computeParchmentLayout(resultMeasureText, SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES);
+  const layout = computeParchmentLayout(layoutMeasureText, SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES);
+  const desiredFeedbackWidth = feedbackInlineContentWidth + PARCHMENT.padX * 2;
+  const feedbackParchmentWidth = clamp(
+    desiredFeedbackWidth,
+    FEEDBACK_PARCHMENT_MIN_WIDTH_PX,
+    Math.min(layout.width, FEEDBACK_PARCHMENT_MAX_WIDTH_PX),
+  );
+  const displayParchmentWidth = feedbackParchmentWidth;
+  const displayContentWidth = Math.max(1, displayParchmentWidth - PARCHMENT.padX * 2);
   const padTop = PARCHMENT.padY + layout.extraPadY;
   const padBottom = PARCHMENT.padY + layout.extraPadY;
   const horizontalPadding = Math.round(
@@ -130,16 +214,14 @@ export function RoundResultView({
     availableHeightPx * SHOW_ANSWER_LAYOUT.maxAvailableParchmentFraction;
   const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
   const ctaBottomInset = `${CTA_BOTTOM_INSET_PX}px` as Devvit.Blocks.SizeString;
-  const debattleButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
-  const debattleButtonHeight = `${CTA_BUTTON_HEIGHT_PX}px` as Devvit.Blocks.SizeString;
-  const ribbonToParchmentGapPx = Math.round(
+  const ribbonToParchmentGapPx = 5;
+  const ctaButtonTopGapPx = Math.round(
     clamp(
       viewportHeight * ARETE_RIBBON.gapFraction,
       ARETE_RIBBON.minGapPx,
       ARETE_RIBBON.maxGapPx,
     ),
   );
-  const debattleButtonTopGapPx = ribbonToParchmentGapPx;
   const areteRibbonWidthPx = Math.round(
     Math.max(
       ARETE_RIBBON.minWidthPx,
@@ -150,9 +232,33 @@ export function RoundResultView({
   const areteRibbonHeightPx = Math.round(areteRibbonWidthPx * ARETE_RIBBON.heightRatio);
   const areteRibbonHeight = `${areteRibbonHeightPx}px` as Devvit.Blocks.SizeString;
   const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.76));
-  const pointsTextMaxWidth = Math.max(140, Math.round(layout.width * 0.38));
+  const pointsTextMaxWidth = Math.max(140, Math.round(displayParchmentWidth * 0.38));
   const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
-  const background = DECISION_BACKGROUNDS[result.decision];
+  const feedbackIconSize = `${FEEDBACK_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
+  const feedbackTextMaxWidth = Math.max(
+    120,
+    displayContentWidth - FEEDBACK_ICON.displaySizePx - FEEDBACK_ICON_TEXT_GAP_PX,
+  );
+  const ribbonText = decisionMeta.label;
+  const background = decisionMeta.background;
+  const ctaButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
+  const ctaButtonHeight = `${CTA_BUTTON_HEIGHT_PX}px` as Devvit.Blocks.SizeString;
+  const ctaImageMeta = isShareable ? CTA_IMAGES.debattle : CTA_IMAGES.tryAgain;
+  const primaryButtonDescription = isShareable
+    ? 'Review your answer before sharing'
+    : 'Try another riddle';
+  const shouldShowCloseButton = isShareable;
+
+  const handlePrimaryButtonPress = () => {
+    if (!isShareable) {
+      console.log('[RoundResultView] try again button pressed');
+      onExit();
+      return;
+    }
+    console.log('[RoundResultView] debattle button pressed - showing preview');
+    setPreviewingResponseId(result.responseId);
+  };
+
   return (
     <zstack width="100%" height="100%">
       <image
@@ -181,11 +287,11 @@ export function RoundResultView({
                     imageWidth={1181}
                     imageHeight={1181}
                     resizeMode="fit"
-                    description="Arete feedback scroll"
+                    description="Scroll ribbon backdrop"
                   />
                   <vstack width="80%" alignment="middle center" gap="none">
                     <WrappedFontText
-                      text={ribbonFeedback}
+                      text={ribbonText}
                       maxWidth={ribbonTextMaxWidth}
                       color={ARETE_RIBBON_TEXT_STYLE.color}
                       fontSize={ARETE_RIBBON_TEXT_STYLE.fontSize}
@@ -199,7 +305,7 @@ export function RoundResultView({
               </vstack>
 
               <ParchmentPanel
-                widthPx={layout.width}
+                widthPx={displayParchmentWidth}
                 heightPx={clampedHeight}
                 innerHeightPx={layout.innerHeight}
                 tiles={layout.tiles}
@@ -208,89 +314,73 @@ export function RoundResultView({
                 needsScroll={layout.needsScroll}
                 contentGap="medium"
               >
-                <WrappedFontText
-                  text={resultQuestion}
-                  maxWidth={layout.contentWidth}
-                  color={showAnswerRiddleStyle.color}
-                  fontSize={showAnswerRiddleStyle.fontSize}
-                  letterSpacing={showAnswerRiddleStyle.letterSpacing}
-                  lineGap={showAnswerRiddleStyle.lineGap}
-                  align="center"
-                />
-                <WrappedAnswerFontText
-                  text={`“${resultAnswer}”`}
-                  maxWidth={layout.contentWidth}
-                  fontSize={20}
-                  letterSpacing={-1.2}
-                  lineGap={30}
-                  color="#2b1e12"
-                  align="center"
-                />
+                <hstack width="100%" alignment="middle center" gap="small">
+                  <image
+                    url={FEEDBACK_ICON.url}
+                    width={feedbackIconSize}
+                    height={feedbackIconSize}
+                    imageWidth={FEEDBACK_ICON.imageWidth}
+                    imageHeight={FEEDBACK_ICON.imageHeight}
+                    resizeMode="fit"
+                    description={FEEDBACK_ICON.description}
+                  />
+                  <WrappedFontText
+                    text={feedbackQuote}
+                    maxWidth={feedbackTextMaxWidth}
+                    color={FEEDBACK_TEXT_STYLE.color}
+                    fontSize={FEEDBACK_TEXT_STYLE.fontSize}
+                    letterSpacing={FEEDBACK_TEXT_STYLE.letterSpacing}
+                    lineGap={FEEDBACK_TEXT_STYLE.lineGap}
+                    align="center"
+                  />
+                </hstack>
               </ParchmentPanel>
 
               {aretePoints !== null && (
-                <vstack
-                  width="100%"
-                  alignment="middle center"
-                  padding={{ top: 'xsmall', bottom: 'xsmall' }}
-                >
-                  <hstack alignment="middle center" gap="small">
-                    <WrappedFontText
-                      text={`+ ${aretePoints}`}
-                      maxWidth={pointsTextMaxWidth}
-                      color={ARETE_POINTS_TEXT_STYLE.color}
-                      fontSize={ARETE_POINTS_TEXT_STYLE.fontSize}
-                      letterSpacing={ARETE_POINTS_TEXT_STYLE.letterSpacing}
-                      lineGap={ARETE_POINTS_TEXT_STYLE.lineGap}
-                      align="center"
-                    />
-                    <image
-                      url={ARETE_POINTS_ICON.url}
-                      width={pointsIconSize}
-                      height={pointsIconSize}
-                      imageWidth={ARETE_POINTS_ICON.imageWidth}
-                      imageHeight={ARETE_POINTS_ICON.imageHeight}
-                      resizeMode="fit"
-                      description={ARETE_POINTS_ICON.description}
-                    />
-                  </hstack>
-                </vstack>
-              )}
-
-              <spacer width="100%" height={`${debattleButtonTopGapPx}px`} />
-
-              <zstack width={debattleButtonWidth} height={debattleButtonHeight}>
-                <image
-                  url="debattle_button.png"
-                  width="100%"
-                  height="100%"
-                  imageWidth={481}
-                  imageHeight={181}
-                  resizeMode="fit"
-                  description="Share to subreddit button"
-                  onPress={() => {
-                    if (isSharing || hasShared) {
-                      console.log('[RoundResultView] debattle button pressed but action is disabled', { isSharing, hasShared });
-                      return;
-                    }
-                    console.log('[RoundResultView] debattle button pressed');
-                    onShare();
-                  }}
-                />
-                {(isSharing || hasShared) && (
+                <>
+                  <spacer width="100%" height={`${ribbonToParchmentGapPx}px`} />
                   <vstack
                     width="100%"
-                    height="100%"
                     alignment="middle center"
-                    backgroundColor="rgba(0,0,0,0.35)"
-                    padding="medium"
-                    gap="none"
+                    padding={{ bottom: 'xsmall' }}
                   >
-                    <text size="medium" color="white">
-                      {isSharing ? 'Sharing…' : 'Shared'}
-                    </text>
+                    <hstack alignment="middle center" gap="small">
+                      <WrappedFontText
+                        text={`+ ${aretePoints}`}
+                        maxWidth={pointsTextMaxWidth}
+                        color={ARETE_POINTS_TEXT_STYLE.color}
+                        fontSize={ARETE_POINTS_TEXT_STYLE.fontSize}
+                        letterSpacing={ARETE_POINTS_TEXT_STYLE.letterSpacing}
+                        lineGap={ARETE_POINTS_TEXT_STYLE.lineGap}
+                        align="center"
+                      />
+                      <image
+                        url={ARETE_POINTS_ICON.url}
+                        width={pointsIconSize}
+                        height={pointsIconSize}
+                        imageWidth={ARETE_POINTS_ICON.imageWidth}
+                        imageHeight={ARETE_POINTS_ICON.imageHeight}
+                        resizeMode="fit"
+                        description={ARETE_POINTS_ICON.description}
+                      />
+                    </hstack>
                   </vstack>
-                )}
+                </>
+              )}
+
+              <spacer width="100%" height={`${ctaButtonTopGapPx}px`} />
+
+              <zstack width={ctaButtonWidth} height={ctaButtonHeight}>
+                <image
+                  url={ctaImageMeta.url}
+                  width="100%"
+                  height="100%"
+                  imageWidth={ctaImageMeta.imageWidth}
+                  imageHeight={ctaImageMeta.imageHeight}
+                  resizeMode="fit"
+                  description={primaryButtonDescription}
+                  onPress={handlePrimaryButtonPress}
+                />
               </zstack>
             </vstack>
             <spacer width={horizontalInset} />
@@ -300,17 +390,19 @@ export function RoundResultView({
         <spacer height={ctaBottomInset} />
       </vstack>
 
-      <hstack width="100%" padding="large" gap="small" alignment="middle center">
-        <spacer grow />
-        <NavIconButton
-          icon="close"
-          onPress={() => {
-            console.log('[RoundResultView] close icon pressed');
-            onExit();
-          }}
-          description="Close results and return home"
-        />
-      </hstack>
+      {shouldShowCloseButton && (
+        <hstack width="100%" padding="large" gap="small" alignment="middle center">
+          <spacer grow />
+          <NavIconButton
+            icon="close"
+            onPress={() => {
+              console.log('[RoundResultView] close icon pressed');
+              onExit();
+            }}
+            description="Close results and return home"
+          />
+        </hstack>
+      )}
     </zstack>
   );
 }
