@@ -495,15 +495,15 @@ export class Service {
 
     const resolvedSubreddit = await this.resolveSubredditName(subredditName);
     const shareDecision = response.decision ?? decision;
-    const { label, emoji } = this.decisionSummary(shareDecision);
+    const { label } = this.decisionSummary(shareDecision);
     const areteShareScore = typeof response.areteEvaluation?.totalPoints === 'number'
       ? Math.round(response.areteEvaluation.totalPoints)
       : null;
     const shareScoreValue = areteShareScore ?? totalScore;
     const shareScoreMax = areteShareScore !== null ? 90 : 15;
     const scoreDisplay = `${shareScoreValue}/${shareScoreMax}`;
-    const title = `${emoji} Debattle · ${scoreDisplay} — ${label}`;
-    const sanitizedUsername = playerUsername || 'anonymous';
+    const sanitizedUsername = (playerUsername || 'anonymous').replace(/^u\//i, '');
+    const title = `This is ${sanitizedUsername} answer. What is yours?`;
     const resolvedFeedback = feedback || response.feedback || 'Feedback unavailable.';
 
     // Follow Devvit "share to subreddit" guidance: create a self-post with markdown payload.
@@ -512,10 +512,9 @@ export class Service {
       '',
       `**Answer by u/${sanitizedUsername}:** ${answerText}`,
       '',
-      `**Score:** ${scoreDisplay} · **Decision:** ${label}`,
-      `**Feedback:** ${resolvedFeedback}`,
+      `**Score:** ${scoreDisplay} · **Decision:** ${label} **Feedback:** ${resolvedFeedback}`,
       '',
-      '_Shared from the Debattle experience._',
+      '_Shared from Debattle._',
     ];
     const post = await this.reddit.submitPost({
       subredditName: resolvedSubreddit,
