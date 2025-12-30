@@ -130,9 +130,11 @@ interface RoundResultViewProps {
   fallbackQuestionText: string;
   viewportHeight: number;
   onExit: () => void;
-  onShare: () => void;
+  onShare: () => Promise<void>;
+  onOpenSharePermalink: () => void;
   isSharing: boolean;
   hasShared: boolean;
+  sharePermalink: string | null;
 }
 
 export function RoundResultView({
@@ -141,8 +143,10 @@ export function RoundResultView({
   viewportHeight,
   onExit,
   onShare,
+  onOpenSharePermalink,
   isSharing,
   hasShared,
+  sharePermalink,
 }: RoundResultViewProps) {
   const decisionMeta = DECISION_DETAILS[result.decision];
   const isShareable = decisionMeta.shareable;
@@ -160,8 +164,10 @@ export function RoundResultView({
         viewportHeight={viewportHeight}
         onShare={onShare}
         onClose={onExit}
+        onOpenSharePermalink={onOpenSharePermalink}
         isSharing={isSharing}
         hasShared={hasShared}
+        sharePermalink={sharePermalink}
       />
     );
   }

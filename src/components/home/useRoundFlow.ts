@@ -23,6 +23,7 @@ interface UseRoundFlowResult {
   riddleId: string | null;
   initialQuestionId: string | null;
   shareToSubreddit: () => Promise<void>;
+  openSharePermalink: () => void;
   hasShared: boolean;
   sharePermalink: string | null;
 }
@@ -50,13 +51,13 @@ const getMeaningfulAnswerLength = (value: string): number => {
 
 export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): UseRoundFlowResult {
   const fireToast = (message: string, logScope: string): void => {
-    const toastFn = context?.ui?.showToast;
-    if (!toastFn) {
+    const ui = context?.ui;
+    if (!ui?.showToast) {
       return;
     }
     const warnPrefix = `[useRoundFlow] ${logScope}`;
     try {
-      const maybePromise = toastFn(message) as Promise<void> | void;
+      const maybePromise = ui.showToast(message) as Promise<void> | void;
       if (maybePromise && typeof (maybePromise as Promise<void>).catch === 'function') {
         (maybePromise as Promise<void>).catch((err: unknown) => {
           console.warn(warnPrefix, err);
@@ -64,6 +65,25 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       }
     } catch (err) {
       console.warn(warnPrefix, err);
+    }
+  };
+
+  const navigateToPermalink = (permalink?: string | null): void => {
+    if (!permalink) {
+      console.warn('[useRoundFlow] shareToSubreddit: missing permalink for navigation');
+      return;
+    }
+    const ui = context?.ui;
+    if (!ui?.navigateTo) {
+      console.log('[useRoundFlow] shareToSubreddit: ui.navigateTo not available');
+      return;
+    }
+    const url = permalink.startsWith('http') ? permalink : `https://reddit.com${permalink}`;
+    console.log('[useRoundFlow] shareToSubreddit: navigating to permalink', { permalink, url });
+    try {
+      ui.navigateTo(url);
+    } catch (err) {
+      console.warn('[useRoundFlow] shareToSubreddit: navigateTo failed', err);
     }
   };
 
@@ -267,7 +287,13 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       console.warn('[useRoundFlow] shareToSubreddit: missing result or riddleId');
       return;
     }
+    console.log('[useRoundFlow] shareToSubreddit: start', {
+      riddleId,
+      responseId: result.responseId,
+      hasSharePostId: !!result.sharePostId,
+    });
     if (isSharing) {
+      console.log('[useRoundFlow] shareToSubreddit: already in progress');
       return;
     }
     if (result.sharePostId) {
@@ -284,7 +310,11 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         { getSetting: context.settings?.get?.bind(context.settings) }
       );
       const username = currentUser?.username || 'anonymous';
-      console.log('[useRoundFlow] shareToSubreddit: submitting post');
+      console.log('[useRoundFlow] shareToSubreddit: submitting post', {
+        username,
+        questionLength: result.questionText?.length ?? 0,
+        answerLength: result.answerText?.length ?? 0,
+      });
       const shareScoreValue = result.areteEvaluation?.totalPoints ?? result.score.total;
       const shareFeedback = result.areteEvaluation?.feedback ?? result.feedback;
       const resp = await service.shareResponseToSubreddit({
@@ -297,6 +327,10 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         decision: result.decision,
         feedback: shareFeedback,
       });
+      console.log('[useRoundFlow] shareToSubreddit: submit ok', {
+        postId: resp.postId,
+        permalink: resp.permalink ?? null,
+      });
       setResult((prev) => {
         if (!prev) {
           return prev;
@@ -307,13 +341,36 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
           sharePermalink: resp.permalink ?? prev.sharePermalink,
         };
       });
+      console.log('[useRoundFlow] shareToSubreddit: updated local share state', {
+        postId: resp.postId,
+        permalink: resp.permalink ?? null,
+      });
       fireToast('Shared to the community!', 'shareToSubreddit: success toast failed');
+      navigateToPermalink(resp.permalink);
     } catch (err) {
       console.error('[useRoundFlow] shareToSubreddit: error', err);
-      fireToast('Failed to share to the subreddit', 'shareToSubreddit: error toast failed');
+      const message = err instanceof Error ? err.message : '';
+      if (message.includes('Scope.SUBMIT_POST') || message.includes('userActions') || message.includes('runAs')) {
+        fireToast(
+          'Please allow Debattle to post as you to share.',
+          'shareToSubreddit: permission toast failed',
+        );
+      } else {
+        fireToast('Failed to share to the subreddit', 'shareToSubreddit: error toast failed');
+      }
     } finally {
       setIsSharing(false);
+      console.log('[useRoundFlow] shareToSubreddit: finished');
     }
+  };
+
+  const openSharePermalink = (): void => {
+    const permalink = result?.sharePermalink;
+    if (!permalink) {
+      console.warn('[useRoundFlow] openSharePermalink: missing permalink');
+      return;
+    }
+    navigateToPermalink(permalink);
   };
 
   return {
@@ -330,6 +387,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     riddleId,
     initialQuestionId: initialQuestion?.id ?? null,
     shareToSubreddit,
+    openSharePermalink,
     hasShared: !!result?.sharePostId,
     sharePermalink: result?.sharePermalink ?? null,
   };

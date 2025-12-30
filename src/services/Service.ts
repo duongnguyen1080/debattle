@@ -473,19 +473,41 @@ export class Service {
       subredditName,
     } = params;
 
+    console.log('[Service.shareResponseToSubreddit] start', {
+      riddleId,
+      responseId,
+      subredditName: subredditName ?? null,
+      totalScore,
+      decision,
+      questionLength: questionText?.length ?? 0,
+      answerLength: answerText?.length ?? 0,
+      feedbackLength: feedback?.length ?? 0,
+    });
+
     const riddle = await this.getRiddle(riddleId);
     if (!riddle) {
+      console.warn('[Service.shareResponseToSubreddit] riddle not found', { riddleId });
       throw new Error('Riddle not found');
     }
 
     const response = riddle.responses.find((resp) => resp.id === responseId);
     if (!response) {
+      console.warn('[Service.shareResponseToSubreddit] response not found', { riddleId, responseId });
       throw new Error('Response not found');
     }
 
     if (response.postId) {
+      console.log('[Service.shareResponseToSubreddit] already shared', {
+        riddleId,
+        responseId,
+        postId: response.postId,
+      });
       try {
         const existing = await this.reddit.getPostById(response.postId);
+        console.log('[Service.shareResponseToSubreddit] existing post lookup ok', {
+          postId: response.postId,
+          permalink: existing?.permalink ?? null,
+        });
         return { postId: response.postId, permalink: existing?.permalink };
       } catch (err) {
         console.warn('[Service.shareResponseToSubreddit] response already shared but lookup failed', err);
@@ -516,15 +538,49 @@ export class Service {
       '',
       '_Shared from Debattle._',
     ];
+    const postBody = bodyLines.join('\n');
+    console.log('[Service.shareResponseToSubreddit] submitting post', {
+      subredditName: resolvedSubreddit,
+      titleLength: title.length,
+      bodyLength: postBody.length,
+      shareScoreValue,
+      shareScoreMax,
+      decision: shareDecision,
+      responseId,
+      runAs: 'USER',
+    });
     const post = await this.reddit.submitPost({
       subredditName: resolvedSubreddit,
       title,
-      text: bodyLines.join('\n'),
+      text: postBody,
+      runAs: 'USER',
     });
+    console.log('[Service.shareResponseToSubreddit] submitPost ok', {
+      postId: post.id,
+      permalink: post.permalink ?? null,
+      authorName: post.authorName ?? null,
+      approved: post.approved,
+      spam: post.spam,
+      removed: post.removed,
+      removedByCategory: post.removedByCategory ?? null,
+    });
+    if (!post.approved && (post.spam || post.removed || post.removedByCategory)) {
+      try {
+        await post.approve();
+        console.log('[Service.shareResponseToSubreddit] post approved', { postId: post.id });
+      } catch (err) {
+        console.warn('[Service.shareResponseToSubreddit] post approval failed', err);
+      }
+    }
 
     response.postId = post.id;
     try {
       await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
+      console.log('[Service.shareResponseToSubreddit] persisted postId', {
+        riddleId,
+        responseId,
+        postId: post.id,
+      });
     } catch (err) {
       console.error('[Service.shareResponseToSubreddit] failed to persist postId', err);
     }

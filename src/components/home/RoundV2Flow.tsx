@@ -25,7 +25,9 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     riddleId,
     initialQuestionId,
     shareToSubreddit,
+    openSharePermalink,
     hasShared,
+    sharePermalink,
   } = useRoundFlow({ context, currentUser });
 
   console.log('[RoundV2Flow] render', {
@@ -80,8 +82,10 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
       viewportHeight={viewportHeight}
       onExit={onExit}
       onShare={shareToSubreddit}
+      onOpenSharePermalink={openSharePermalink}
       isSharing={isSharing}
       hasShared={hasShared}
+      sharePermalink={sharePermalink}
     />
   );
 }

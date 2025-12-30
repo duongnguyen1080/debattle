@@ -19,10 +19,12 @@ interface RoundSharePreviewProps {
     url: string;
     description: string;
   };
-  onShare: () => void;
+  onShare: () => Promise<void>;
   onClose: () => void;
+  onOpenSharePermalink: () => void;
   isSharing: boolean;
   hasShared: boolean;
+  sharePermalink: string | null;
 }
 
 const SHARE_BUTTON_META = {
@@ -65,8 +67,10 @@ export function RoundSharePreview({
   background,
   onShare,
   onClose,
+  onOpenSharePermalink,
   isSharing,
   hasShared,
+  sharePermalink,
 }: RoundSharePreviewProps) {
   const shareButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
   const shareButtonHeight = `${CTA_BUTTON_HEIGHT_PX}px` as Devvit.Blocks.SizeString;
@@ -106,13 +110,29 @@ export function RoundSharePreview({
   const padBottom = PARCHMENT.padY + layout.extraPadY;
   const contentWidth = Math.max(1, layout.width - PARCHMENT.padX * 2);
   const shareDisabled = isSharing || hasShared;
+  const shareStatusText = isSharing ? 'Sharing...' : hasShared ? 'Shared' : null;
+  const hasPermalink = !!sharePermalink;
 
-  const handleSharePress = () => {
+  const handleSharePress = async () => {
     if (shareDisabled) {
+      console.log('[RoundSharePreview] share button pressed while disabled', { isSharing, hasShared });
       return;
     }
     console.log('[RoundSharePreview] share button pressed');
-    onShare();
+    try {
+      await onShare();
+    } catch (err) {
+      console.error('[RoundSharePreview] share handler failed', err);
+    }
+  };
+
+  const handleOpenPermalink = () => {
+    if (!hasPermalink) {
+      console.log('[RoundSharePreview] open permalink pressed without permalink');
+      return;
+    }
+    console.log('[RoundSharePreview] open permalink pressed');
+    onOpenSharePermalink();
   };
 
   return (
@@ -163,32 +183,30 @@ export function RoundSharePreview({
           <spacer width={`${horizontalInsetPx}px`} />
         </hstack>
         <spacer height={`${shareButtonGapPx}px`} />
-        <zstack width={shareButtonWidth} height={shareButtonHeight}>
-          <image
-            url={SHARE_BUTTON_META.url}
-            width="100%"
-            height="100%"
-            imageWidth={SHARE_BUTTON_META.imageWidth}
-            imageHeight={SHARE_BUTTON_META.imageHeight}
-            resizeMode="fit"
-            description={SHARE_BUTTON_META.description}
-            onPress={handleSharePress}
-          />
-          {shareDisabled && (
-            <vstack
+        <vstack alignment="middle center" gap="xsmall">
+          <zstack width={shareButtonWidth} height={shareButtonHeight}>
+            <image
+              url={SHARE_BUTTON_META.url}
               width="100%"
               height="100%"
-              alignment="middle center"
-              backgroundColor="rgba(0,0,0,0.35)"
-              padding="medium"
-              gap="none"
-            >
-              <text size="medium" color="white">
-                {isSharing ? 'Sharing…' : 'Shared'}
-              </text>
-            </vstack>
+              imageWidth={SHARE_BUTTON_META.imageWidth}
+              imageHeight={SHARE_BUTTON_META.imageHeight}
+              resizeMode="fit"
+              description={SHARE_BUTTON_META.description}
+              onPress={handleSharePress}
+            />
+          </zstack>
+          {shareStatusText && (
+            <text size="medium" color="white">
+              {shareStatusText}
+            </text>
           )}
-        </zstack>
+          {hasPermalink && (
+            <button appearance="secondary" onPress={handleOpenPermalink}>
+              Open post
+            </button>
+          )}
+        </vstack>
         <spacer height={`${bottomInsetPx}px`} />
       </vstack>
 

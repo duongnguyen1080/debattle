@@ -10,6 +10,7 @@ Devvit.configure({
   redis: true,
   http: true,
   media: true,
+  userActions: true,
 });
 
 // Declare settings so they appear in Devvit UI/CLI
