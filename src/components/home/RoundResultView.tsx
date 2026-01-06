@@ -1,16 +1,21 @@
-import { Devvit, useState } from '@devvit/public-api';
+import { Devvit } from '@devvit/public-api';
 import type { RoundResult } from './roundTypes.js';
-import { WrappedFontText, measureTextWidth } from './FontText.js';
+import { WrappedFontText } from './FontText.js';
+import { WrappedAnswerFontText } from './AnswerFontText.js';
 import { ParchmentPanel } from './ParchmentPanel.js';
 import { NavIconButton } from './NavIconButton.js';
-import { RoundSharePreview } from './RoundSharePreview.js';
 import {
   computeParchmentLayout,
   PARCHMENT,
   RIDDLE_STYLE,
   type RiddleLayoutStyleOverrides,
 } from './roundLayout.js';
-import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from './uiConstants.js';
+import {
+  CTA_BOTTOM_INSET_PX,
+  CTA_BUTTON_HEIGHT_PX,
+  CTA_BUTTON_WIDTH_PX,
+  NAV_ICON_SIZE_PX,
+} from './uiConstants.js';
 
 const ARETE_RIBBON = {
   widthRatio: 0.48,
@@ -43,23 +48,12 @@ const ARETE_POINTS_ICON = {
   imageHeight: 245,
   description: 'Arete coin reward',
 } as const;
-const FEEDBACK_ICON = {
-  url: 'eagle_icon.png',
-  displaySizePx: 72,
-  imageWidth: 435,
-  imageHeight: 422,
-  description: 'Eagle crest feedback icon',
-} as const;
-const FEEDBACK_ICON_TEXT_GAP_PX = 12;
-const FEEDBACK_TEXT_STYLE = {
-  fontSize: 30,
-  letterSpacing: -1.6,
-  lineGap: 12,
+const SHOW_ANSWER_ANSWER_TEXT_STYLE = {
+  fontSize: 22,
+  letterSpacing: -1,
+  lineGap: 26,
   color: '#2b1e12',
 } as const;
-const FEEDBACK_PARCHMENT_MIN_WIDTH_PX = 420;
-const FEEDBACK_PARCHMENT_MAX_WIDTH_PX = 760;
-const FEEDBACK_INLINE_MIN_CONTENT_PX = 300;
 
 const CTA_IMAGES = {
   debattle: {
@@ -121,6 +115,9 @@ const SHOW_ANSWER_LAYOUT = {
   maxTopSafePx: 96,
 };
 
+const SHOW_ANSWER_CTA_SCALE = 0.5;
+const SHOW_ANSWER_CLOSE_SCALE = 0.5;
+
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
 }
@@ -131,10 +128,6 @@ interface RoundResultViewProps {
   viewportHeight: number;
   onExit: () => void;
   onShare: () => Promise<void>;
-  onOpenSharePermalink: () => void;
-  isSharing: boolean;
-  hasShared: boolean;
-  sharePermalink: string | null;
 }
 
 export function RoundResultView({
@@ -143,60 +136,22 @@ export function RoundResultView({
   viewportHeight,
   onExit,
   onShare,
-  onOpenSharePermalink,
-  isSharing,
-  hasShared,
-  sharePermalink,
 }: RoundResultViewProps) {
   const decisionMeta = DECISION_DETAILS[result.decision];
   const isShareable = decisionMeta.shareable;
-  const [previewingResponseId, setPreviewingResponseId] = useState<string | null>(null);
-  const isPreviewingShare = isShareable && previewingResponseId === result.responseId;
   const resultQuestion = result.questionText || fallbackQuestionText;
   const resultAnswer = result.answerText || 'No answer submitted.';
 
-  if (isShareable && isPreviewingShare) {
-    return (
-      <RoundSharePreview
-        question={resultQuestion}
-        answer={resultAnswer}
-        background={decisionMeta.background}
-        viewportHeight={viewportHeight}
-        onShare={onShare}
-        onClose={onExit}
-        onOpenSharePermalink={onOpenSharePermalink}
-        isSharing={isSharing}
-        hasShared={hasShared}
-        sharePermalink={sharePermalink}
-      />
-    );
-  }
-
-  const feedbackText = result.areteEvaluation?.feedback || result.feedback || 'Nice expression!';
-  const feedbackQuote = `“${feedbackText}”`;
-  const layoutMeasureText = feedbackQuote;
-  const feedbackTextWidth = measureTextWidth({
-    text: feedbackQuote,
-    fontSize: FEEDBACK_TEXT_STYLE.fontSize,
-    letterSpacing: FEEDBACK_TEXT_STYLE.letterSpacing,
-  });
-  const feedbackInlineContentWidth = Math.max(
-    FEEDBACK_INLINE_MIN_CONTENT_PX,
-    FEEDBACK_ICON.displaySizePx + FEEDBACK_ICON_TEXT_GAP_PX + feedbackTextWidth,
-  );
+  const questionStyle = { ...RIDDLE_STYLE, ...SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES };
+  const answerQuote = `“${resultAnswer}”`;
+  const layoutMeasureText = `${resultQuestion}\n${resultAnswer}`;
   const aretePoints =
     typeof result.areteEvaluation?.totalPoints === 'number'
       ? result.areteEvaluation.totalPoints
       : null;
   const layout = computeParchmentLayout(layoutMeasureText, SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES);
-  const desiredFeedbackWidth = feedbackInlineContentWidth + PARCHMENT.padX * 2;
-  const feedbackParchmentWidth = clamp(
-    desiredFeedbackWidth,
-    FEEDBACK_PARCHMENT_MIN_WIDTH_PX,
-    Math.min(layout.width, FEEDBACK_PARCHMENT_MAX_WIDTH_PX),
-  );
-  const displayParchmentWidth = feedbackParchmentWidth;
-  const displayContentWidth = Math.max(1, displayParchmentWidth - PARCHMENT.padX * 2);
+  const displayParchmentWidth = layout.width;
+  const displayContentWidth = layout.contentWidth;
   const padTop = PARCHMENT.padY + layout.extraPadY;
   const padBottom = PARCHMENT.padY + layout.extraPadY;
   const horizontalPadding = Math.round(
@@ -220,7 +175,8 @@ export function RoundResultView({
     availableHeightPx * SHOW_ANSWER_LAYOUT.maxAvailableParchmentFraction;
   const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
   const ctaBottomInset = `${CTA_BOTTOM_INSET_PX}px` as Devvit.Blocks.SizeString;
-  const ribbonToParchmentGapPx = 5;
+  const ribbonToParchmentGapPx = 1;
+  const parchmentToPointsGapPx = 5;
   const ctaButtonTopGapPx = Math.round(
     clamp(
       viewportHeight * ARETE_RIBBON.gapFraction,
@@ -240,29 +196,32 @@ export function RoundResultView({
   const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.76));
   const pointsTextMaxWidth = Math.max(140, Math.round(displayParchmentWidth * 0.38));
   const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
-  const feedbackIconSize = `${FEEDBACK_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
-  const feedbackTextMaxWidth = Math.max(
-    120,
-    displayContentWidth - FEEDBACK_ICON.displaySizePx - FEEDBACK_ICON_TEXT_GAP_PX,
-  );
   const ribbonText = decisionMeta.label;
   const background = decisionMeta.background;
-  const ctaButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
-  const ctaButtonHeight = `${CTA_BUTTON_HEIGHT_PX}px` as Devvit.Blocks.SizeString;
+  const ctaButtonWidthPx = Math.round(CTA_BUTTON_WIDTH_PX * SHOW_ANSWER_CTA_SCALE);
+  const ctaButtonHeightPx = Math.round(CTA_BUTTON_HEIGHT_PX * SHOW_ANSWER_CTA_SCALE);
+  const ctaButtonWidth = `${ctaButtonWidthPx}px` as Devvit.Blocks.SizeString;
+  const ctaButtonHeight = `${ctaButtonHeightPx}px` as Devvit.Blocks.SizeString;
+  const closeButtonSize =
+    `${Math.round(NAV_ICON_SIZE_PX * SHOW_ANSWER_CLOSE_SCALE)}px` as Devvit.Blocks.SizeString;
   const ctaImageMeta = isShareable ? CTA_IMAGES.debattle : CTA_IMAGES.tryAgain;
   const primaryButtonDescription = isShareable
     ? 'Review your answer before sharing'
     : 'Try another riddle';
   const shouldShowCloseButton = isShareable;
 
-  const handlePrimaryButtonPress = () => {
+  const handlePrimaryButtonPress = async () => {
     if (!isShareable) {
       console.log('[RoundResultView] try again button pressed');
       onExit();
       return;
     }
-    console.log('[RoundResultView] debattle button pressed - showing preview');
-    setPreviewingResponseId(result.responseId);
+    console.log('[RoundResultView] debattle button pressed - sharing');
+    try {
+      await onShare();
+    } catch (err) {
+      console.error('[RoundResultView] debattle share failed', err);
+    }
   };
 
   return (
@@ -318,33 +277,31 @@ export function RoundResultView({
                 padTopPx={padTop}
                 padBottomPx={padBottom}
                 needsScroll={layout.needsScroll}
-                contentGap="medium"
+                contentGap="small"
               >
-                <hstack width="100%" alignment="middle center" gap="small">
-                  <image
-                    url={FEEDBACK_ICON.url}
-                    width={feedbackIconSize}
-                    height={feedbackIconSize}
-                    imageWidth={FEEDBACK_ICON.imageWidth}
-                    imageHeight={FEEDBACK_ICON.imageHeight}
-                    resizeMode="fit"
-                    description={FEEDBACK_ICON.description}
-                  />
-                  <WrappedFontText
-                    text={feedbackQuote}
-                    maxWidth={feedbackTextMaxWidth}
-                    color={FEEDBACK_TEXT_STYLE.color}
-                    fontSize={FEEDBACK_TEXT_STYLE.fontSize}
-                    letterSpacing={FEEDBACK_TEXT_STYLE.letterSpacing}
-                    lineGap={FEEDBACK_TEXT_STYLE.lineGap}
-                    align="center"
-                  />
-                </hstack>
+                <WrappedFontText
+                  text={resultQuestion}
+                  maxWidth={displayContentWidth}
+                  color={questionStyle.color}
+                  fontSize={questionStyle.fontSize}
+                  letterSpacing={questionStyle.letterSpacing}
+                  lineGap={questionStyle.lineGap}
+                  align="center"
+                />
+                <WrappedAnswerFontText
+                  text={answerQuote}
+                  maxWidth={displayContentWidth}
+                  color={SHOW_ANSWER_ANSWER_TEXT_STYLE.color}
+                  fontSize={SHOW_ANSWER_ANSWER_TEXT_STYLE.fontSize}
+                  letterSpacing={SHOW_ANSWER_ANSWER_TEXT_STYLE.letterSpacing}
+                  lineGap={SHOW_ANSWER_ANSWER_TEXT_STYLE.lineGap}
+                  align="center"
+                />
               </ParchmentPanel>
 
               {aretePoints !== null && (
                 <>
-                  <spacer width="100%" height={`${ribbonToParchmentGapPx}px`} />
+                  <spacer width="100%" height={`${parchmentToPointsGapPx}px`} />
                   <vstack
                     width="100%"
                     alignment="middle center"
@@ -401,6 +358,7 @@ export function RoundResultView({
           <spacer grow />
           <NavIconButton
             icon="close"
+            size={closeButtonSize}
             onPress={() => {
               console.log('[RoundResultView] close icon pressed');
               onExit();

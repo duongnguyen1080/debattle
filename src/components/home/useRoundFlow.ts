@@ -23,9 +23,6 @@ interface UseRoundFlowResult {
   riddleId: string | null;
   initialQuestionId: string | null;
   shareToSubreddit: () => Promise<void>;
-  openSharePermalink: () => void;
-  hasShared: boolean;
-  sharePermalink: string | null;
 }
 
 const MAX_MEANINGFUL_ANSWER_LENGTH = 100;
@@ -68,14 +65,31 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     }
   };
 
-  const navigateToPermalink = (permalink?: string | null): void => {
-    if (!permalink) {
-      console.warn('[useRoundFlow] shareToSubreddit: missing permalink for navigation');
-      return;
-    }
+  const navigateToPost = async (postId?: string | null, permalink?: string | null): Promise<void> => {
     const ui = context?.ui;
     if (!ui?.navigateTo) {
       console.log('[useRoundFlow] shareToSubreddit: ui.navigateTo not available');
+      return;
+    }
+
+    if (postId && context?.reddit?.getPostById) {
+      try {
+        const post = await context.reddit.getPostById(postId);
+        if (post?.url) {
+          console.log('[useRoundFlow] shareToSubreddit: navigating to post', {
+            postId,
+            url: post.url,
+          });
+          ui.navigateTo(post);
+          return;
+        }
+      } catch (err) {
+        console.warn('[useRoundFlow] shareToSubreddit: post lookup failed', err);
+      }
+    }
+
+    if (!permalink) {
+      console.warn('[useRoundFlow] shareToSubreddit: missing permalink for navigation');
       return;
     }
     const url = permalink.startsWith('http') ? permalink : `https://reddit.com${permalink}`;
@@ -296,11 +310,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       console.log('[useRoundFlow] shareToSubreddit: already in progress');
       return;
     }
-    if (result.sharePostId) {
-      console.log('[useRoundFlow] shareToSubreddit: already shared');
-      fireToast('Already shared to the subreddit', 'shareToSubreddit: toast failed');
-      return;
-    }
+    const alreadyShared = !!result.sharePostId;
 
     try {
       setIsSharing(true);
@@ -345,8 +355,12 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         postId: resp.postId,
         permalink: resp.permalink ?? null,
       });
-      fireToast('Shared to the community!', 'shareToSubreddit: success toast failed');
-      navigateToPermalink(resp.permalink);
+      const toastMessage = alreadyShared
+        ? 'Already shared — opening post.'
+        : 'Shared to the community!';
+      fireToast(toastMessage, 'shareToSubreddit: success toast failed');
+      const permalink = resp.permalink ?? result.sharePermalink;
+      await navigateToPost(resp.postId, permalink);
     } catch (err) {
       console.error('[useRoundFlow] shareToSubreddit: error', err);
       const message = err instanceof Error ? err.message : '';
@@ -364,15 +378,6 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     }
   };
 
-  const openSharePermalink = (): void => {
-    const permalink = result?.sharePermalink;
-    if (!permalink) {
-      console.warn('[useRoundFlow] openSharePermalink: missing permalink');
-      return;
-    }
-    navigateToPermalink(permalink);
-  };
-
   return {
     step,
     riddleText,
@@ -387,8 +392,5 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     riddleId,
     initialQuestionId: initialQuestion?.id ?? null,
     shareToSubreddit,
-    openSharePermalink,
-    hasShared: !!result?.sharePostId,
-    sharePermalink: result?.sharePermalink ?? null,
   };
 }
