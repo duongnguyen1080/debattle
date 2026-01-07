@@ -4,6 +4,7 @@ import { PinnedPost } from './PinnedPost.js';
 import { SplashScreen } from './SplashScreen.js';
 import { HomeScreen } from './home/HomeScreen.js';
 import { RoundV2Flow } from './home/RoundV2Flow.js';
+import { AchievementsScreen } from './home/AchievementsScreen.js';
 
 import { Service } from '../services/Service.js';
 import type { User } from '../types/index.js';
@@ -89,7 +90,6 @@ useAsync(
         currentUser={currentUser}
         onStart={() => setView('play')}
         onLeaderboard={() => setView('leaderboard')}
-        onHowToPlay={() => setView('info')}
         onProgress={() => setView('progress')}
       />
     ),
@@ -102,7 +102,13 @@ useAsync(
     ),
     leaderboard: <PinnedPost context={context} currentUser={currentUser} initialTab="leaderboard" />,
     info: <PinnedPost context={context} currentUser={currentUser} initialTab="info" />,
-    progress: <PinnedPost context={context} currentUser={currentUser} initialTab="progress" />,
+    progress: (
+      <AchievementsScreen
+        currentUser={currentUser}
+        onBack={() => setView('home')}
+        viewportHeight={context?.viewportHeight ?? 1024}
+      />
+    ),
   };
 
   return views[view] ?? (

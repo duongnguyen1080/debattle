@@ -19,24 +19,24 @@ import {
 
 const ARETE_RIBBON = {
   widthRatio: 0.48,
-  minWidthPx: 280,
-  maxWidthPx: 540,
+  minWidthPx: 300,
+  maxWidthPx: 600,
   heightRatio: 0.23,
   gapFraction: 0.015,
-  minGapPx: 6,
-  maxGapPx: 12,
+  minGapPx: 5,
+  maxGapPx: 10,
 } as const;
 
 const ARETE_RIBBON_TEXT_STYLE = {
   fontSize: 26,
-  letterSpacing: -0.9,
+  letterSpacing: 0,
   lineGap: 3,
   color: '#3b1f0c',
 } as const;
 
 const ARETE_POINTS_TEXT_STYLE = {
-  fontSize: 36,
-  letterSpacing: -1.4,
+  fontSize: 32,
+  letterSpacing: 0,
   lineGap: 4,
   color: '#f8e7bb',
 } as const;
@@ -49,9 +49,9 @@ const ARETE_POINTS_ICON = {
   description: 'Arete coin reward',
 } as const;
 const SHOW_ANSWER_ANSWER_TEXT_STYLE = {
-  fontSize: 22,
-  letterSpacing: -1,
-  lineGap: 26,
+  fontSize: 20,
+  letterSpacing: 0,
+  lineGap: 28,
   color: '#2b1e12',
 } as const;
 
@@ -115,8 +115,9 @@ const SHOW_ANSWER_LAYOUT = {
   maxTopSafePx: 96,
 };
 
-const SHOW_ANSWER_CTA_SCALE = 0.5;
-const SHOW_ANSWER_CLOSE_SCALE = 0.5;
+const SHOW_ANSWER_CTA_SCALE = 0.8;
+const SHOW_ANSWER_CLOSE_SCALE = 0.8;
+const SHOW_ANSWER_RIBBON_OVERLAP_PX = 0;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
@@ -175,7 +176,6 @@ export function RoundResultView({
     availableHeightPx * SHOW_ANSWER_LAYOUT.maxAvailableParchmentFraction;
   const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
   const ctaBottomInset = `${CTA_BOTTOM_INSET_PX}px` as Devvit.Blocks.SizeString;
-  const ribbonToParchmentGapPx = 1;
   const parchmentToPointsGapPx = 5;
   const ctaButtonTopGapPx = Math.round(
     clamp(
@@ -193,6 +193,16 @@ export function RoundResultView({
   const areteRibbonWidth = `${areteRibbonWidthPx}px` as Devvit.Blocks.SizeString;
   const areteRibbonHeightPx = Math.round(areteRibbonWidthPx * ARETE_RIBBON.heightRatio);
   const areteRibbonHeight = `${areteRibbonHeightPx}px` as Devvit.Blocks.SizeString;
+  const ribbonParchmentOffsetPx = Math.max(
+    0,
+    areteRibbonHeightPx - SHOW_ANSWER_RIBBON_OVERLAP_PX,
+  );
+  const ribbonParchmentHeightPx = Math.max(
+    areteRibbonHeightPx,
+    ribbonParchmentOffsetPx + clampedHeight,
+  );
+  const ribbonParchmentHeight = `${ribbonParchmentHeightPx}px` as Devvit.Blocks.SizeString;
+  const parchmentOffset = `${ribbonParchmentOffsetPx}px` as Devvit.Blocks.SizeString;
   const ribbonTextMaxWidth = Math.max(120, Math.round(areteRibbonWidthPx * 0.76));
   const pointsTextMaxWidth = Math.max(140, Math.round(displayParchmentWidth * 0.38));
   const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
@@ -243,61 +253,65 @@ export function RoundResultView({
           <hstack width="100%" alignment="middle center" gap="none">
             <spacer width={horizontalInset} />
             <vstack width="100%" alignment="top center" gap="none">
-              <vstack width="100%" alignment="top center" gap="none">
-                <zstack width={areteRibbonWidth} height={areteRibbonHeight} alignment="middle center">
-                  <image
-                    url="parchment_2.png"
-                    width="100%"
-                    height="100%"
-                    imageWidth={1181}
-                    imageHeight={1181}
-                    resizeMode="fit"
-                    description="Scroll ribbon backdrop"
-                  />
-                  <vstack width="80%" alignment="middle center" gap="none">
+              <zstack width="100%" height={ribbonParchmentHeight} alignment="top center">
+                <vstack width="100%" alignment="top center" gap="none">
+                  <zstack width={areteRibbonWidth} height={areteRibbonHeight} alignment="middle center">
+                    <image
+                      url="parchment_2.png"
+                      width="100%"
+                      height="100%"
+                      imageWidth={1181}
+                      imageHeight={1181}
+                      resizeMode="fit"
+                      description="Scroll ribbon backdrop"
+                    />
+                    <vstack width="80%" alignment="middle center" gap="none">
+                      <WrappedFontText
+                        text={ribbonText}
+                        maxWidth={ribbonTextMaxWidth}
+                        color={ARETE_RIBBON_TEXT_STYLE.color}
+                        fontSize={ARETE_RIBBON_TEXT_STYLE.fontSize}
+                        letterSpacing={ARETE_RIBBON_TEXT_STYLE.letterSpacing}
+                        lineGap={ARETE_RIBBON_TEXT_STYLE.lineGap}
+                        align="center"
+                      />
+                    </vstack>
+                  </zstack>
+                </vstack>
+
+                <vstack width="100%" alignment="top center" gap="none">
+                  <spacer width="100%" height={parchmentOffset} />
+                  <ParchmentPanel
+                    widthPx={displayParchmentWidth}
+                    heightPx={clampedHeight}
+                    innerHeightPx={layout.innerHeight}
+                    tiles={layout.tiles}
+                    padTopPx={padTop}
+                    padBottomPx={padBottom}
+                    needsScroll={layout.needsScroll}
+                    contentGap="small"
+                  >
                     <WrappedFontText
-                      text={ribbonText}
-                      maxWidth={ribbonTextMaxWidth}
-                      color={ARETE_RIBBON_TEXT_STYLE.color}
-                      fontSize={ARETE_RIBBON_TEXT_STYLE.fontSize}
-                      letterSpacing={ARETE_RIBBON_TEXT_STYLE.letterSpacing}
-                      lineGap={ARETE_RIBBON_TEXT_STYLE.lineGap}
+                      text={resultQuestion}
+                      maxWidth={displayContentWidth}
+                      color={questionStyle.color}
+                      fontSize={questionStyle.fontSize}
+                      letterSpacing={questionStyle.letterSpacing}
+                      lineGap={questionStyle.lineGap}
                       align="center"
                     />
-                  </vstack>
-                </zstack>
-                <spacer width="100%" height={`${ribbonToParchmentGapPx}px`} />
-              </vstack>
-
-              <ParchmentPanel
-                widthPx={displayParchmentWidth}
-                heightPx={clampedHeight}
-                innerHeightPx={layout.innerHeight}
-                tiles={layout.tiles}
-                padTopPx={padTop}
-                padBottomPx={padBottom}
-                needsScroll={layout.needsScroll}
-                contentGap="small"
-              >
-                <WrappedFontText
-                  text={resultQuestion}
-                  maxWidth={displayContentWidth}
-                  color={questionStyle.color}
-                  fontSize={questionStyle.fontSize}
-                  letterSpacing={questionStyle.letterSpacing}
-                  lineGap={questionStyle.lineGap}
-                  align="center"
-                />
-                <WrappedAnswerFontText
-                  text={answerQuote}
-                  maxWidth={displayContentWidth}
-                  color={SHOW_ANSWER_ANSWER_TEXT_STYLE.color}
-                  fontSize={SHOW_ANSWER_ANSWER_TEXT_STYLE.fontSize}
-                  letterSpacing={SHOW_ANSWER_ANSWER_TEXT_STYLE.letterSpacing}
-                  lineGap={SHOW_ANSWER_ANSWER_TEXT_STYLE.lineGap}
-                  align="center"
-                />
-              </ParchmentPanel>
+                    <WrappedAnswerFontText
+                      text={answerQuote}
+                      maxWidth={displayContentWidth}
+                      color={SHOW_ANSWER_ANSWER_TEXT_STYLE.color}
+                      fontSize={SHOW_ANSWER_ANSWER_TEXT_STYLE.fontSize}
+                      letterSpacing={SHOW_ANSWER_ANSWER_TEXT_STYLE.letterSpacing}
+                      lineGap={SHOW_ANSWER_ANSWER_TEXT_STYLE.lineGap}
+                      align="center"
+                    />
+                  </ParchmentPanel>
+                </vstack>
+              </zstack>
 
               {aretePoints !== null && (
                 <>

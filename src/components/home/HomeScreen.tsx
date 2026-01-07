@@ -7,11 +7,10 @@ interface HomeScreenProps {
   currentUser: User | null;
   onStart: () => void;
   onLeaderboard: () => void;
-  onHowToPlay: () => void;
   onProgress: () => void;
 }
 
-export function HomeScreen({ currentUser, onStart, onLeaderboard, onHowToPlay, onProgress }: HomeScreenProps) {
+export function HomeScreen({ currentUser, onStart, onLeaderboard, onProgress }: HomeScreenProps) {
   console.log('HomeScreen render');
   console.log('[HomeScreen] render', { hasUser: !!currentUser, level: currentUser?.level, flair: currentUser?.flair });
   const ctaButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
@@ -54,13 +53,6 @@ export function HomeScreen({ currentUser, onStart, onLeaderboard, onHowToPlay, o
 
       <hstack width="100%" padding="large" gap="small">
         <spacer grow />
-        <NavIconButton
-          icon="info"
-          onPress={() => {
-            console.log('[HomeScreen] info icon pressed');
-            onHowToPlay();
-          }}
-        />
         <NavIconButton
           icon="profile"
           onPress={() => {
