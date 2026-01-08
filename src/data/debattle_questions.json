@@ -77,836 +77,691 @@
   {
     "id": 16,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "What if impermanence is not the problem but the solution?"
+    "question": "Do we suffer because we forget we are temporary?"
   },
   {
     "id": 17,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Is suffering universal or universally misunderstood?"
+    "question": "Can beauty exist without decay?"
   },
   {
     "id": 18,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Do we suffer because we forget we are temporary?"
+    "question": "Is letting go an act of faith or defeat?"
   },
   {
     "id": 19,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Can beauty exist without decay?"
+    "question": "Why does healing hurt almost as much as the wound?"
   },
   {
     "id": 20,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Is letting go an act of faith or defeat?"
+    "question": "What do we fear more, death or insignificance?"
   },
   {
     "id": 21,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Why does healing hurt almost as much as the wound?"
+    "question": "Is hope a comfort or a curse?"
   },
   {
     "id": 22,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Do we fear death or insignificance?"
+    "question": "Can we hold memories without being held by them?"
   },
   {
     "id": 23,
     "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Is hope a comfort or a curse?"
-  },
-  {
-    "id": 24,
-    "theme": "The acceptance of impermanence and the universality of suffering",
-    "question": "Can we hold memories without being held by them?"
-  },
-  {
-    "id": 25,
-    "theme": "The acceptance of impermanence and the universality of suffering",
     "question": "Does time heal wounds or merely distance us from them?"
   },
   {
-    "id": 26,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Is memorization the death of understanding?"
-  },
-  {
-    "id": 27,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Does convenience kill curiosity?"
-  },
-  {
-    "id": 28,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "When machines teach us, who learns whom?"
-  },
-  {
-    "id": 29,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Can automation make ignorance invisible?"
-  },
-  {
-    "id": 30,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Do algorithms dull the hunger for truth?"
-  },
-  {
-    "id": 31,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Are we outsourcing wisdom or abandoning it?"
-  },
-  {
-    "id": 32,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Does information abundance create knowledge poverty?"
-  },
-  {
-    "id": 33,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Can wisdom be downloaded or must it be earned?"
-  },
-  {
-    "id": 34,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Is the shortcut always the wrong path?"
-  },
-  {
-    "id": 35,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Do search engines make us smarter or lazier?"
-  },
-  {
-    "id": 36,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Has efficiency replaced depth?"
-  },
-  {
-    "id": 37,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Are students becoming consumers?"
-  },
-  {
-    "id": 38,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Can you learn without struggle?"
-  },
-  {
-    "id": 39,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Is thinking becoming obsolete?"
-  },
-  {
-    "id": 40,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Does technology connect us to knowledge or distance us from understanding?"
-  },
-  {
-    "id": 41,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Are we training minds or programming them?"
-  },
-  {
-    "id": 42,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Can artificial intelligence teach authentic wisdom?"
-  },
-  {
-    "id": 43,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Is data the new truth or the new distraction?"
-  },
-  {
-    "id": 44,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Do we trust machines more than ourselves?"
-  },
-  {
-    "id": 45,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Has education become industrial?"
-  },
-  {
-    "id": 46,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Are we learning to think or to comply?"
-  },
-  {
-    "id": 47,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Can you teach wonder through a screen?"
-  },
-  {
-    "id": 48,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Is ignorance now a choice or an inevitability?"
-  },
-  {
-    "id": 49,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Does speed of access mean depth of comprehension?"
-  },
-  {
-    "id": 50,
-    "theme": "The corruption of genuine learning in the age of systems and machines",
-    "question": "Are we becoming extensions of our tools?"
-  },
-  {
-    "id": 51,
+    "id": 24,
     "theme": "The tension between striving and simply being",
     "question": "When do goals become cages?"
   },
   {
-    "id": 52,
+    "id": 25,
     "theme": "The tension between striving and simply being",
     "question": "Can stillness be progress?"
   },
   {
-    "id": 53,
+    "id": 26,
     "theme": "The tension between striving and simply being",
     "question": "Is contentment surrender or wisdom?"
   },
   {
-    "id": 54,
+    "id": 27,
     "theme": "The tension between striving and simply being",
     "question": "Why chase meaning when presence already holds it?"
   },
   {
-    "id": 55,
+    "id": 28,
     "theme": "The tension between striving and simply being",
     "question": "Is ambition a mask for fear?"
   },
   {
-    "id": 56,
+    "id": 29,
     "theme": "The tension between striving and simply being",
     "question": "Does rest feel like failure?"
   },
   {
-    "id": 57,
+    "id": 30,
     "theme": "The tension between striving and simply being",
-    "question": "Are we running toward something or away from ourselves?"
+    "question": "Are we striving toward something or away from ourselves?"
   },
   {
-    "id": 58,
+    "id": 31,
     "theme": "The tension between striving and simply being",
     "question": "Can you be enough without becoming more?"
   },
   {
-    "id": 59,
+    "id": 32,
     "theme": "The tension between striving and simply being",
     "question": "Is productivity a virtue or an addiction?"
   },
   {
-    "id": 60,
+    "id": 33,
     "theme": "The tension between striving and simply being",
     "question": "Do we measure worth by output?"
   },
   {
-    "id": 61,
+    "id": 34,
     "theme": "The tension between striving and simply being",
-    "question": "Is the present moment enough?"
+    "question": "Can you want nothing and still feel alive?"
   },
   {
-    "id": 62,
-    "theme": "The tension between striving and simply being",
-    "question": "Can you want nothing and still be alive?"
-  },
-  {
-    "id": 63,
+    "id": 35,
     "theme": "The tension between striving and simply being",
     "question": "Does striving bring fulfillment or just more striving?"
   },
   {
-    "id": 64,
+    "id": 36,
     "theme": "The tension between striving and simply being",
     "question": "Are we human beings or human doings?"
   },
   {
-    "id": 65,
+    "id": 37,
     "theme": "The tension between striving and simply being",
-    "question": "Is peace possible without achievement?"
+    "question": "Is peace possible without achievements?"
   },
   {
-    "id": 66,
+    "id": 38,
     "theme": "The tension between striving and simply being",
-    "question": "Can we stop without falling behind?"
+    "question": "Is success the enemy of self-satisfaction?"
   },
   {
-    "id": 67,
-    "theme": "The tension between striving and simply being",
-    "question": "Does meditation feel like wasted time?"
-  },
-  {
-    "id": 68,
-    "theme": "The tension between striving and simply being",
-    "question": "Is success the enemy of satisfaction?"
-  },
-  {
-    "id": 69,
+    "id": 39,
     "theme": "The tension between striving and simply being",
     "question": "Why do we fear being ordinary?"
   },
   {
-    "id": 70,
+    "id": 40,
     "theme": "The tension between striving and simply being",
     "question": "Can ambition and peace coexist?"
   },
   {
-    "id": 71,
+    "id": 41,
     "theme": "The tension between striving and simply being",
-    "question": "Is exhaustion a badge of honor?"
+    "question": "Why do people think exhaustion is a badge of honor?"
   },
   {
-    "id": 72,
+    "id": 42,
     "theme": "The tension between striving and simply being",
     "question": "Do we confuse busyness with purpose?"
   },
   {
-    "id": 73,
+    "id": 43,
     "theme": "The tension between striving and simply being",
-    "question": "Can you arrive at yourself?"
+    "question": "How can you arrive at yourself?"
   },
   {
-    "id": 74,
+    "id": 44,
     "theme": "The tension between striving and simply being",
     "question": "Is wanting less the same as having more?"
   },
   {
-    "id": 75,
+    "id": 45,
     "theme": "The tension between striving and simply being",
     "question": "Does the journey matter if there is no destination?"
   },
   {
-    "id": 76,
-    "theme": "The paradox of solitude and connection",
-    "question": "Can one be lonely in a crowd or complete alone?"
-  },
-  {
-    "id": 77,
+    "id": 46,
     "theme": "The paradox of solitude and connection",
     "question": "Is solitude freedom or exile?"
   },
   {
-    "id": 78,
+    "id": 47,
     "theme": "The paradox of solitude and connection",
     "question": "Does silence separate or reveal?"
   },
   {
-    "id": 79,
+    "id": 48,
     "theme": "The paradox of solitude and connection",
     "question": "When we connect, do we merge or vanish?"
   },
   {
-    "id": 80,
+    "id": 49,
     "theme": "The paradox of solitude and connection",
     "question": "Can love survive without distance?"
   },
   {
-    "id": 81,
+    "id": 50,
     "theme": "The paradox of solitude and connection",
     "question": "Is intimacy always a loss of self?"
   },
   {
-    "id": 82,
+    "id": 51,
     "theme": "The paradox of solitude and connection",
     "question": "Do we need others to know ourselves?"
   },
   {
-    "id": 83,
+    "id": 52,
     "theme": "The paradox of solitude and connection",
     "question": "Can you be alone without being lonely?"
   },
   {
-    "id": 84,
+    "id": 53,
     "theme": "The paradox of solitude and connection",
     "question": "Is connection a human need or a human weakness?"
   },
   {
-    "id": 85,
+    "id": 54,
     "theme": "The paradox of solitude and connection",
     "question": "Do we seek company or escape from ourselves?"
   },
   {
-    "id": 86,
+    "id": 55,
     "theme": "The paradox of solitude and connection",
     "question": "Can two people truly understand each other?"
   },
   {
-    "id": 87,
+    "id": 56,
     "theme": "The paradox of solitude and connection",
     "question": "Is every relationship a compromise of autonomy?"
   },
   {
-    "id": 88,
+    "id": 57,
     "theme": "The paradox of solitude and connection",
     "question": "Does vulnerability create bonds or expose weakness?"
   },
   {
-    "id": 89,
+    "id": 58,
     "theme": "The paradox of solitude and connection",
     "question": "Are we all fundamentally alone?"
   },
   {
-    "id": 90,
-    "theme": "The paradox of solitude and connection",
-    "question": "Can you find yourself in another person?"
-  },
-  {
-    "id": 91,
-    "theme": "The paradox of solitude and connection",
-    "question": "Is solitude a luxury or a punishment?"
-  },
-  {
-    "id": 92,
-    "theme": "The paradox of solitude and connection",
-    "question": "Do digital connections deepen loneliness?"
-  },
-  {
-    "id": 93,
-    "theme": "The paradox of solitude and connection",
-    "question": "Can you be present with others while absent from yourself?"
-  },
-  {
-    "id": 94,
+    "id": 59,
     "theme": "The paradox of solitude and connection",
     "question": "Is belonging worth the price of conformity?"
   },
   {
-    "id": 95,
+    "id": 60,
     "theme": "The paradox of solitude and connection",
-    "question": "Do we fear isolation or confrontation with self?"
+    "question": "Do we fear isolation or confrontation with our-self?"
   },
   {
-    "id": 96,
+    "id": 61,
     "theme": "The paradox of solitude and connection",
     "question": "Can true connection exist without boundaries?"
   },
   {
-    "id": 97,
-    "theme": "The paradox of solitude and connection",
-    "question": "Is the crowd just organized loneliness?"
-  },
-  {
-    "id": 98,
+    "id": 62,
     "theme": "The paradox of solitude and connection",
     "question": "Does being seen mean being known?"
   },
   {
-    "id": 99,
+    "id": 63,
     "theme": "The paradox of solitude and connection",
     "question": "Can we ever escape the prison of perspective?"
   },
   {
-    "id": 100,
+    "id": 64,
     "theme": "The paradox of solitude and connection",
     "question": "Is companionship a need or a habit?"
   },
   {
-    "id": 101,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can one voice bend the world?"
-  },
-  {
-    "id": 102,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can rebellion be pure without ego?"
-  },
-  {
-    "id": 103,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Does obedience breed peace or decay?"
-  },
-  {
-    "id": 104,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is conformity safer or more dangerous?"
-  },
-  {
-    "id": 105,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Who defines order, and who benefits from it?"
-  },
-  {
-    "id": 106,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is silence complicity?"
-  },
-  {
-    "id": 107,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can a system reform itself?"
-  },
-  {
-    "id": 108,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Does power ever relinquish itself willingly?"
-  },
-  {
-    "id": 109,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Are rules for protection or control?"
-  },
-  {
-    "id": 110,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is questioning a right or a responsibility?"
-  },
-  {
-    "id": 111,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can authority exist without consent?"
-  },
-  {
-    "id": 112,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Does revolution require violence?"
-  },
-  {
-    "id": 113,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is every institution eventually corrupt?"
-  },
-  {
-    "id": 114,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can we dismantle what we depend on?"
-  },
-  {
-    "id": 115,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is tradition wisdom or inertia?"
-  },
-  {
-    "id": 116,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Do we serve systems or do systems serve us?"
-  },
-  {
-    "id": 117,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can justice exist within an unjust system?"
-  },
-  {
-    "id": 118,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is civility a virtue or a chain?"
-  },
-  {
-    "id": 119,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Does comfort make cowards?"
-  },
-  {
-    "id": 120,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Are we citizens or subjects?"
-  },
-  {
-    "id": 121,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can dissent be patriotic?"
-  },
-  {
-    "id": 122,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is compromise necessary or corrosive?"
-  },
-  {
-    "id": 123,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Do we need permission to be free?"
-  },
-  {
-    "id": 124,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Can the oppressed become oppressors?"
-  },
-  {
-    "id": 125,
-    "theme": "The defiance of systems and the courage to question",
-    "question": "Is legitimacy granted or taken?"
-  },
-  {
-    "id": 126,
-    "theme": "The return to simplicity",
-    "question": "Is simplicity laziness or clarity?"
-  },
-  {
-    "id": 127,
-    "theme": "The return to simplicity",
-    "question": "When did enough stop being enough?"
-  },
-  {
-    "id": 128,
-    "theme": "The return to simplicity",
-    "question": "Can freedom exist without restraint?"
-  },
-  {
-    "id": 129,
-    "theme": "The return to simplicity",
-    "question": "Do possessions possess us?"
-  },
-  {
-    "id": 130,
-    "theme": "The return to simplicity",
-    "question": "Is less always more, or just less noise?"
-  },
-  {
-    "id": 131,
-    "theme": "The return to simplicity",
-    "question": "Does abundance create emptiness?"
-  },
-  {
-    "id": 132,
-    "theme": "The return to simplicity",
-    "question": "Can you be rich without anything?"
-  },
-  {
-    "id": 133,
-    "theme": "The return to simplicity",
-    "question": "Is minimalism privilege or principle?"
-  },
-  {
-    "id": 134,
-    "theme": "The return to simplicity",
-    "question": "Do we own things or do things own us?"
-  },
-  {
-    "id": 135,
-    "theme": "The return to simplicity",
-    "question": "Can simplicity be complicated?"
-  },
-  {
-    "id": 136,
-    "theme": "The return to simplicity",
-    "question": "Is wanting less the same as needing less?"
-  },
-  {
-    "id": 137,
-    "theme": "The return to simplicity",
-    "question": "Does complexity mask confusion?"
-  },
-  {
-    "id": 138,
-    "theme": "The return to simplicity",
-    "question": "Can we return to what we never left?"
-  },
-  {
-    "id": 139,
-    "theme": "The return to simplicity",
-    "question": "Is modern life too complicated to simplify?"
-  },
-  {
-    "id": 140,
-    "theme": "The return to simplicity",
-    "question": "Do choices create freedom or paralysis?"
-  },
-  {
-    "id": 141,
-    "theme": "The return to simplicity",
-    "question": "Is accumulation progress?"
-  },
-  {
-    "id": 142,
-    "theme": "The return to simplicity",
-    "question": "Can you subtract your way to happiness?"
-  },
-  {
-    "id": 143,
-    "theme": "The return to simplicity",
-    "question": "Does scarcity breed appreciation?"
-  },
-  {
-    "id": 144,
-    "theme": "The return to simplicity",
-    "question": "Is poverty simple or simply hard?"
-  },
-  {
-    "id": 145,
-    "theme": "The return to simplicity",
-    "question": "Can we unlearn desire?"
-  },
-  {
-    "id": 146,
-    "theme": "The return to simplicity",
-    "question": "Is restraint freedom or limitation?"
-  },
-  {
-    "id": 147,
-    "theme": "The return to simplicity",
-    "question": "Do we need most of what we have?"
-  },
-  {
-    "id": 148,
-    "theme": "The return to simplicity",
-    "question": "Can wealth be measured in what you don't need?"
-  },
-  {
-    "id": 149,
-    "theme": "The return to simplicity",
-    "question": "Is the simple life harder than the complicated one?"
-  },
-  {
-    "id": 150,
-    "theme": "The return to simplicity",
-    "question": "Does letting go require strength or weakness?"
-  },
-  {
-    "id": 151,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can dignity exist without power?"
-  },
-  {
-    "id": 152,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Is silence dignity or defeat?"
-  },
-  {
-    "id": 153,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Does survival justify surrender?"
-  },
-  {
-    "id": 154,
+    "id": 65,
     "theme": "The fight for dignity in an unjust world",
     "question": "What is the price of self-respect?"
   },
   {
-    "id": 155,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can one stay pure in a corrupt world?"
-  },
-  {
-    "id": 156,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Is humiliation worse than death?"
-  },
-  {
-    "id": 157,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can you have dignity in chains?"
-  },
-  {
-    "id": 158,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Does injustice make resistance a duty?"
-  },
-  {
-    "id": 159,
+    "id": 66,
     "theme": "The fight for dignity in an unjust world",
     "question": "Is pride a strength or a weakness?"
   },
   {
-    "id": 160,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can dignity be stripped or only surrendered?"
-  },
-  {
-    "id": 161,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Is suffering with dignity better than comfort without it?"
-  },
-  {
-    "id": 162,
+    "id": 67,
     "theme": "The fight for dignity in an unjust world",
     "question": "Does the world owe us fairness?"
   },
   {
-    "id": 163,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can honor exist in dishonest times?"
-  },
-  {
-    "id": 164,
+    "id": 68,
     "theme": "The fight for dignity in an unjust world",
     "question": "Is dignity inherent or earned?"
   },
   {
-    "id": 165,
+    "id": 69,
     "theme": "The fight for dignity in an unjust world",
-    "question": "Does powerlessness demand submission?"
+    "question": "Is vengeance justice?"
   },
   {
-    "id": 166,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can we fight without becoming what we fight against?"
-  },
-  {
-    "id": 167,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Is vengeance justice or just more violence?"
-  },
-  {
-    "id": 168,
+    "id": 70,
     "theme": "The fight for dignity in an unjust world",
     "question": "Does resilience require resistance?"
   },
   {
-    "id": 169,
+    "id": 71,
     "theme": "The fight for dignity in an unjust world",
     "question": "Can you forgive without forgetting?"
   },
   {
-    "id": 170,
+    "id": 72,
     "theme": "The fight for dignity in an unjust world",
     "question": "Is patience a virtue or a trap?"
   },
   {
-    "id": 171,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Does suffering ennoble or embitter?"
+    "id": 73,
+    "theme": null,
+    "question": "Can truth exist without interpretation?"
   },
   {
-    "id": 172,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can we demand what we cannot enforce?"
+    "id": 74,
+    "theme": null,
+    "question": "Do we create meaning or discover it?"
   },
   {
-    "id": 173,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Is hope a form of dignity?"
+    "id": 75,
+    "theme": null,
+    "question": "Can you outgrow who you were without losing yourself?"
   },
   {
-    "id": 174,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Does indignity unite or isolate?"
+    "id": 76,
+    "theme": null,
+    "question": "Does authenticity require rebellion?"
   },
   {
-    "id": 175,
-    "theme": "The fight for dignity in an unjust world",
-    "question": "Can there be dignity in compromise?"
+    "id": 77,
+    "theme": null,
+    "question": "Is doubt the beginning of wisdom or its obstacle?"
   },
   {
-    "id": 176,
-    "theme": "The fate of humanity and the values that sustain it",
-    "question": "Are we evolving or escaping ourselves?"
+    "id": 78,
+    "theme": null,
+    "question": "What is freedom?"
   },
   {
-    "id": 177,
-    "theme": "The fate of humanity and the values that sustain it",
-    "question": "Will progress outlive wisdom?"
+    "id": 79,
+    "theme": null,
+    "question": "Why do we fear the unknown?"
   },
   {
-    "id": 178,
-    "theme": "The fate of humanity and the values that sustain it",
-    "question": "What does the future owe the past?"
+    "id": 80,
+    "theme": null,
+    "question": "Can happiness be pursued or only welcomed?"
   },
   {
-    "id": 179,
-    "theme": "The fate of humanity and the values that sustain it",
-    "question": "Is the end of the world the start of truth?"
+    "id": 81,
+    "theme": null,
+    "question": "Is identity fixed or fluid?"
   },
   {
-    "id": 180,
-    "theme": "The fate of humanity and the values that sustain it",
-    "question": "Can humanity survive its own intelligence?"
+    "id": 82,
+    "theme": null,
+    "question": "Does maturity mean losing innocence or gaining perspective?"
   },
   {
-    "id": 181,
-    "theme": "The fate of humanity and the values that sustain it",
-    "question": "Is civilization sustainable?"
+    "id": 83,
+    "theme": null,
+    "question": "Does speaking your truth require an audience?"
   },
   {
-    "id": 182,
-    "theme": "The fate of humanity and the values that sustain it",
-    "question": "Do we learn from history or repeat it?"
+    "id": 84,
+    "theme": null,
+    "question": "What makes a life worth living?"
+  },
+  {
+    "id": 85,
+    "theme": null,
+    "question": "How do we measure the weight of our choices?"
+  },
+  {
+    "id": 86,
+    "theme": null,
+    "question": "Why do we crave certainty in an uncertain world?"
+  },
+  {
+    "id": 87,
+    "theme": null,
+    "question": "What survives us after we're gone?"
+  },
+  {
+    "id": 88,
+    "theme": null,
+    "question": "How do we distinguish between instinct and intuition?"
+  },
+  {
+    "id": 89,
+    "theme": null,
+    "question": "Where do thoughts come from before we think them?"
+  },
+  {
+    "id": 90,
+    "theme": null,
+    "question": "Why does silence sometimes say more than words?"
+  },
+  {
+    "id": 91,
+    "theme": null,
+    "question": "What gives words their power to heal or harm?"
+  },
+  {
+    "id": 92,
+    "theme": null,
+    "question": "How do we know when to hold on and when to release?"
+  },
+  {
+    "id": 93,
+    "theme": null,
+    "question": "Where does courage come from in moments of terror?"
+  },
+  {
+    "id": 94,
+    "theme": null,
+    "question": "Why do we tell ourselves stories about who we are?"
+  },
+  {
+    "id": 95,
+    "theme": null,
+    "question": "How do we reconcile who we were with who we've become?"
+  },
+  {
+    "id": 96,
+    "theme": null,
+    "question": "Where does moral authority originate?"
+  },
+  {
+    "id": 97,
+    "theme": null,
+    "question": "Why does beauty sometimes hurt to witness?"
+  },
+  {
+    "id": 98,
+    "theme": null,
+    "question": "When does persistence become delusion?"
+  },
+  {
+    "id": 99,
+    "theme": null,
+    "question": "What separates conviction from stubbornness?"
+  },
+  {
+    "id": 100,
+    "theme": null,
+    "question": "How do we carry grief without being crushed by it?"
+  },
+  {
+    "id": 101,
+    "theme": null,
+    "question": "Where does the boundary lie between self-care and selfishness?"
+  },
+  {
+    "id": 102,
+    "theme": null,
+    "question": "When does adaptation become betrayal of self?"
+  },
+  {
+    "id": 103,
+    "theme": null,
+    "question": "What makes some wounds impossible to heal?"
+  },
+  {
+    "id": 104,
+    "theme": null,
+    "question": "Why do we resist what we cannot change?"
+  },
+  {
+    "id": 105,
+    "theme": null,
+    "question": "What determines the value of a moment?"
+  },
+  {
+    "id": 106,
+    "theme": null,
+    "question": "How do we discern truth from comfortable lies?"
+  },
+  {
+    "id": 107,
+    "theme": null,
+    "question": "Where does responsibility end and circumstance begin?"
+  },
+  {
+    "id": 108,
+    "theme": null,
+    "question": "Why does the familiar often feel safer than the good?"
+  },
+  {
+    "id": 109,
+    "theme": null,
+    "question": "When does ambition curdle into greed?"
+  },
+  {
+    "id": 110,
+    "theme": null,
+    "question": "How do we know which voice inside us to trust?"
+  },
+  {
+    "id": 111,
+    "theme": null,
+    "question": "Why do we seek approval from others?"
+  },
+  {
+    "id": 112,
+    "theme": null,
+    "question": "What distinguishes influence from manipulation?"
+  },
+  {
+    "id": 113,
+    "theme": null,
+    "question": "How do we measure emotional distance?"
+  },
+  {
+    "id": 114,
+    "theme": null,
+    "question": "Where does empathy end and projection begin?"
+  },
+  {
+    "id": 115,
+    "theme": null,
+    "question": "When does patience become complicity?"
+  },
+  {
+    "id": 116,
+    "theme": null,
+    "question": "What makes a promise sacred?"
+  },
+  {
+    "id": 117,
+    "theme": null,
+    "question": "How do we navigate the gap between intention and impact?"
+  },
+  {
+    "id": 118,
+    "theme": null,
+    "question": "Why does growth often require breaking?"
+  },
+  {
+    "id": 119,
+    "theme": null,
+    "question": "When does self-reflection become self-absorption?"
+  },
+  {
+    "id": 120,
+    "theme": null,
+    "question": "How do we honor contradictions within ourselves?"
+  },
+  {
+    "id": 121,
+    "theme": null,
+    "question": "How do we rebuild trust after betrayal?"
+  },
+  {
+    "id": 122,
+    "theme": null,
+    "question": "Where does prejudice take root?"
+  },
+  {
+    "id": 123,
+    "theme": null,
+    "question": "Why does shame linger longer than guilt?"
+  },
+  {
+    "id": 124,
+    "theme": null,
+    "question": "When does idealism become naivety?"
+  },
+  {
+    "id": 125,
+    "theme": null,
+    "question": "What makes suffering redemptive versus senseless?"
+  },
+  {
+    "id": 126,
+    "theme": null,
+    "question": "How do we define success for ourselves?"
+  },
+  {
+    "id": 127,
+    "theme": null,
+    "question": "Where does our sense of identity come from?"
+  },
+  {
+    "id": 128,
+    "theme": null,
+    "question": "Why do we romanticize the past?"
+  },
+  {
+    "id": 129,
+    "theme": null,
+    "question": "When does confidence cross into arrogance?"
+  },
+  {
+    "id": 130,
+    "theme": null,
+    "question": "How do we learn to sit with discomfort?"
+  },
+  {
+    "id": 131,
+    "theme": null,
+    "question": "Where does anxiety end and intuition begin?"
+  },
+  {
+    "id": 132,
+    "theme": null,
+    "question": "Why do we protect illusions we know are false?"
+  },
+  {
+    "id": 133,
+    "theme": null,
+    "question": "When does helping become enabling?"
+  },
+  {
+    "id": 134,
+    "theme": null,
+    "question": "What makes a relationship worth fighting for?"
+  },
+  {
+    "id": 135,
+    "theme": null,
+    "question": "Where does jealousy originate?"
+  },
+  {
+    "id": 136,
+    "theme": null,
+    "question": "When does nostalgia become escapism?"
+  },
+  {
+    "id": 137,
+    "theme": null,
+    "question": "Where does wisdom accumulate in the body?"
+  },
+  {
+    "id": 138,
+    "theme": null,
+    "question": "Why do we repeat patterns that hurt us?"
+  },
+  {
+    "id": 139,
+    "theme": null,
+    "question": "When does independence become isolation?"
+  },
+  {
+    "id": 140,
+    "theme": null,
+    "question": "What distinguishes remorse from regret?"
+  },
+  {
+    "id": 141,
+    "theme": null,
+    "question": "How do we cultivate compassion for our former selves?"
+  },
+  {
+    "id": 142,
+    "theme": null,
+    "question": "When does loyalty become blind devotion?"
+  },
+  {
+    "id": 143,
+    "theme": null,
+    "question": "What makes an experience transformative?"
+  },
+  {
+    "id": 144,
+    "theme": null,
+    "question": "Where does entitlement originate?"
+  },
+  {
+    "id": 145,
+    "theme": null,
+    "question": "Why does simplicity feel so elusive?"
+  },
+  {
+    "id": 146,
+    "theme": null,
+    "question": "When does caution become cowardice?"
+  },
+  {
+    "id": 147,
+    "theme": null,
+    "question": "How do we calibrate our moral compass?"
+  },
+  {
+    "id": 148,
+    "theme": null,
+    "question": "Where does resentment accumulate unseen?"
+  },
+  {
+    "id": 149,
+    "theme": null,
+    "question": "What makes forgiveness complete?"
+  },
+  {
+    "id": 150,
+    "theme": null,
+    "question": "How do we mourn what never was?"
+  },
+  {
+    "id": 151,
+    "theme": null,
+    "question": "Where does hope live after despair?"
+  },
+  {
+    "id": 152,
+    "theme": null,
+    "question": "Why do we confuse intensity with intimacy?"
+  },
+  {
+    "id": 153,
+    "theme": null,
+    "question": "When does acceptance become resignation?"
   }
 ]
