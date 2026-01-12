@@ -2,7 +2,11 @@ import { RedisClient, RedditAPIClient, AppUpgrade, TriggerContext } from '@devvi
 import { User, Guess, Theme, LeaderboardEntry, RiddleV2, PlayerResponse, AreteEvaluation } from '../types/index.js';
 import { calculateLevel, getFlairForLevel, calculateGuessScore } from '../utils/gameUtils.js';
 import { calculatePostBonusFromUpvotes } from '../utils/gameUtils.js';
-import { getRandomQuestion, QuestionBankEntry } from '../utils/questionBank.js';
+import { getAllQuestions, getRandomQuestion, QuestionBankEntry } from '../utils/questionBank.js';
+
+const DAILY_ANSWER_LIMIT = 3;
+const DAILY_ANSWER_LIMIT_ERROR = 'DAILY_ANSWER_LIMIT';
+const DAILY_ANSWER_DUPLICATE_ERROR = 'DAILY_ANSWER_DUPLICATE';
 
 const ARETE_SYSTEM_PROMPT = `You are the Guardian of the Arete Gate, keeper of wisdom and judge of truth.
 Your task is to evaluate the wanderer’s answer to decide if the gate shall open — and how many points they deserve.
@@ -101,6 +105,70 @@ export class Service {
     const m = fence.exec(s);
     const raw = m ? m[1] : s;
     return JSON.parse(raw);
+  }
+
+  private getUtcDayKey(now: number = Date.now()): string {
+    const date = new Date(now);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private getNextUtcMidnight(now: number = Date.now()): Date {
+    const date = new Date(now);
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1));
+  }
+
+  private getDailyAnswerKey(username: string, dayKey: string): string {
+    return `debattle:answers:${username}:${dayKey}`;
+  }
+
+  private async getDailyAnsweredQuestionKeys(username: string, now: number = Date.now()): Promise<{
+    key: string;
+    dayKey: string;
+    questionKeys: string[];
+    expiresAt: Date;
+  }> {
+    const dayKey = this.getUtcDayKey(now);
+    const key = this.getDailyAnswerKey(username, dayKey);
+    const raw = await this.redis.get(key);
+    let questionKeys: string[] = [];
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          questionKeys = parsed.filter((entry): entry is string => typeof entry === 'string');
+        }
+      } catch {
+        // ignore malformed data
+      }
+    }
+    return {
+      key,
+      dayKey,
+      questionKeys,
+      expiresAt: this.getNextUtcMidnight(now),
+    };
+  }
+
+  private async recordDailyAnsweredQuestionKey(username: string, questionKey: string): Promise<number> {
+    const { key, questionKeys, expiresAt } = await this.getDailyAnsweredQuestionKeys(username);
+    if (!questionKeys.includes(questionKey)) {
+      questionKeys.push(questionKey);
+    }
+    await this.redis.set(key, JSON.stringify(questionKeys), { expiration: expiresAt });
+    return questionKeys.length;
+  }
+
+  private normalizeQuestionKey(questionId: unknown, riddleId: string): string {
+    if (typeof questionId === 'number' && Number.isFinite(questionId)) {
+      return String(questionId);
+    }
+    if (typeof questionId === 'string' && questionId.trim()) {
+      return questionId.trim();
+    }
+    return `riddle:${riddleId}`;
   }
 
 
@@ -249,6 +317,11 @@ export class Service {
     return user;
   }
 
+  async isDailyAnswerLimitReached(username: string): Promise<boolean> {
+    const { questionKeys } = await this.getDailyAnsweredQuestionKeys(username);
+    return questionKeys.length >= DAILY_ANSWER_LIMIT;
+  }
+
   async updateUserXp(username: string, xpGained: number): Promise<User> {
     let user = await this.getUser(username);
     if (!user) {
@@ -292,7 +365,20 @@ export class Service {
       const id = `${Date.now()}:${Math.random().toString(36).slice(2, 11)}`;
       const now = Date.now();
       const expiresAt = now + 24 * 60 * 60 * 1000; // 24h
-      const question = providedQuestion ?? getRandomQuestion();
+      const { questionKeys } = await this.getDailyAnsweredQuestionKeys(playerUsername);
+      const usedQuestionKeys = new Set(questionKeys);
+      const availableQuestions = getAllQuestions().filter(
+        (entry) => !usedQuestionKeys.has(String(entry.id))
+      );
+      let question: QuestionBankEntry;
+      if (providedQuestion && !usedQuestionKeys.has(String(providedQuestion.id))) {
+        question = providedQuestion;
+      } else if (availableQuestions.length > 0) {
+        const index = Math.floor(Math.random() * availableQuestions.length);
+        question = availableQuestions[index];
+      } else {
+        question = providedQuestion ?? getRandomQuestion();
+      }
       const riddleText = question.question || `On the theme of ${question.theme}: What do you owe to yourself that cannot be owned?`;
 
       const riddle: RiddleV2 = {
@@ -340,6 +426,14 @@ export class Service {
     const riddle = await this.getRiddle(riddleId);
     if (!riddle || riddle.status !== 'active') {
       throw new Error('Riddle not found or inactive');
+    }
+    const questionKey = this.normalizeQuestionKey(riddle.meta?.questionId, riddle.id);
+    const { questionKeys } = await this.getDailyAnsweredQuestionKeys(playerUsername);
+    if (questionKeys.length >= DAILY_ANSWER_LIMIT) {
+      throw new Error(DAILY_ANSWER_LIMIT_ERROR);
+    }
+    if (questionKeys.includes(questionKey)) {
+      throw new Error(DAILY_ANSWER_DUPLICATE_ERROR);
     }
 
     const trimmed = answerText.trim();
@@ -389,6 +483,12 @@ export class Service {
 
     riddle.responses.push(response);
     await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
+
+    try {
+      await this.recordDailyAnsweredQuestionKey(playerUsername, questionKey);
+    } catch (err) {
+      console.error('[Service.submitAnswer] failed to record daily answer', err);
+    }
 
     await this.updateUserXp(playerUsername, total);
     return {
@@ -712,6 +812,18 @@ export class Service {
             });
           } catch (e) {
             console.error('Error scoring answer:', e);
+            const message = e instanceof Error ? e.message : '';
+            if (message === DAILY_ANSWER_LIMIT_ERROR) {
+              await context.reddit.submitComment({
+                id: comment.id,
+                text: '🛑 Daily limit reached. You can answer up to 3 questions per day.',
+              });
+            } else if (message === DAILY_ANSWER_DUPLICATE_ERROR) {
+              await context.reddit.submitComment({
+                id: comment.id,
+                text: '🔁 You already answered this question today. Try a new one tomorrow.',
+              });
+            }
           }
         }
       }

@@ -7,6 +7,7 @@ import { FALLBACK_RIDDLE_TEXT, RoundResult, Step } from './roundTypes.js';
 interface UseRoundFlowOptions {
   context: any;
   currentUser: User | null;
+  onDailyLimitReached?: () => void;
 }
 
 interface UseRoundFlowResult {
@@ -28,6 +29,9 @@ interface UseRoundFlowResult {
 const MAX_MEANINGFUL_ANSWER_LENGTH = 250;
 const ANSWER_LENGTH_LIMIT_MESSAGE =
   'Answers are limited to 250 characters (spaces and punctuation excluded).';
+const DAILY_ANSWER_LIMIT_ERROR = 'DAILY_ANSWER_LIMIT';
+const DAILY_ANSWER_DUPLICATE_ERROR = 'DAILY_ANSWER_DUPLICATE';
+const DAILY_ANSWER_DUPLICATE_MESSAGE = 'You already answered this question today. Try a new one tomorrow.';
 
 const createIgnoredCharRegex = (): RegExp => {
   try {
@@ -46,7 +50,7 @@ const getMeaningfulAnswerLength = (value: string): number => {
   return value.replace(IGNORED_ANSWER_CHAR_REGEX, '').length;
 };
 
-export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): UseRoundFlowResult {
+export function useRoundFlow({ context, currentUser, onDailyLimitReached }: UseRoundFlowOptions): UseRoundFlowResult {
   const fireToast = (message: string, logScope: string): void => {
     const ui = context?.ui;
     if (!ui?.showToast) {
@@ -238,6 +242,15 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       setStep('result');
     } catch (e) {
       console.error('[useRoundFlow] handleSubmitAnswer: error', e);
+      const message = e instanceof Error ? e.message : '';
+      if (message === DAILY_ANSWER_LIMIT_ERROR) {
+        onDailyLimitReached?.();
+        return;
+      } else if (message === DAILY_ANSWER_DUPLICATE_ERROR) {
+        fireToast(DAILY_ANSWER_DUPLICATE_MESSAGE, 'handleSubmitAnswer: duplicate toast failed');
+      } else {
+        fireToast('Failed to submit answer. Please try again.', 'handleSubmitAnswer: error toast failed');
+      }
     } finally {
       setIsSubmitting(false);
     }
