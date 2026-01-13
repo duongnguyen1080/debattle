@@ -8,10 +8,9 @@ interface RoundV2FlowProps {
   context: any;
   currentUser: User | null;
   onExit: () => void;
-  onDailyLimitReached?: () => void;
 }
 
-export function RoundV2Flow({ context, currentUser, onExit, onDailyLimitReached }: RoundV2FlowProps) {
+export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) {
   const {
     step,
     riddleText,
@@ -25,7 +24,7 @@ export function RoundV2Flow({ context, currentUser, onExit, onDailyLimitReached 
     riddleId,
     initialQuestionId,
     shareToSubreddit,
-  } = useRoundFlow({ context, currentUser, onDailyLimitReached });
+  } = useRoundFlow({ context, currentUser });
 
   console.log('[RoundV2Flow] render', {
     step,

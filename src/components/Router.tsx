@@ -2,7 +2,6 @@ import { Devvit, useAsync, useState } from '@devvit/public-api';
 
 import { PinnedPost } from './PinnedPost.js';
 import { SplashScreen } from './SplashScreen.js';
-import { DailyLimitScreen } from './home/DailyLimitScreen.js';
 import { HomeScreen } from './home/HomeScreen.js';
 import { RoundV2Flow } from './home/RoundV2Flow.js';
 import { AchievementsScreen } from './home/AchievementsScreen.js';
@@ -47,13 +46,12 @@ function HomeFlow({ context, initialView }: HomeFlowProps) {
   const initialViewState: ViewState = (initialView || 'home') as ViewState;
   const [view, setView] = useState<ViewState>(initialViewState);
   const [session, setSession] = useState<HomeSession | null>(null);
-  const [dailyLimitReached, setDailyLimitReached] = useState<boolean | null>(null);
 
-  useAsync(
-    async () => {
-      if (session) {
-        return session;
-      }
+useAsync(
+  async () => {
+    if (session) {
+      return session;
+    }
 
       try {
         const service = new Service(
@@ -80,48 +78,11 @@ function HomeFlow({ context, initialView }: HomeFlowProps) {
     }
   );
 
-  useAsync(
-    async () => {
-      if (!session) {
-        return null;
-      }
-      const service = new Service(
-        context.redis,
-        context.reddit,
-        { getSetting: context.settings?.get?.bind(context.settings) }
-      );
-      return await service.isDailyAnswerLimitReached(session.username);
-    },
-    {
-      depends: [session?.username ?? 'pending'],
-      finally: (result, error) => {
-        if (!session) {
-          return;
-        }
-        if (error) {
-          console.error('[HomeFlow] daily limit check failed', error);
-          setDailyLimitReached(false);
-          return;
-        }
-        setDailyLimitReached(typeof result === 'boolean' ? result : false);
-      },
-    }
-  );
-
   if (!session) {
     return <SplashScreen />;
   }
 
-  if (dailyLimitReached === null) {
-    return <SplashScreen />;
-  }
-
   const currentUser = session.currentUser;
-  const viewportHeight = context?.viewportHeight ?? 1024;
-
-  if (dailyLimitReached && (view === 'home' || view === 'play')) {
-    return <DailyLimitScreen viewportHeight={viewportHeight} />;
-  }
 
   const views: Record<ViewState, JSX.Element> = {
     home: (
@@ -137,7 +98,6 @@ function HomeFlow({ context, initialView }: HomeFlowProps) {
         context={context}
         currentUser={currentUser}
         onExit={() => setView('home')}
-        onDailyLimitReached={() => setDailyLimitReached(true)}
       />
     ),
     leaderboard: <PinnedPost context={context} currentUser={currentUser} initialTab="leaderboard" />,
