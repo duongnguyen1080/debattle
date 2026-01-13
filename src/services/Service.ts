@@ -103,6 +103,28 @@ export class Service {
     return JSON.parse(raw);
   }
 
+  private formatUserFlairText(level: number, flair: string): string {
+    return `Level ${level} - ${flair}`.replace(/\s+/g, ' ').trim();
+  }
+
+  private async syncUserFlair(username: string, user: User): Promise<void> {
+    const sanitizedUsername = (username || '').replace(/^u\//i, '').trim();
+    if (!sanitizedUsername) {
+      return;
+    }
+
+    try {
+      const subredditName = await this.resolveSubredditName();
+      await this.reddit.setUserFlair({
+        subredditName,
+        username: sanitizedUsername,
+        text: this.formatUserFlairText(user.level, user.flair),
+      });
+    } catch (err) {
+      console.warn('[Service.syncUserFlair] failed', { username: sanitizedUsername, level: user.level }, err);
+    }
+  }
+
 
   private async callOpenAI(
     messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
@@ -251,11 +273,13 @@ export class Service {
 
   async updateUserXp(username: string, xpGained: number): Promise<User> {
     let user = await this.getUser(username);
+    const isNewUser = !user;
     if (!user) {
       user = await this.createUser(username);
     }
     
     const oldLevel = user.level;
+    const oldFlair = user.flair;
     user.xp += xpGained;
     user.level = calculateLevel(user.xp);
     user.flair = getFlairForLevel(user.level);
@@ -265,6 +289,10 @@ export class Service {
     // Check if user leveled up
     if (user.level > oldLevel) {
       await this.handleUserLevelUp(username, user);
+    }
+
+    if (isNewUser || user.flair !== oldFlair) {
+      await this.syncUserFlair(username, user);
     }
     
     return user;
@@ -421,7 +449,7 @@ export class Service {
       return await this.reddit.getCurrentSubredditName();
     } catch (err) {
       console.error('[Service.resolveSubredditName] fallback to getCurrentSubredditName failed', err);
-      throw new Error('Unable to determine subreddit name for sharing');
+      throw new Error('Unable to determine subreddit name');
     }
   }
 
