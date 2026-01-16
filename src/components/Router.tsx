@@ -1,6 +1,5 @@
 import { Devvit, useAsync, useState } from '@devvit/public-api';
 
-import { SplashScreen } from './SplashScreen.js';
 import { HomeScreen } from './home/HomeScreen.js';
 import { RoundV2Flow } from './home/RoundV2Flow.js';
 import { AchievementsScreen } from './home/AchievementsScreen.js';
@@ -77,11 +76,7 @@ useAsync(
     }
   );
 
-  if (!session) {
-    return <SplashScreen />;
-  }
-
-  const currentUser = session.currentUser;
+  const currentUser = session?.currentUser ?? null;
 
   const views: Record<ViewState, JSX.Element> = {
     home: (
@@ -106,6 +101,10 @@ useAsync(
       />
     ),
   };
+
+  if (!session) {
+    return views.home;
+  }
 
   return views[view] ?? (
     <vstack height="100%" width="100%" alignment="middle center">
