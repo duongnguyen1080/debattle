@@ -1,4 +1,4 @@
-import { User, LevelTier, LEVEL_TIERS, Theme, THEMES } from '../types/index.js';
+import { LEVEL_TIERS } from '../types/index.js';
 
 // =============================
 // Leveling & Flair
@@ -21,14 +21,6 @@ export function getNextLevelXp(currentXp: number): number {
   const currentLevel = calculateLevel(currentXp);
   const nextTier = LEVEL_TIERS.find(t => t.level === currentLevel + 1);
   return nextTier ? nextTier.minXp : currentXp;
-}
-
-// =============================
-// Themes
-// =============================
-export function getRandomThemes(count: number = 3): Theme[] {
-  const shuffled = [...THEMES].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
 }
 
 // =============================
@@ -81,12 +73,6 @@ export function calculateGuessScore(upvotes: number, _isFirstSolver: boolean): n
   // Points accrue from community upvotes only: +5 per 10 upvotes.
   const fromUpvotes = Math.floor((upvotes || 0) / 10) * 5;
   return fromUpvotes;
-}
-
-// Post upvotes bonus for the answer owner (+5 per 10 upvotes)
-export function calculatePostBonusFromUpvotes(upvotes: number): number {
-  if (!upvotes || upvotes <= 0) return 0;
-  return Math.floor(upvotes / 10) * 5;
 }
 
 // =============================

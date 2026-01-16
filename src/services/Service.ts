@@ -1,7 +1,6 @@
 import { RedisClient, RedditAPIClient, AppUpgrade, TriggerContext } from '@devvit/public-api';
-import { User, Guess, Theme, LeaderboardEntry, RiddleV2, PlayerResponse, AreteEvaluation } from '../types/index.js';
+import { User, Guess, RiddleV2, PlayerResponse, AreteEvaluation } from '../types/index.js';
 import { calculateLevel, getFlairForLevel, calculateGuessScore } from '../utils/gameUtils.js';
-import { calculatePostBonusFromUpvotes } from '../utils/gameUtils.js';
 import { getRandomQuestion, QuestionBankEntry } from '../utils/questionBank.js';
 
 const ARETE_SYSTEM_PROMPT = `You are the Guardian of the Arete Gate, keeper of wisdom and judge of truth.
@@ -712,49 +711,6 @@ export class Service {
     await this.redis.set(key, JSON.stringify(list));
   }
 
-  // Leaderboard Management
-  async getLeaderboard(limit: number = 50): Promise<LeaderboardEntry[]> {
-    console.log('[Service.getLeaderboard] start', { limit });
-    const users = await this.getAllUsers();
-    console.log('[Service.getLeaderboard] users fetched', { count: users.length });
-    
-    const result = users
-      .sort((a, b) => b.xp - a.xp)
-      .slice(0, limit)
-      .map((user, index) => ({
-        username: user.username,
-        xp: user.xp,
-        level: user.level,
-        flair: user.flair,
-        rank: index + 1
-      }));
-    console.log('[Service.getLeaderboard] returning', { resultCount: result.length });
-    return result;
-  }
-
-  async getAllUsers(): Promise<User[]> {
-    // hGetAll may return undefined/null on empty; normalize to empty object
-    const usersRecord = (await this.redis.hGetAll('users')) ?? ({} as Record<string, string>);
-    const keys = Object.keys(usersRecord);
-    console.log('[Service.getAllUsers] raw keys', { count: keys.length });
-    const users: User[] = [];
-    for (const raw of Object.values(usersRecord)) {
-      try {
-        const u = JSON.parse(raw);
-        if (u && typeof u.username === 'string') users.push(u);
-      } catch {
-        // skip invalid entries
-      }
-    }
-    const normalized = users.map((u) => ({
-      ...u,
-      level: calculateLevel(u.xp),
-      flair: getFlairForLevel(calculateLevel(u.xp)),
-    }));
-    console.log('[Service.getAllUsers] normalized users', { count: normalized.length });
-    return normalized;
-  }
-
   // Utility Methods
   private async updateUserStats(username: string, stat: keyof User, increment: number): Promise<void> {
     const user = await this.getUser(username);
@@ -823,23 +779,6 @@ export class Service {
     
     // Clean up expired riddles
     await this.cleanupExpiredRiddles();
-  }
-
-  async syncAnswerPostUpvotes(riddleId: string, responseId: string): Promise<void> {
-    const riddle = await this.getRiddle(riddleId);
-    if (!riddle) return;
-    const resp = riddle.responses.find(r => r.id === responseId);
-    if (!resp || !resp.postId) return;
-
-    try {
-      const post = await this.reddit.getPostById(resp.postId);
-      const bonus = calculatePostBonusFromUpvotes(post.score ?? 0);
-      if (bonus > 0) {
-        await this.updateUserXp(resp.username, bonus);
-      }
-    } catch (e) {
-      console.error('Failed to sync upvotes:', e);
-    }
   }
 
   private async cleanupExpiredRiddles(): Promise<void> {

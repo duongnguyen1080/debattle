@@ -1,6 +1,5 @@
 import { Devvit, useAsync, useState } from '@devvit/public-api';
 
-import { PinnedPost } from './PinnedPost.js';
 import { SplashScreen } from './SplashScreen.js';
 import { HomeScreen } from './home/HomeScreen.js';
 import { RoundV2Flow } from './home/RoundV2Flow.js';
@@ -13,7 +12,7 @@ import { hydrateCurrentUser } from '../utils/user.js';
 interface RouterProps {
   context: any;
   postType?: 'riddle' | 'pinned';
-  initialView?: 'home' | 'play' | 'leaderboard' | 'info' | 'progress';
+  initialView?: 'home' | 'play' | 'progress';
 }
 
 export function Router({ context, postType, initialView }: RouterProps) {
@@ -30,7 +29,7 @@ export function Router({ context, postType, initialView }: RouterProps) {
   return <HomeFlow context={context} initialView={resolvedInitialView} />;
 }
 
-type ViewState = 'home' | 'play' | 'leaderboard' | 'info' | 'progress';
+type ViewState = 'home' | 'play' | 'progress';
 
 interface HomeFlowProps {
   context: any;
@@ -89,7 +88,6 @@ useAsync(
       <HomeScreen
         currentUser={currentUser}
         onStart={() => setView('play')}
-        onLeaderboard={() => setView('leaderboard')}
         onProgress={() => setView('progress')}
       />
     ),
@@ -100,8 +98,6 @@ useAsync(
         onExit={() => setView('home')}
       />
     ),
-    leaderboard: <PinnedPost context={context} currentUser={currentUser} initialTab="leaderboard" />,
-    info: <PinnedPost context={context} currentUser={currentUser} initialTab="info" />,
     progress: (
       <AchievementsScreen
         currentUser={currentUser}

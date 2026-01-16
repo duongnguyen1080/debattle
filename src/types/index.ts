@@ -42,28 +42,6 @@ export interface Guess {
   [key: string]: any;
 }
 
-// =============================
-// Themes
-// =============================
-export interface Theme {
-  id: string;
-  name: string;
-  description: string;
-  difficulty: number;
-  [key: string]: any;
-}
-
-// Optional UI game state (kept for compatibility; answer is optional now)
-export interface GameState {
-  currentStep: 'theme' | 'riddle' | 'review' | 'complete';
-  selectedTheme?: Theme;
-  riddleText: string;
-  answer?: string;        // optional: player free-form response
-  timeRemaining: number;
-  isComplete: boolean;
-  [key: string]: any;
-}
-
 export interface LeaderboardEntry {
   username: string;
   xp: number;
@@ -103,14 +81,6 @@ export const LEVEL_TIERS: LevelTier[] = [
   { level: 5, minXp: 1000, maxXp: 1999, flair: '🔥 Orator', notes: 'High community influence (upvotes)' },
   { level: 6, minXp: 2000, maxXp: 4999, flair: '🧠 Philosopher', notes: 'Recognized thought-leader' },
   { level: 7, minXp: 5000, maxXp: Infinity, flair: '🏛️ Sage of Arete', notes: 'Rare prestige title' },
-];
-
-export const THEMES: Theme[] = [
-  { id: 'self', name: '🧍 Self', description: 'Riddles about self and identity', difficulty: 2 },
-  { id: 'relationships', name: '🤝 Relationships', description: 'Riddles about human connections', difficulty: 2 },
-  { id: 'work', name: '💼 Work', description: 'Riddles about labor and purpose', difficulty: 2 },
-  { id: 'life', name: '🌅 Life', description: 'Riddles about existence and meaning', difficulty: 3 },
-  { id: 'knowledge', name: '📖 Knowledge', description: 'Riddles about wisdom and learning', difficulty: 3 },
 ];
 
 // =============================

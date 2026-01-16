@@ -6,11 +6,10 @@ import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from '
 interface HomeScreenProps {
   currentUser: User | null;
   onStart: () => void;
-  onLeaderboard: () => void;
   onProgress: () => void;
 }
 
-export function HomeScreen({ currentUser, onStart, onLeaderboard, onProgress }: HomeScreenProps) {
+export function HomeScreen({ currentUser, onStart, onProgress }: HomeScreenProps) {
   console.log('HomeScreen render');
   console.log('[HomeScreen] render', { hasUser: !!currentUser, level: currentUser?.level, flair: currentUser?.flair });
   const ctaButtonWidth = `${CTA_BUTTON_WIDTH_PX}px` as Devvit.Blocks.SizeString;
