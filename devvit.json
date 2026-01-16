@@ -3,7 +3,7 @@
   "permissions": {
     "http": {
       "enable": true,
-      "domains": ["api.openai.com"]
+      "domains": ["api.openai.com", "dlukhaogmdtzopmbehvt.supabase.co"]
     }
   },
   "blocks": {

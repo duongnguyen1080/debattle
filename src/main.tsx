@@ -27,6 +27,28 @@ Devvit.addSettings([
   { type: 'string', name: 'OPENAI_API_KEY', label: 'OpenAI API Key (Legacy)', isSecret: true, scope: SettingScope.App },
   { type: 'string', name: 'OPENAI_MODEL', label: 'OpenAI Model (Legacy)', defaultValue: 'gpt-4o-mini', scope: SettingScope.App },
   { type: 'string', name: 'openaiModel', label: 'OpenAI Model', defaultValue: 'gpt-4o-mini', scope: SettingScope.App },
+  {
+    type: 'string',
+    name: 'supabaseUrl',
+    label: 'Supabase URL',
+    defaultValue: 'https://dlukhaogmdtzopmbehvt.supabase.co',
+    scope: SettingScope.App,
+  },
+  {
+    type: 'string',
+    name: 'supabaseServiceRoleKey',
+    label: 'Supabase Service Role Key',
+    isSecret: true,
+    scope: SettingScope.App,
+  },
+  { type: 'string', name: 'SUPABASE_URL', label: 'Supabase URL (Legacy)', scope: SettingScope.App },
+  {
+    type: 'string',
+    name: 'SUPABASE_SERVICE_ROLE_KEY',
+    label: 'Supabase Service Role Key (Legacy)',
+    isSecret: true,
+    scope: SettingScope.App,
+  },
 ]);
 
 // Add custom post types

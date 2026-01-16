@@ -241,6 +241,72 @@ export class Service {
   }
   // --- end AI integration ---
 
+  private async getSupabaseConfig(): Promise<{ url: string; serviceKey: string } | null> {
+    const getSetting = this.opts?.getSetting;
+    const url =
+      process.env.SUPABASE_URL ||
+      (getSetting ? await getSetting('supabaseUrl') : undefined) ||
+      (getSetting ? await getSetting('SUPABASE_URL') : undefined) ||
+      '';
+    const serviceKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      (getSetting ? await getSetting('supabaseServiceRoleKey') : undefined) ||
+      (getSetting ? await getSetting('SUPABASE_SERVICE_ROLE_KEY') : undefined) ||
+      '';
+
+    const normalizedUrl = String(url || '').trim().replace(/\/+$/, '');
+    const normalizedKey = String(serviceKey || '').trim();
+    if (!normalizedUrl || !normalizedKey) return null;
+    return { url: normalizedUrl, serviceKey: normalizedKey };
+  }
+
+  private async logAnswerToSupabase(payload: {
+    user_name: string;
+    riddle_id: string;
+    question_id: string | null;
+    question_text: string;
+    answer_text: string;
+  }): Promise<void> {
+    const config = await this.getSupabaseConfig();
+    if (!config) {
+      console.warn('[Service.logAnswerToSupabase] missing supabase config');
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    try {
+      const res = await fetch(`${config.url}/rest/v1/answer_events`, {
+        method: 'POST',
+        headers: {
+          apikey: config.serviceKey,
+          Authorization: `Bearer ${config.serviceKey}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        let body = '';
+        try {
+          body = await res.text();
+        } catch {
+          // ignore
+        }
+        console.warn('[Service.logAnswerToSupabase] insert failed', {
+          status: res.status,
+          statusText: res.statusText,
+          body,
+        });
+      }
+    } catch (err) {
+      console.warn('[Service.logAnswerToSupabase] insert error', err);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   // User Management
   async getUser(username: string): Promise<User | null> {
     const raw = await this.redis.hGet('users', username);
@@ -393,9 +459,11 @@ export class Service {
     const fallbackDecision: 'open' | 'ajar' | 'closed' =
       total >= 12 ? 'open' : total >= 7 ? 'ajar' : 'closed';
 
+    const questionText = riddle.meta?.riddleText ?? 'No riddle question was provided.';
+    const questionId = typeof riddle.meta?.questionId === 'string' ? riddle.meta.questionId : null;
+
     let areteEvaluation: AreteEvaluation | null = null;
     try {
-      const questionText = riddle.meta?.riddleText ?? 'No riddle question was provided.';
       areteEvaluation = await this.evaluateAnswerWithAI(questionText, trimmed);
     } catch (err) {
       console.error('[Service.submitAnswer] evaluateAnswerWithAI failed', err);
@@ -419,6 +487,13 @@ export class Service {
     await this.redis.set(this.riddleKey(riddle.id), JSON.stringify(riddle));
 
     await this.updateUserXp(playerUsername, total);
+    await this.logAnswerToSupabase({
+      user_name: playerUsername,
+      riddle_id: riddle.id,
+      question_id: questionId,
+      question_text: questionText,
+      answer_text: trimmed,
+    });
     return {
       score: response.score,
       feedback: response.feedback,
