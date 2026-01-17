@@ -1,6 +1,6 @@
 import { RedisClient, RedditAPIClient, AppUpgrade, TriggerContext } from '@devvit/public-api';
-import { User, Guess, RiddleV2, PlayerResponse, AreteEvaluation } from '../types/index.js';
-import { calculateLevel, getFlairForLevel, calculateGuessScore } from '../utils/gameUtils.js';
+import { User, RiddleV2, PlayerResponse, AreteEvaluation } from '../types/index.js';
+import { calculateLevel, getFlairForLevel } from '../utils/gameUtils.js';
 import { getRandomQuestion, QuestionBankEntry } from '../utils/questionBank.js';
 
 const ARETE_SYSTEM_PROMPT = `You are the Guardian of the Arete Gate, keeper of wisdom and judge of truth.
@@ -671,46 +671,6 @@ export class Service {
     return { postId: post.id, permalink: post.permalink };
   }
 
-  // Guess Management
-  async submitGuess(riddleId: string, username: string, guess: string): Promise<Guess> {
-    const riddle = await this.getRiddle(riddleId);
-    if (!riddle) throw new Error('Riddle not found');
-    
-    const newGuess: Guess = {
-      id: `guess:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`,
-      username,
-      guess,
-      timestamp: Date.now(),
-      upvotes: 0,
-      isCorrect: false
-    };
-    
-    const key = `${this.riddleKey(riddleId)}:guesses`;
-    const raw = await this.redis.get(key);
-    const list: Guess[] = raw ? JSON.parse(raw) : [];
-    list.push(newGuess);
-    await this.redis.set(key, JSON.stringify(list));
-    return newGuess;
-  }
-
-  async upvoteGuess(riddleId: string, guessId: string): Promise<void> {
-    const key = `${this.riddleKey(riddleId)}:guesses`;
-    const raw = await this.redis.get(key);
-    if (!raw) return;
-    const list: Guess[] = JSON.parse(raw);
-
-    const idx = list.findIndex(g => g.id === guessId);
-    if (idx === -1) return;
-
-    list[idx].upvotes++;
-
-    // Award points to guesser (5 points per 10 upvotes)
-    const pointsGained = calculateGuessScore(list[idx].upvotes, false);
-    await this.updateUserXp(list[idx].username, pointsGained);
-
-    await this.redis.set(key, JSON.stringify(list));
-  }
-
   // Utility Methods
   private async updateUserStats(username: string, stat: keyof User, increment: number): Promise<void> {
     const user = await this.getUser(username);
@@ -758,19 +718,6 @@ export class Service {
       return;
     }
 
-    // Legacy: treat !guess as a reflection; award via upvotes only
-    if (body.toLowerCase().startsWith('!guess ')) {
-      const guess = body.substring(7).trim();
-      if (guess) {
-        try {
-          await this.submitGuess(post.id, comment.author, guess);
-          await context.reddit.submitComment({ id: comment.id, text: `📝 Reflection recorded. Earn points via community upvotes.` });
-        } catch (error) {
-          console.error('Error handling guess:', error);
-        }
-      }
-      return;
-    }
   }
 
   async handleAppUpgrade(event: AppUpgrade, context: TriggerContext): Promise<void> {
