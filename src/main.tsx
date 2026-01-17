@@ -2,7 +2,6 @@ import { Devvit, SettingScope } from '@devvit/public-api';
 import { Router } from './components/Router.js';
 import { Service } from './services/Service.js';
 import { installGame } from './mod-actions/installGame.js';
-import { topWeeklyDebattle } from './mod-actions/topWeeklyDebattle.js';
 
 Devvit.configure({
   redditAPI: true,
@@ -61,7 +60,6 @@ Devvit.addCustomPostType({
 
 // Moderator menu items (separated files)
 Devvit.addMenuItem(installGame);
-Devvit.addMenuItem(topWeeklyDebattle);
 
 // Backend triggers
 Devvit.addTrigger({
