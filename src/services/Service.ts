@@ -552,6 +552,26 @@ export class Service {
     return 'open';
   }
 
+  private buildShareModMessage(params: {
+    totalScore: number;
+    decision: 'open' | 'ajar' | 'closed';
+    feedback: string;
+  }): string {
+    const { totalScore, decision, feedback } = params;
+    const scoreValue = Number.isFinite(totalScore) ? Math.round(totalScore) : 0;
+    const decisionLabel = this.decisionSummary(decision).label;
+    const feedbackText = feedback?.trim() || 'No feedback from Arete.';
+    return [
+      'Debattle is a Ravenclaw-inspired riddle game: instead of logic puzzles, you face philosophical riddles to "open the door." There\'s no right or wrong - Arete, the gatekeeper, rewards thoughtful answers.',
+      '',
+      `- Score: ${scoreValue}`,
+      `- Decision: ${decisionLabel}`,
+      `- Feedback from Arete: ${feedbackText}`,
+      '',
+      "Share your take on the riddle and whether you agree with the player's response. No scores here - just deeper thoughts about life.",
+    ].join('\n');
+  }
+
   async shareResponseToSubreddit(params: {
     riddleId: string;
     responseId: string;
@@ -654,6 +674,20 @@ export class Service {
       } catch (err) {
         console.warn('[Service.shareResponseToSubreddit] post approval failed', err);
       }
+    }
+    const modMessage = this.buildShareModMessage({ totalScore, decision, feedback });
+    try {
+      const comment = await this.reddit.submitComment({
+        id: post.id,
+        text: modMessage,
+        runAs: 'APP',
+      });
+      console.log('[Service.shareResponseToSubreddit] mod comment posted', {
+        postId: post.id,
+        commentId: comment.id,
+      });
+    } catch (err) {
+      console.warn('[Service.shareResponseToSubreddit] mod comment failed', err);
     }
 
     response.postId = post.id;
