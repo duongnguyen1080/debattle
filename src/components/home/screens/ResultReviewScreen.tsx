@@ -1,21 +1,19 @@
 import { Devvit } from '@devvit/public-api';
-import type { RoundResult } from './roundTypes.js';
-import { WrappedFontText, measureWrappedText } from './FontText.js';
-import { WrappedAnswerFontText, measureAnswerWrappedText } from './AnswerFontText.js';
-import { ParchmentPanel } from './ParchmentPanel.js';
-import { NavIconButton } from './NavIconButton.js';
+import type { RoundResult } from '../play/playLayout.js';
+import { WrappedFontText, measureWrappedText } from '../typography/FontText.js';
+import { WrappedAnswerFontText, measureAnswerWrappedText } from '../typography/AnswerFontText.js';
+import { ParchmentPanel } from '../ui/ParchmentPanel.js';
+import { NavIconButton } from '../ui/NavIconButton.js';
 import {
   chooseResponsiveWidth,
-  PARCHMENT,
-  RIDDLE_STYLE,
-  type RiddleLayoutStyleOverrides,
-} from './roundLayout.js';
-import {
   CTA_BOTTOM_INSET_PX,
   CTA_BUTTON_HEIGHT_PX,
   CTA_BUTTON_WIDTH_PX,
   NAV_ICON_SIZE_PX,
-} from './uiConstants.js';
+  PARCHMENT,
+  RIDDLE_STYLE,
+  type RiddleLayoutStyleOverrides,
+} from '../play/playLayout.js';
 
 const ARETE_RIBBON = {
   widthRatio: 0.48,
@@ -125,7 +123,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
 }
 
-interface RoundResultViewProps {
+interface ResultReviewScreenProps {
   result: RoundResult;
   fallbackQuestionText: string;
   viewportHeight: number;
@@ -133,13 +131,13 @@ interface RoundResultViewProps {
   onShare: () => Promise<void>;
 }
 
-export function RoundResultView({
+export function ResultReviewScreen({
   result,
   fallbackQuestionText,
   viewportHeight,
   onExit,
   onShare,
-}: RoundResultViewProps) {
+}: ResultReviewScreenProps) {
   const decisionMeta = DECISION_DETAILS[result.decision];
   const isShareable = decisionMeta.shareable;
   const resultQuestion = result.questionText || fallbackQuestionText;
@@ -270,15 +268,15 @@ export function RoundResultView({
 
   const handlePrimaryButtonPress = async () => {
     if (!isShareable) {
-      console.log('[RoundResultView] try again button pressed');
+      console.log('[ResultReviewScreen] try again button pressed');
       onExit();
       return;
     }
-    console.log('[RoundResultView] debattle button pressed - sharing');
+    console.log('[ResultReviewScreen] debattle button pressed - sharing');
     try {
       await onShare();
     } catch (err) {
-      console.error('[RoundResultView] debattle share failed', err);
+      console.error('[ResultReviewScreen] debattle share failed', err);
     }
   };
 
@@ -424,7 +422,7 @@ export function RoundResultView({
             icon="close"
             size={closeButtonSize}
             onPress={() => {
-              console.log('[RoundResultView] close icon pressed');
+              console.log('[ResultReviewScreen] close icon pressed');
               onExit();
             }}
             description="Close results and return home"

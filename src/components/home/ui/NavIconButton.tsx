@@ -1,5 +1,5 @@
 import { Devvit } from '@devvit/public-api';
-import { NAV_ICON_SIZE_PX } from './uiConstants.js';
+import { NAV_ICON_SIZE_PX } from '../play/playLayout.js';
 
 type NavIconType = 'back' | 'profile' | 'info' | 'close';
 

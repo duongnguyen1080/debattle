@@ -1,5 +1,5 @@
 import { Devvit } from '@devvit/public-api';
-import { PARCHMENT, SLICE_PIXEL_DIMENSIONS } from './roundLayout.js';
+import { PARCHMENT, SLICE_PIXEL_DIMENSIONS } from '../play/playLayout.js';
 
 interface ParchmentPanelProps {
   widthPx: number;

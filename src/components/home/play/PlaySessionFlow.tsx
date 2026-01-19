@@ -1,16 +1,16 @@
 import { Devvit } from '@devvit/public-api';
-import type { User } from '../../types/index.js';
-import { RoundAnswerView } from './RoundAnswerView.js';
-import { RoundResultView } from './RoundResultView.js';
-import { useRoundFlow } from './useRoundFlow.js';
+import type { User } from '../../../types/index.js';
+import { AnswerRiddleScreen } from '../screens/AnswerRiddleScreen.js';
+import { ResultReviewScreen } from '../screens/ResultReviewScreen.js';
+import { usePlaySession } from './usePlaySession.js';
 
-interface RoundV2FlowProps {
+interface PlaySessionFlowProps {
   context: any;
   currentUser: User | null;
   onExit: () => void;
 }
 
-export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) {
+export function PlaySessionFlow({ context, currentUser, onExit }: PlaySessionFlowProps) {
   const {
     step,
     riddleText,
@@ -24,9 +24,9 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     riddleId,
     initialQuestionId,
     shareToSubreddit,
-  } = useRoundFlow({ context, currentUser });
+  } = usePlaySession({ context, currentUser });
 
-  console.log('[RoundV2Flow] render', {
+  console.log('[PlaySessionFlow] render', {
     step,
     hasUser: !!currentUser,
     roundNonce,
@@ -38,9 +38,9 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   });
 
   if (step === 'answer') {
-    console.log('[RoundV2Flow] rendering answer step', { elapsed, startedAt });
+    console.log('[PlaySessionFlow] rendering answer step', { elapsed, startedAt });
     return (
-      <RoundAnswerView
+      <AnswerRiddleScreen
         riddleText={riddleText}
         viewportHeight={viewportHeight}
         isSubmitting={isSubmitting}
@@ -50,7 +50,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
     );
   }
 
-  console.log('[RoundV2Flow] rendering result step', { result });
+  console.log('[PlaySessionFlow] rendering result step', { result });
   if (!result) {
     return (
       <zstack width="100%" height="100%">
@@ -72,7 +72,7 @@ export function RoundV2Flow({ context, currentUser, onExit }: RoundV2FlowProps) 
   }
 
   return (
-    <RoundResultView
+    <ResultReviewScreen
       result={result}
       fallbackQuestionText={riddleText}
       viewportHeight={viewportHeight}

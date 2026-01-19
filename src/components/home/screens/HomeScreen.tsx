@@ -1,7 +1,7 @@
 import { Devvit } from '@devvit/public-api';
-import { User } from '../../types/index.js';
-import { NavIconButton } from './NavIconButton.js';
-import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from './uiConstants.js';
+import { User } from '../../../types/index.js';
+import { NavIconButton } from '../ui/NavIconButton.js';
+import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from '../play/playLayout.js';
 
 interface HomeScreenProps {
   currentUser: User | null;

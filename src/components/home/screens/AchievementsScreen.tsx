@@ -1,9 +1,9 @@
 import { Devvit } from '@devvit/public-api';
-import type { User } from '../../types/index.js';
-import { LEVEL_TIERS } from '../../types/index.js';
-import { WrappedFontText } from './FontText.js';
-import { NavIconButton } from './NavIconButton.js';
-import { CTA_BOTTOM_INSET_PX, NAV_ICON_SIZE_PX } from './uiConstants.js';
+import type { User } from '../../../types/index.js';
+import { LEVEL_TIERS } from '../../../types/index.js';
+import { WrappedFontText } from '../typography/FontText.js';
+import { NavIconButton } from '../ui/NavIconButton.js';
+import { CTA_BOTTOM_INSET_PX, NAV_ICON_SIZE_PX } from '../play/playLayout.js';
 
 interface AchievementsScreenProps {
   currentUser: User | null;

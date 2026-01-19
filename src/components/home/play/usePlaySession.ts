@@ -1,15 +1,15 @@
 import { useInterval, useState, useAsync, useForm } from '@devvit/public-api';
-import { Service } from '../../services/Service.js';
-import type { User } from '../../types/index.js';
-import { getRandomQuestion, QuestionBankEntry } from '../../utils/questionBank.js';
-import { FALLBACK_RIDDLE_TEXT, RoundResult, Step } from './roundTypes.js';
+import { Service } from '../../../services/Service.js';
+import type { User } from '../../../types/index.js';
+import { getRandomQuestion, QuestionBankEntry } from '../../../utils/questionBank.js';
+import { FALLBACK_RIDDLE_TEXT, RoundResult, Step } from './playLayout.js';
 
-interface UseRoundFlowOptions {
+interface UsePlaySessionOptions {
   context: any;
   currentUser: User | null;
 }
 
-interface UseRoundFlowResult {
+interface UsePlaySessionResult {
   step: Step;
   riddleText: string;
   result: RoundResult | null;
@@ -46,13 +46,13 @@ const getMeaningfulAnswerLength = (value: string): number => {
   return value.replace(IGNORED_ANSWER_CHAR_REGEX, '').length;
 };
 
-export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): UseRoundFlowResult {
+export function usePlaySession({ context, currentUser }: UsePlaySessionOptions): UsePlaySessionResult {
   const fireToast = (message: string, logScope: string): void => {
     const ui = context?.ui;
     if (!ui?.showToast) {
       return;
     }
-    const warnPrefix = `[useRoundFlow] ${logScope}`;
+    const warnPrefix = `[usePlaySession] ${logScope}`;
     try {
       const maybePromise = ui.showToast(message) as Promise<void> | void;
       if (maybePromise && typeof (maybePromise as Promise<void>).catch === 'function') {
@@ -68,7 +68,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
   const navigateToPost = async (postId?: string | null, permalink?: string | null): Promise<void> => {
     const ui = context?.ui;
     if (!ui?.navigateTo) {
-      console.log('[useRoundFlow] shareToSubreddit: ui.navigateTo not available');
+      console.log('[usePlaySession] shareToSubreddit: ui.navigateTo not available');
       return;
     }
 
@@ -76,7 +76,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       try {
         const post = await context.reddit.getPostById(postId);
         if (post?.url) {
-          console.log('[useRoundFlow] shareToSubreddit: navigating to post', {
+          console.log('[usePlaySession] shareToSubreddit: navigating to post', {
             postId,
             url: post.url,
           });
@@ -84,20 +84,20 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
           return;
         }
       } catch (err) {
-        console.warn('[useRoundFlow] shareToSubreddit: post lookup failed', err);
+        console.warn('[usePlaySession] shareToSubreddit: post lookup failed', err);
       }
     }
 
     if (!permalink) {
-      console.warn('[useRoundFlow] shareToSubreddit: missing permalink for navigation');
+      console.warn('[usePlaySession] shareToSubreddit: missing permalink for navigation');
       return;
     }
     const url = permalink.startsWith('http') ? permalink : `https://reddit.com${permalink}`;
-    console.log('[useRoundFlow] shareToSubreddit: navigating to permalink', { permalink, url });
+    console.log('[usePlaySession] shareToSubreddit: navigating to permalink', { permalink, url });
     try {
       ui.navigateTo(url);
     } catch (err) {
-      console.warn('[useRoundFlow] shareToSubreddit: navigateTo failed', err);
+      console.warn('[usePlaySession] shareToSubreddit: navigateTo failed', err);
     }
   };
 
@@ -105,7 +105,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     try {
       return getRandomQuestion();
     } catch (err) {
-      console.error('[useRoundFlow] failed to fetch initial question from bank', err);
+      console.error('[usePlaySession] failed to fetch initial question from bank', err);
       return null;
     }
   }, []);
@@ -139,7 +139,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
 
     // Watchdog: if UI is stuck on the placeholder > 5s, force a visible fallback
     if (riddleText?.startsWith('⏳ Generating riddle') && secs >= 5) {
-      console.warn('[useRoundFlow] watchdog replacing stuck riddle text with fallback');
+      console.warn('[usePlaySession] watchdog replacing stuck riddle text with fallback');
       setRiddleText(FALLBACK_RIDDLE_TEXT);
     }
   }, 1000);
@@ -150,7 +150,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         return null;
       }
       const startTime = Date.now();
-      console.log('[useRoundFlow] starting round', {
+      console.log('[usePlaySession] starting round', {
         nonce: roundNonce,
         questionId: initialQuestion?.id ?? null,
       });
@@ -172,7 +172,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         playerUsername: username,
         question: initialQuestion ?? undefined,
       });
-      console.log('[useRoundFlow] createRiddle complete', { id: riddle?.id ?? null, ms: Date.now() - t0 });
+      console.log('[usePlaySession] createRiddle complete', { id: riddle?.id ?? null, ms: Date.now() - t0 });
       return riddle;
     },
     {
@@ -182,7 +182,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
           return;
         }
         if (error) {
-          console.error('[useRoundFlow] createRiddle error', error);
+          console.error('[usePlaySession] createRiddle error', error);
         }
         if (riddle && riddle.meta?.riddleText) {
           setRiddleId(riddle.id);
@@ -200,7 +200,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     const now = Date.now();
     const computedElapsed = startedAt ? Math.max(0, Math.floor((now - startedAt) / 1000)) : elapsed;
     const answer = (submittedAnswer ?? answerText).trim();
-    console.log('[useRoundFlow] handleSubmitAnswer: start', {
+    console.log('[usePlaySession] handleSubmitAnswer: start', {
       riddleId,
       hasAnswer: !!answer,
       elapsed: computedElapsed,
@@ -215,14 +215,14 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         { getSetting: context.settings?.get?.bind(context.settings) }
       );
       const username = currentUser?.username || 'anonymous';
-      console.log('[useRoundFlow] handleSubmitAnswer: submitting');
+      console.log('[usePlaySession] handleSubmitAnswer: submitting');
       const resp = await service.submitAnswer({
         riddleId,
         playerUsername: username,
         answerText: answer,
         elapsed: computedElapsed * 1000,
       });
-      console.log('[useRoundFlow] handleSubmitAnswer: submitted', {
+      console.log('[usePlaySession] handleSubmitAnswer: submitted', {
         total: resp.score.total,
         decision: resp.decision,
       });
@@ -237,7 +237,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       });
       setStep('result');
     } catch (e) {
-      console.error('[useRoundFlow] handleSubmitAnswer: error', e);
+      console.error('[usePlaySession] handleSubmitAnswer: error', e);
     } finally {
       setIsSubmitting(false);
     }
@@ -263,12 +263,12 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
     async ({ answer }) => {
       const trimmed = (answer ?? '').trim();
       if (!trimmed) {
-        console.warn('[useRoundFlow] answerForm: empty answer submitted');
+        console.warn('[usePlaySession] answerForm: empty answer submitted');
         return;
       }
       const meaningfulLength = getMeaningfulAnswerLength(trimmed);
       if (meaningfulLength > MAX_MEANINGFUL_ANSWER_LENGTH) {
-        console.warn('[useRoundFlow] answerForm: answer exceeds length limit', {
+        console.warn('[usePlaySession] answerForm: answer exceeds length limit', {
           trimmedLength: trimmed.length,
           meaningfulLength,
         });
@@ -284,30 +284,30 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       return;
     }
     if (!context?.ui?.showForm) {
-      console.warn('[useRoundFlow] context.ui.showForm is unavailable');
+      console.warn('[usePlaySession] context.ui.showForm is unavailable');
       return;
     }
 
     try {
-      console.log('[useRoundFlow] promptForAnswer: showing form');
+      console.log('[usePlaySession] promptForAnswer: showing form');
       context.ui.showForm(answerFormKey);
     } catch (err) {
-      console.error('[useRoundFlow] promptForAnswer: error displaying form', err);
+      console.error('[usePlaySession] promptForAnswer: error displaying form', err);
     }
   };
 
   const shareToSubreddit = async () => {
     if (!result || !riddleId) {
-      console.warn('[useRoundFlow] shareToSubreddit: missing result or riddleId');
+      console.warn('[usePlaySession] shareToSubreddit: missing result or riddleId');
       return;
     }
-    console.log('[useRoundFlow] shareToSubreddit: start', {
+    console.log('[usePlaySession] shareToSubreddit: start', {
       riddleId,
       responseId: result.responseId,
       hasSharePostId: !!result.sharePostId,
     });
     if (isSharing) {
-      console.log('[useRoundFlow] shareToSubreddit: already in progress');
+      console.log('[usePlaySession] shareToSubreddit: already in progress');
       return;
     }
     const alreadyShared = !!result.sharePostId;
@@ -320,7 +320,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         { getSetting: context.settings?.get?.bind(context.settings) }
       );
       const username = currentUser?.username || 'anonymous';
-      console.log('[useRoundFlow] shareToSubreddit: submitting post', {
+      console.log('[usePlaySession] shareToSubreddit: submitting post', {
         username,
         questionLength: result.questionText?.length ?? 0,
         answerLength: result.answerText?.length ?? 0,
@@ -337,7 +337,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         decision: result.decision,
         feedback: shareFeedback,
       });
-      console.log('[useRoundFlow] shareToSubreddit: submit ok', {
+      console.log('[usePlaySession] shareToSubreddit: submit ok', {
         postId: resp.postId,
         permalink: resp.permalink ?? null,
       });
@@ -351,7 +351,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
           sharePermalink: resp.permalink ?? prev.sharePermalink,
         };
       });
-      console.log('[useRoundFlow] shareToSubreddit: updated local share state', {
+      console.log('[usePlaySession] shareToSubreddit: updated local share state', {
         postId: resp.postId,
         permalink: resp.permalink ?? null,
       });
@@ -362,7 +362,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       const permalink = resp.permalink ?? result.sharePermalink;
       await navigateToPost(resp.postId, permalink);
     } catch (err) {
-      console.error('[useRoundFlow] shareToSubreddit: error', err);
+      console.error('[usePlaySession] shareToSubreddit: error', err);
       const message = err instanceof Error ? err.message : '';
       if (message.includes('Scope.SUBMIT_POST') || message.includes('userActions') || message.includes('runAs')) {
         fireToast(
@@ -374,7 +374,7 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
       }
     } finally {
       setIsSharing(false);
-      console.log('[useRoundFlow] shareToSubreddit: finished');
+      console.log('[usePlaySession] shareToSubreddit: finished');
     }
   };
 

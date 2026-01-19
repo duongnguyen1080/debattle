@@ -1,11 +1,18 @@
 import { Devvit } from '@devvit/public-api';
-import { WrappedFontText } from './FontText.js';
-import { ParchmentPanel } from './ParchmentPanel.js';
-import { NavIconButton } from './NavIconButton.js';
-import { computeParchmentLayout, LAYOUT, PARCHMENT, RIDDLE_STYLE } from './roundLayout.js';
-import { CTA_BOTTOM_INSET_PX, CTA_BUTTON_HEIGHT_PX, CTA_BUTTON_WIDTH_PX } from './uiConstants.js';
+import { WrappedFontText } from '../typography/FontText.js';
+import { ParchmentPanel } from '../ui/ParchmentPanel.js';
+import { NavIconButton } from '../ui/NavIconButton.js';
+import {
+  computeParchmentLayout,
+  CTA_BOTTOM_INSET_PX,
+  CTA_BUTTON_HEIGHT_PX,
+  CTA_BUTTON_WIDTH_PX,
+  LAYOUT,
+  PARCHMENT,
+  RIDDLE_STYLE,
+} from '../play/playLayout.js';
 
-interface RoundAnswerViewProps {
+interface AnswerRiddleScreenProps {
   riddleText: string;
   viewportHeight: number;
   isSubmitting: boolean;
@@ -13,13 +20,13 @@ interface RoundAnswerViewProps {
   onBack: () => void;
 }
 
-export function RoundAnswerView({
+export function AnswerRiddleScreen({
   riddleText,
   viewportHeight,
   isSubmitting,
   onPromptAnswer,
   onBack,
-}: RoundAnswerViewProps) {
+}: AnswerRiddleScreenProps) {
   const { color, fontSize, lineGap, letterSpacing } = RIDDLE_STYLE;
   const maxParchmentHeight = viewportHeight * LAYOUT.maxParchmentFraction;
   const buttonGap = viewportHeight * LAYOUT.buttonGapFraction;
@@ -84,7 +91,7 @@ export function RoundAnswerView({
                 resizeMode="fit"
                 description="Enter answer button"
                 onPress={() => {
-                  console.log('[RoundAnswerView] enter answer button pressed');
+                  console.log('[AnswerRiddleScreen] enter answer button pressed');
                   onPromptAnswer();
                 }}
               />
@@ -113,7 +120,7 @@ export function RoundAnswerView({
         <NavIconButton
           icon="close"
           onPress={() => {
-            console.log('[RoundAnswerView] close icon pressed');
+            console.log('[AnswerRiddleScreen] close icon pressed');
             onBack();
           }}
           description="Close and return home"
