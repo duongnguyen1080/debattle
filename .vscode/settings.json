@@ -1,0 +1,6 @@
+{
+  "git.ignoredRepositories": [
+    "tmp/devvit",
+    "tmp/devvit-pixelary"
+  ]
+}
