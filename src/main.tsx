@@ -54,7 +54,7 @@ Devvit.addCustomPostType({
   name: 'Install Game',
   height: 'tall',
   render: (context) => {
-    return <Router context={context} postType="pinned" initialView="home" />;
+    return <Router context={context} />;
   },
 });
 

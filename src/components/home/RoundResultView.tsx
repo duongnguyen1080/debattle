@@ -1,11 +1,11 @@
 import { Devvit } from '@devvit/public-api';
 import type { RoundResult } from './roundTypes.js';
-import { WrappedFontText } from './FontText.js';
-import { WrappedAnswerFontText } from './AnswerFontText.js';
+import { WrappedFontText, measureWrappedText } from './FontText.js';
+import { WrappedAnswerFontText, measureAnswerWrappedText } from './AnswerFontText.js';
 import { ParchmentPanel } from './ParchmentPanel.js';
 import { NavIconButton } from './NavIconButton.js';
 import {
-  computeParchmentLayout,
+  chooseResponsiveWidth,
   PARCHMENT,
   RIDDLE_STYLE,
   type RiddleLayoutStyleOverrides,
@@ -118,6 +118,8 @@ const SHOW_ANSWER_LAYOUT = {
 const SHOW_ANSWER_CTA_SCALE = 0.8;
 const SHOW_ANSWER_CLOSE_SCALE = 0.8;
 const SHOW_ANSWER_RIBBON_OVERLAP_PX = 0;
+const RESULT_CONTENT_GAP_PX = 12;
+const CTA_OVERLAY_TOP_PADDING_PX = 8;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
@@ -144,15 +146,50 @@ export function RoundResultView({
   const resultAnswer = result.answerText || 'No answer submitted.';
 
   const questionStyle = { ...RIDDLE_STYLE, ...SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES };
+  const answerStyle = SHOW_ANSWER_ANSWER_TEXT_STYLE;
   const answerQuote = `“${resultAnswer}”`;
   const layoutMeasureText = `${resultQuestion}\n${resultAnswer}`;
+  const displayParchmentWidth = chooseResponsiveWidth(layoutMeasureText, questionStyle);
+  const displayContentWidth = Math.max(1, displayParchmentWidth - PARCHMENT.padX * 2);
+  const questionMetrics = measureWrappedText({
+    text: resultQuestion,
+    maxWidth: displayContentWidth,
+    fontSize: questionStyle.fontSize,
+    letterSpacing: questionStyle.letterSpacing,
+    lineGap: questionStyle.lineGap,
+  });
+  const answerMetrics = measureAnswerWrappedText({
+    text: answerQuote,
+    maxWidth: displayContentWidth,
+    fontSize: answerStyle.fontSize,
+    letterSpacing: answerStyle.letterSpacing,
+    lineGap: answerStyle.lineGap,
+  });
+  const combinedContentHeight =
+    questionMetrics.totalHeight + answerMetrics.totalHeight + RESULT_CONTENT_GAP_PX;
+  const neededInner = combinedContentHeight + PARCHMENT.padY * 2;
+  const minInner = Math.max(PARCHMENT.minHeight, PARCHMENT.capTop + PARCHMENT.capBottom);
+  const maxInner = Math.max(minInner, PARCHMENT.maxHeight);
+  const clampedInner = clamp(neededInner, minInner, maxInner);
+  const middleBand = Math.max(0, clampedInner - PARCHMENT.capTop - PARCHMENT.capBottom);
+  const tiles = middleBand > 0 ? Math.ceil(middleBand / PARCHMENT.midTile) : 0;
+  const flyerHeight = PARCHMENT.capTop + tiles * PARCHMENT.midTile + PARCHMENT.capBottom;
+  const extraPadY = Math.max(0, (flyerHeight - neededInner) / 2);
+  const needsScroll = neededInner > flyerHeight;
+  const layout = {
+    width: displayParchmentWidth,
+    contentWidth: displayContentWidth,
+    innerHeight: flyerHeight,
+    flyerHeight,
+    tiles,
+    extraPadY,
+    needsScroll,
+  };
   const aretePoints =
     typeof result.areteEvaluation?.totalPoints === 'number'
       ? result.areteEvaluation.totalPoints
       : null;
-  const layout = computeParchmentLayout(layoutMeasureText, SHOW_ANSWER_RIDDLE_STYLE_OVERRIDES);
-  const displayParchmentWidth = layout.width;
-  const displayContentWidth = layout.contentWidth;
+  const showPoints = aretePoints !== null;
   const padTop = PARCHMENT.padY + layout.extraPadY;
   const padBottom = PARCHMENT.padY + layout.extraPadY;
   const horizontalPadding = Math.round(
@@ -171,12 +208,10 @@ export function RoundResultView({
     ),
   );
   const topSafeSpacer = `${topSafeSpacerPx}px` as Devvit.Blocks.SizeString;
-  const availableHeightPx = Math.max(1, viewportHeight - topSafeSpacerPx - CTA_BOTTOM_INSET_PX);
-  const maxParchmentHeight =
-    availableHeightPx * SHOW_ANSWER_LAYOUT.maxAvailableParchmentFraction;
-  const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
-  const ctaBottomInset = `${CTA_BOTTOM_INSET_PX}px` as Devvit.Blocks.SizeString;
-  const parchmentToPointsGapPx = 5;
+  const ctaButtonWidthPx = Math.round(CTA_BUTTON_WIDTH_PX * SHOW_ANSWER_CTA_SCALE);
+  const ctaButtonHeightPx = Math.round(CTA_BUTTON_HEIGHT_PX * SHOW_ANSWER_CTA_SCALE);
+  const ctaButtonWidth = `${ctaButtonWidthPx}px` as Devvit.Blocks.SizeString;
+  const ctaButtonHeight = `${ctaButtonHeightPx}px` as Devvit.Blocks.SizeString;
   const ctaButtonTopGapPx = Math.round(
     clamp(
       viewportHeight * ARETE_RIBBON.gapFraction,
@@ -184,6 +219,16 @@ export function RoundResultView({
       ARETE_RIBBON.maxGapPx,
     ),
   );
+  const pointsRowHeightPx = showPoints
+    ? Math.max(ARETE_POINTS_ICON.displaySizePx, ARETE_POINTS_TEXT_STYLE.fontSize)
+    : 0;
+  const overlayTopPadding = `${CTA_OVERLAY_TOP_PADDING_PX}px` as Devvit.Blocks.SizeString;
+  const ctaOverlayHeightPx =
+    CTA_OVERLAY_TOP_PADDING_PX +
+    (showPoints ? pointsRowHeightPx + ctaButtonTopGapPx : 0) +
+    ctaButtonHeightPx +
+    CTA_BOTTOM_INSET_PX;
+  const ctaOverlayHeight = `${ctaOverlayHeightPx}px` as Devvit.Blocks.SizeString;
   const areteRibbonWidthPx = Math.round(
     Math.max(
       ARETE_RIBBON.minWidthPx,
@@ -193,6 +238,13 @@ export function RoundResultView({
   const areteRibbonWidth = `${areteRibbonWidthPx}px` as Devvit.Blocks.SizeString;
   const areteRibbonHeightPx = Math.round(areteRibbonWidthPx * ARETE_RIBBON.heightRatio);
   const areteRibbonHeight = `${areteRibbonHeightPx}px` as Devvit.Blocks.SizeString;
+  const availableHeightPx = Math.max(1, viewportHeight - topSafeSpacerPx - ctaOverlayHeightPx);
+  const maxParchmentHeightByFraction =
+    availableHeightPx * SHOW_ANSWER_LAYOUT.maxAvailableParchmentFraction;
+  const maxParchmentHeightByRibbon = Math.max(1, availableHeightPx - areteRibbonHeightPx);
+  const maxParchmentHeight = Math.min(maxParchmentHeightByFraction, maxParchmentHeightByRibbon);
+  const clampedHeight = Math.min(layout.flyerHeight, maxParchmentHeight);
+  const ctaBottomInset = `${CTA_BOTTOM_INSET_PX}px` as Devvit.Blocks.SizeString;
   const ribbonParchmentOffsetPx = Math.max(
     0,
     areteRibbonHeightPx - SHOW_ANSWER_RIBBON_OVERLAP_PX,
@@ -208,10 +260,6 @@ export function RoundResultView({
   const pointsIconSize = `${ARETE_POINTS_ICON.displaySizePx}px` as Devvit.Blocks.SizeString;
   const ribbonText = decisionMeta.label;
   const background = decisionMeta.background;
-  const ctaButtonWidthPx = Math.round(CTA_BUTTON_WIDTH_PX * SHOW_ANSWER_CTA_SCALE);
-  const ctaButtonHeightPx = Math.round(CTA_BUTTON_HEIGHT_PX * SHOW_ANSWER_CTA_SCALE);
-  const ctaButtonWidth = `${ctaButtonWidthPx}px` as Devvit.Blocks.SizeString;
-  const ctaButtonHeight = `${ctaButtonHeightPx}px` as Devvit.Blocks.SizeString;
   const closeButtonSize =
     `${Math.round(NAV_ICON_SIZE_PX * SHOW_ANSWER_CLOSE_SCALE)}px` as Devvit.Blocks.SizeString;
   const ctaImageMeta = isShareable ? CTA_IMAGES.debattle : CTA_IMAGES.tryAgain;
@@ -313,58 +361,60 @@ export function RoundResultView({
                 </vstack>
               </zstack>
 
-              {aretePoints !== null && (
-                <>
-                  <spacer width="100%" height={`${parchmentToPointsGapPx}px`} />
-                  <vstack
-                    width="100%"
-                    alignment="middle center"
-                    padding={{ bottom: 'xsmall' }}
-                  >
-                    <hstack alignment="middle center" gap="small">
-                      <WrappedFontText
-                        text={`+ ${aretePoints}`}
-                        maxWidth={pointsTextMaxWidth}
-                        color={ARETE_POINTS_TEXT_STYLE.color}
-                        fontSize={ARETE_POINTS_TEXT_STYLE.fontSize}
-                        letterSpacing={ARETE_POINTS_TEXT_STYLE.letterSpacing}
-                        lineGap={ARETE_POINTS_TEXT_STYLE.lineGap}
-                        align="center"
-                      />
-                      <image
-                        url={ARETE_POINTS_ICON.url}
-                        width={pointsIconSize}
-                        height={pointsIconSize}
-                        imageWidth={ARETE_POINTS_ICON.imageWidth}
-                        imageHeight={ARETE_POINTS_ICON.imageHeight}
-                        resizeMode="fit"
-                        description={ARETE_POINTS_ICON.description}
-                      />
-                    </hstack>
-                  </vstack>
-                </>
-              )}
-
-              <spacer width="100%" height={`${ctaButtonTopGapPx}px`} />
-
-              <zstack width={ctaButtonWidth} height={ctaButtonHeight}>
-                <image
-                  url={ctaImageMeta.url}
-                  width="100%"
-                  height="100%"
-                  imageWidth={ctaImageMeta.imageWidth}
-                  imageHeight={ctaImageMeta.imageHeight}
-                  resizeMode="fit"
-                  description={primaryButtonDescription}
-                  onPress={handlePrimaryButtonPress}
-                />
-              </zstack>
             </vstack>
             <spacer width={horizontalInset} />
           </hstack>
           <spacer grow />
         </vstack>
-        <spacer height={ctaBottomInset} />
+        <spacer height={ctaOverlayHeight} />
+      </vstack>
+
+      <vstack width="100%" height="100%" alignment="bottom center" gap="none">
+        <spacer grow />
+        <vstack
+          width="100%"
+          alignment="middle center"
+          gap="none"
+          padding={{ top: overlayTopPadding, bottom: ctaBottomInset }}
+        >
+          {showPoints && (
+            <vstack width="100%" alignment="middle center">
+              <hstack alignment="middle center" gap="small">
+                <WrappedFontText
+                  text={`+ ${aretePoints}`}
+                  maxWidth={pointsTextMaxWidth}
+                  color={ARETE_POINTS_TEXT_STYLE.color}
+                  fontSize={ARETE_POINTS_TEXT_STYLE.fontSize}
+                  letterSpacing={ARETE_POINTS_TEXT_STYLE.letterSpacing}
+                  lineGap={ARETE_POINTS_TEXT_STYLE.lineGap}
+                  align="center"
+                />
+                <image
+                  url={ARETE_POINTS_ICON.url}
+                  width={pointsIconSize}
+                  height={pointsIconSize}
+                  imageWidth={ARETE_POINTS_ICON.imageWidth}
+                  imageHeight={ARETE_POINTS_ICON.imageHeight}
+                  resizeMode="fit"
+                  description={ARETE_POINTS_ICON.description}
+                />
+              </hstack>
+            </vstack>
+          )}
+          {showPoints && <spacer height={`${ctaButtonTopGapPx}px`} />}
+          <zstack width={ctaButtonWidth} height={ctaButtonHeight}>
+            <image
+              url={ctaImageMeta.url}
+              width="100%"
+              height="100%"
+              imageWidth={ctaImageMeta.imageWidth}
+              imageHeight={ctaImageMeta.imageHeight}
+              resizeMode="fit"
+              description={primaryButtonDescription}
+              onPress={handlePrimaryButtonPress}
+            />
+          </zstack>
+        </vstack>
       </vstack>
 
       {shouldShowCloseButton && (

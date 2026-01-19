@@ -10,29 +10,18 @@ import { hydrateCurrentUser } from '../utils/user.js';
 
 interface RouterProps {
   context: any;
-  postType?: 'riddle' | 'pinned';
-  initialView?: 'home' | 'play' | 'progress';
 }
 
-export function Router({ context, postType, initialView }: RouterProps) {
-  console.log('[Router] render', { postType, initialView });
+export function Router({ context }: RouterProps) {
+  console.log('[Router] render');
 
-  const normalizedPostType = postType ?? 'pinned';
-
-  let resolvedInitialView = initialView;
-  if (normalizedPostType === 'pinned') {
-    console.log('[Router] pinned route: forcing home flow');
-    resolvedInitialView = 'home';
-  }
-
-  return <HomeFlow context={context} initialView={resolvedInitialView} />;
+  return <HomeFlow context={context} />;
 }
 
 type ViewState = 'home' | 'play' | 'progress';
 
 interface HomeFlowProps {
   context: any;
-  initialView?: ViewState;
 }
 
 interface HomeSession {
@@ -40,9 +29,8 @@ interface HomeSession {
   username: string;
 }
 
-function HomeFlow({ context, initialView }: HomeFlowProps) {
-  const initialViewState: ViewState = (initialView || 'home') as ViewState;
-  const [view, setView] = useState<ViewState>(initialViewState);
+function HomeFlow({ context }: HomeFlowProps) {
+  const [view, setView] = useState<ViewState>('home');
   const [session, setSession] = useState<HomeSession | null>(null);
 
 useAsync(

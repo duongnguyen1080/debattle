@@ -25,9 +25,9 @@ interface UseRoundFlowResult {
   shareToSubreddit: () => Promise<void>;
 }
 
-const MAX_MEANINGFUL_ANSWER_LENGTH = 250;
+const MAX_MEANINGFUL_ANSWER_LENGTH = 200;
 const ANSWER_LENGTH_LIMIT_MESSAGE =
-  'Answers are limited to 250 characters (spaces and punctuation excluded).';
+  'Answers are limited to 200 characters (spaces and punctuation excluded).';
 
 const createIgnoredCharRegex = (): RegExp => {
   try {
@@ -252,9 +252,9 @@ export function useRoundFlow({ context, currentUser }: UseRoundFlowOptions): Use
         {
           type: 'paragraph',
           name: 'answer',
-          label: 'Your answer (max 250 characters)',
+          label: 'Your answer (max 200 characters)',
           required: true,
-          placeholder: 'Share your reasoning (250 characters)...',
+          placeholder: 'Share your reasoning (200 characters)...',
           lineHeight: 6,
           defaultValue: answerText,
         },
