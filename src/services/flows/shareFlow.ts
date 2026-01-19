@@ -47,16 +47,17 @@ export function createShareFlow(deps: {
   }): string => {
     const { totalScore, decision, feedback } = params;
     const scoreValue = Number.isFinite(totalScore) ? Math.round(totalScore) : 0;
+    const scoreMax = 90;
     const decisionLabel = decisionSummary(decision).label;
     const feedbackText = feedback?.trim() || 'No feedback from Arete.';
     return [
-      'Debattle is a Ravenclaw-inspired riddle game: instead of logic puzzles, you face philosophical riddles to "open the door." There\'s no right or wrong - Arete, the gatekeeper, rewards thoughtful answers.',
+      'Debattle is a Ravenclaw-inspired riddle game: instead of logic puzzles, you face philosophical riddles to "open the door." There\u2019s no right or wrong answer.',
       '',
-      `- Score: ${scoreValue}`,
-      `- Decision: ${decisionLabel}`,
-      `- Feedback from Arete: ${feedbackText}`,
+      `\uD83D\uDFE2**Score:** ${scoreValue}/${scoreMax}  `,
+      `\uD83D\uDEAA**Decision:** ${decisionLabel}  `,
+      `\uD83D\uDDD2\uFE0F**Feedback from Arete, the gatekeeper:** ${feedbackText}`,
       '',
-      "Share your take on the riddle and whether you agree with the player's response. No scores here - just deeper thoughts about life.",
+      `Share your take on the riddle and whether you agree with the player\u2019s response. No scores here\u2014just deeper thoughts about life \uD83D\uDCDD`,
     ].join('\n');
   };
 
