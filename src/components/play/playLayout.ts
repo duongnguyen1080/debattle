@@ -1,4 +1,4 @@
-import type { AreteEvaluation } from '../../../types/index.js';
+import type { AreteEvaluation } from '../../types/index.js';
 import { measureWrappedText } from '../typography/FontText.js';
 
 export type Step = 'answer' | 'result';

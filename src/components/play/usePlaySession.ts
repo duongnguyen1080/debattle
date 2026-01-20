@@ -1,7 +1,7 @@
 import { useInterval, useState, useAsync, useForm } from '@devvit/public-api';
-import { Service } from '../../../services/Service.js';
-import type { User } from '../../../types/index.js';
-import { getRandomQuestion, QuestionBankEntry } from '../../../utils/questionBank.js';
+import { Service } from '../../services/Service.js';
+import type { User } from '../../types/index.js';
+import { getRandomQuestion, QuestionBankEntry } from '../../utils/questionBank.js';
 import { FALLBACK_RIDDLE_TEXT, RoundResult, Step } from './playLayout.js';
 
 interface UsePlaySessionOptions {

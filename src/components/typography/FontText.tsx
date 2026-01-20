@@ -1,6 +1,6 @@
 import { Devvit } from '@devvit/public-api';
-import { Icons } from '../../../icons.js';
-import { PIRATA_ONE_GLYPH_WIDTHS } from '../../../utils/pirataGlyphMetrics.js';
+import { Icons } from '../../icons.js';
+import { PIRATA_ONE_GLYPH_WIDTHS } from '../../utils/pirataGlyphMetrics.js';
 
 const PIRATA_ONE_ASCENDER_HEIGHT = 1000;
 const DEFAULT_FONT_SIZE = 78;

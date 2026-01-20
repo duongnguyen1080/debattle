@@ -1,8 +1,8 @@
 import { Devvit, useAsync, useState } from '@devvit/public-api';
 
-import { HomeScreen } from './home/screens/HomeScreen.js';
-import { PlaySessionFlow } from './home/play/PlaySessionFlow.js';
-import { AchievementsScreen } from './home/screens/AchievementsScreen.js';
+import { HomeScreen } from './screens/HomeScreen.js';
+import { PlaySessionFlow } from './play/PlaySessionFlow.js';
+import { AchievementsScreen } from './screens/AchievementsScreen.js';
 
 import { Service } from '../services/Service.js';
 import type { User } from '../types/index.js';

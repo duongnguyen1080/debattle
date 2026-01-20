@@ -1,5 +1,5 @@
 import { Devvit } from '@devvit/public-api';
-import type { User } from '../../../types/index.js';
+import type { User } from '../../types/index.js';
 import { AnswerRiddleScreen } from '../screens/AnswerRiddleScreen.js';
 import { ResultReviewScreen } from '../screens/ResultReviewScreen.js';
 import { usePlaySession } from './usePlaySession.js';

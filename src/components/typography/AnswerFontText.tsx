@@ -1,6 +1,6 @@
 import { Devvit } from '@devvit/public-api';
-import { Icons } from '../../../icons.js';
-import { ANSWER_FONT_GLYPH_WIDTHS } from '../../../utils/answerFontGlyphMetrics.js';
+import { Icons } from '../../icons.js';
+import { ANSWER_FONT_GLYPH_WIDTHS } from '../../utils/answerFontGlyphMetrics.js';
 
 const ANSWER_FONT_ASCENDER_HEIGHT = 2000;
 const DEFAULT_FONT_SIZE = 28;
