@@ -1,0 +1,42 @@
+@import './fonts.css';
+
+:root {
+  font-family: 'Merriweather', 'Times New Roman', serif;
+  color: #2b1e12;
+  background: radial-gradient(circle at top, #f7e8c8 0%, #efe2c0 45%, #d6c19a 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.app {
+  text-align: center;
+  max-width: 720px;
+}
+
+.app h1 {
+  font-family: 'Pirata One', 'Times New Roman', serif;
+  font-size: clamp(32px, 6vw, 56px);
+  margin: 0 0 12px;
+  letter-spacing: 1px;
+}
+
+.app p {
+  font-size: clamp(16px, 2.2vw, 20px);
+  line-height: 1.6;
+  margin: 0;
+}

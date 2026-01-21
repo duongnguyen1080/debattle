@@ -6,8 +6,25 @@
       "domains": ["api.openai.com", "dlukhaogmdtzopmbehvt.supabase.co"]
     }
   },
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "entry": "index.html",
+        "height": "tall"
+      },
+      "game": {
+        "entry": "index.html",
+        "height": "tall"
+      }
+    }
+  },
   "blocks": {
     "entry": "src/main.tsx"
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
   },
   "media": {
     "dir": "assets"

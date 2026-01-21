@@ -5,18 +5,28 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "dependencies": {
-    "@devvit/public-api": "0.11.19",
+    "@devvit/public-api": "0.12.8",
+    "@devvit/web": "0.12.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "redis": "^5.8.2"
   },
   "devDependencies": {
-    "@devvit/cli": "^0.12.1",
-    "devvit": "^0.12.1",
+    "@devvit/cli": "0.12.8",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "devvit": "0.12.8",
     "typescript": "5.8.3",
+    "vite": "^5.4.12",
     "vitest": "^3.2.4"
   },
   "scripts": {
     "dev": "devvit playtest",
     "build": "devvit upload",
+    "build:client": "vite build -c vite.client.config.ts",
+    "build:server": "vite build -c vite.server.config.ts",
+    "build:web": "npm run build:client && npm run build:server",
     "deploy": "devvit publish",
     "icons:build": "node scripts/generate-icons.mjs",
     "glyphs:answer": "node scripts/generate-answer-font-metrics.mjs"

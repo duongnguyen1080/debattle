@@ -4,6 +4,9 @@ import type { User } from '../types/index.js';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 async function resolveUsername(context: any): Promise<string | null> {
+  const explicit = typeof context?.username === 'string' ? context.username.trim() : '';
+  if (explicit) return explicit;
+
   const userId: string | undefined = context?.userId;
   if (!userId) return null;
 
