@@ -89,6 +89,14 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (url.pathname.startsWith('/api/')) {
+    console.log('[web] request', {
+      method: req.method,
+      path: url.pathname,
+      hasUser: Boolean(context.userId),
+    });
+  }
+
   if (!url.pathname.startsWith('/api/')) {
     sendError(res, 404, 'Not Found');
     return;
