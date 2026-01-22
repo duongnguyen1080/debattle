@@ -1,5 +1,4 @@
 import { Devvit, SettingScope } from '@devvit/public-api';
-import { Router } from './components/Router.js';
 import { Service } from './services/Service.js';
 import { installGame } from './mod-actions/installGame.js';
 
@@ -49,14 +48,7 @@ Devvit.addSettings([
   },
 ]);
 
-// Add custom post types
-Devvit.addCustomPostType({
-  name: 'Install Game',
-  height: 'tall',
-  render: (context) => {
-    return <Router context={context} />;
-  },
-});
+// Web custom post entrypoints live in devvit.json (post.entrypoints).
 
 // Moderator menu items (separated files)
 Devvit.addMenuItem(installGame);

@@ -64,15 +64,16 @@ Players level up through 7 tiers, each unlocking unique community flairs:
 ## 🛠️ Technical Architecture
 
 Built with:
-- **Frontend**: React-based UI with Devvit blocks
-- **Backend**: Redis for data persistence
+- **Frontend**: React-based Devvit Web UI (`src/client`)
+- **Backend**: Devvit Web server + Redis for data persistence
 - **Integration**: Reddit API for community features
 - **Language**: TypeScript for type safety
 
 ### **Core Components**
-- `Router.tsx` - Main routing and state management
-- `PinnedPost.tsx` - Community hub
-- `Service.ts` - Core game logic and data management
+- `src/client/App.tsx` - Web UI flow and state management
+- `src/server/index.ts` - Web API handlers
+- `src/services/Service.ts` - Core game logic and data management
+- `src/main.tsx` - Devvit entry for triggers and mod actions
 
 ### **Data Schema**
 - `users` - User profiles and progress (Redis hash)

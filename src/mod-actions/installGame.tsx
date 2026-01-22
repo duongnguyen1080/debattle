@@ -11,15 +11,11 @@ export const installGame: MenuItem = {
       const community = await reddit.getCurrentSubreddit();
       console.log('[InstallGame] subreddit', { name: community?.name });
 
-      // Create a Pinned/Hub custom post as the moderator (experience post)
-      const post = await reddit.submitPost({
+      // Create a Web custom post so the web client is the default experience.
+      const post = await reddit.submitCustomPost({
         subredditName: community.name,
         title: 'Debattle — Community Hub',
-        preview: (
-          <vstack height="100%" width="100%" alignment="middle center">
-            <text size="large">🏛️ Debattle Hub — Installing…</text>
-          </vstack>
-        ),
+        entry: 'default',
         textFallback: { text: 'Debattle Community Hub — open in the Reddit app to view.' },
       });
       console.log('[InstallGame] post created', { id: post?.id, url: (post as any)?.url });

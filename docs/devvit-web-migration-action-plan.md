@@ -1,16 +1,14 @@
 # Devvit Web Migration Research and Action Plan
 
 ## Scope and goal
-Migrate the Debattle app from a Blocks-only Devvit app to Devvit Web (client + server) while keeping the existing Blocks entry running during the transition. The goal is feature parity with the current gameplay flow and a path to phase out Blocks once the web client is stable.
+Migrate the Debattle app from a Blocks-only Devvit app to Devvit Web (client + server) while keeping a minimal Blocks entry for triggers and mod actions. The goal is feature parity with the current gameplay flow and a path to phase out Blocks UI once the web client is stable.
 
 ## Current app inventory (repo findings)
 - Config: `devvit.json` has `blocks.entry` and http permissions for OpenAI and Supabase; web entries are now scaffolding and should follow the current `post.dir` + `post.entrypoints` schema.
-- Entry point: `src/main.tsx` configures redditAPI, redis, http, media, and userActions; registers a custom post type, a mod menu item, and triggers.
-- UI (Blocks):
-  - `src/components/Router.tsx` routes between Home, Play, and Achievements views.
-  - `src/components/screens/HomeScreen.tsx`, `AnswerRiddleScreen.tsx`, `ResultReviewScreen.tsx`, `AchievementsScreen.tsx` implement the core UI.
-  - `src/components/play/usePlaySession.ts` owns the gameplay flow, uses `useForm` and `context.ui` APIs.
-  - Custom visual system uses image tiles and SVG glyph rendering (`ParchmentPanel`, `FontText`, `AnswerFontText`) plus large asset sets under `assets/`.
+- Entry point: `src/main.tsx` configures redditAPI, redis, http, media, and userActions; registers mod menu items and triggers (no Blocks UI).
+- UI (Web):
+  - `src/client/App.tsx` owns the launch, home, answer, result, and achievements flow.
+  - Client APIs live under `src/client/lib/api.ts` and call `/api/*` endpoints.
 - Backend services:
   - `src/services/Service.ts` composes flows for riddles, answers, shares, users, and events.
   - `src/services/flows/answerFlow.ts` calls OpenAI and logs to Supabase, plus writes to Redis.
@@ -21,11 +19,11 @@ Migrate the Debattle app from a Blocks-only Devvit app to Devvit Web (client + s
   - Riddle content is local JSON (`src/data/debattle_questions.json`) accessed by `src/utils/questionBank.ts`.
   - Redis keys are used for riddle storage, active riddle lists, and cached settings.
 - Build pipeline:
-  - `package.json` scripts only run `devvit playtest` and `devvit upload/publish`.
-  - No client or server bundling; `dist/` is the Blocks build output.
+  - Vite builds the client/server bundles to `dist/client` and `dist/server`.
+  - Devvit build continues for the Blocks entry (triggers + mod actions).
 
 ## Target Devvit Web architecture
-- Keep Blocks entry for compatibility while web is built.
+- Keep a minimal Blocks entry for triggers and mod actions; no Blocks UI.
 - Add Devvit Web client and server entries in `devvit.json`:
   - `post.dir: "dist/client"` with `post.entrypoints.default.entry: "index.html"` (and height).
   - Optional `post.entrypoints.game` for the gameplay view, entered via `requestExpandedMode`.
@@ -43,7 +41,7 @@ Migrate the Debattle app from a Blocks-only Devvit app to Devvit Web (client + s
 - Gameplay UI (Home, Answer, Result, Achievements): Web client.
 - Data and scoring (riddle creation, submit answer, share): Web server endpoints that call existing Service flows.
 - User data and flair updates: Web server (needs Reddit API access).
-- Comment triggers and mod menu items: keep in Blocks for now; optionally rewire to call Web server via `fetchDevvitWeb`.
+- Comment triggers and mod menu items: keep in Blocks (no web-equivalent in Devvit Web).
 - Assets and fonts: move or copy to client bundler; decide on a font strategy (web fonts or keep SVG glyphs).
 - Share card image: current Blocks flow fell back to markdown-only sharing because PNG share cards were blocked by Blocks limitations; Devvit Web should restore PNG share cards via server-side `submitCustomPost`/`postData` per the share docs (`docs/share-feature-prd.md`, `docs/share-feature-implementation-plan.md`, `docs/share-implementation-log.md`).
 - Launch/entrypoints: use a default launch screen entrypoint and an optional gameplay entrypoint to expand into the full experience.
@@ -106,19 +104,36 @@ Deliverables:
 - Implement client API layer to call `/api/*` endpoints.
 - Implement a mobile-first responsive system with breakpoints and layout rules that preserve the visual DNA while adapting per viewport.
 - Implement launch screen entrypoint and transition into gameplay via `requestExpandedMode` (if using multiple entrypoints).
+- Restore the art-directed UI (backgrounds, texture, icons) using web assets instead of Blocks SVG glyph layout.
 Risks:
 - Recreating custom typography and parchment layout may be non-trivial; if web fonts are chosen, layout metrics must be reworked.
 - Webview sizing differs from Blocks `viewportHeight`; design must be responsive to real window size.
 - Assets in `assets/` must be copied or imported into the client build, or moved under `src/client/assets`.
 
-### Phase 4 - Hybrid and migration bridge
+### Phase 4: UI restoration plan 
 Deliverables:
-- Timebox the hybrid period; keep Blocks as a safety net only.
-- Update Blocks UI to call Web server endpoints via `fetchDevvitWeb` only where needed during the transition.
-- Keep comment-based triggers in Blocks (AppUpgrade and CommentCreate) to avoid breaking existing behavior, unless a Web replacement is proven.
+- Map the Blocks UI screens to backgrounds and foreground assets (source: compiled Blocks UI in `dist/components/` + `dist/constants/decisionMeta.js`):
+  - Splash / initial load (`dist/components/SplashScreen.js`): `background_1.png` + `game_title.png`.
+  - Home (`dist/components/home/HomeScreen.js`): `background_1.png` + `knock button.gif` + nav icons `info_icon.png` and `profile_icon.png`.
+  - Answer (`dist/components/home/RoundAnswerView.js`): `background_2.png` + parchment stack (`riddle_top.png`, `riddle_mid.png`, `riddle_bottom.png`) + `enter_answer_button.png` + `close_button.png`.
+  - Result (`dist/components/home/RoundResultView.js` + `dist/constants/decisionMeta.js`):
+    - decision=open -> `background_3.png` (sunlit courtyard), CTA `debattle_button.png`.
+    - decision=ajar -> `background_4.png` (door slightly open), CTA `debattle_button.png`.
+    - decision=closed -> `background_2.png` (sealed door), CTA `try_again_button.png`.
+    - Foreground: parchment ribbon `parchment_2.png`, parchment stack (`riddle_top.png`, `riddle_mid.png`, `riddle_bottom.png`), `eagle_icon.png`, `Arete_coin.png`, `close_button.png` (shareable decisions only).
+  - Share preview (`dist/components/home/RoundSharePreview.js` + `dist/components/home/SharePreviewScene.js`): same decision background as result + parchment stack + `post_button.png` + `close_button.png`.
+  - Shared post entry (`dist/components/home/SharePostEntry.js`): uses decision background when no server image is present; otherwise renders the provided share image full-screen.
+  - PinnedPost tabs (leaderboard/info/progress) are text-only; no dedicated background assets beyond the optional Splash screen (`dist/components/PinnedPost.js`).
+- Move or copy the background PNGs and UI bitmaps to `src/client/assets/` so Vite can bundle them.
+- Add a background layer system in the web client:
+  - Per-screen background class or inline style that swaps the `background-image` by screen.
+  - `background-size: cover` and `background-position: center` to preserve the cinematic framing.
+- Reintroduce foreground art elements (parchment panels, buttons, icons) as positioned layers on top of the background.
+- Add asset preloading to avoid first-paint flash (preload background + fonts at launch).
+- Validate with side-by-side QA: align typography, spacing, and key art framing against the Blocks version across mobile/desktop breakpoints.
 Risks:
-- Duplicate logic if both Blocks and Web server manipulate the same data; ensure only one path writes for each action.
-- Block UI + web server dependency increases complexity; keep the bridge temporary.
+- Large background assets can cause slow first render; mitigate with compression, responsive sizing, and preloading.
+- Cropping differences across aspect ratios can hide key art; mitigate with tested `background-position` presets per screen.
 
 ### Phase 5 - Cutover and cleanup
 Deliverables:

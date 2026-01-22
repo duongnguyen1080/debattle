@@ -11,29 +11,94 @@ import { LEVEL_TIERS } from '../types/index.js';
 import { ANSWER_LENGTH_LIMIT_MESSAGE, MAX_MEANINGFUL_ANSWER_LENGTH, getMeaningfulAnswerLength } from './lib/answer';
 import { ApiError, api, type SubmitAnswerResult } from './lib/api';
 import { getDevvitAvailable, resolveEntrypointName } from './lib/entrypoint';
+import backgroundOne from './assets/images/background_1.png';
+import backgroundTwo from './assets/images/background_2.png';
+import backgroundThree from './assets/images/background_3.png';
+import backgroundFour from './assets/images/background_4.png';
+import gameTitle from './assets/images/game_title.png';
+import knockButton from './assets/images/knock button.gif';
+import infoIcon from './assets/images/info_icon.png';
+import profileIcon from './assets/images/profile_icon.png';
+import closeIcon from './assets/images/close_button.png';
+import backIcon from './assets/images/back_icon.png';
+import enterAnswerButton from './assets/images/enter_answer_button.png';
+import debattleButton from './assets/images/debattle_button.png';
+import tryAgainButton from './assets/images/try_again_button.png';
+import parchmentRibbon from './assets/images/parchment_2.png';
+import eagleIcon from './assets/images/eagle_icon.png';
+import areteCoin from './assets/images/Arete_coin.png';
+import riddleTop from './assets/images/riddle_top.png';
+import riddleMid from './assets/images/riddle_mid.png';
+import riddleBottom from './assets/images/riddle_bottom.png';
 
 type Screen = 'launch' | 'home' | 'answer' | 'result' | 'achievements';
 type Decision = 'open' | 'ajar' | 'closed';
 
 const DEFAULT_THEME = 'fate';
 
-const DECISION_META: Record<Decision, { label: string; tone: string; className: string }> = {
+const DECISION_META: Record<Decision, { label: string; tone: string; shareable: boolean }> = {
   open: {
     label: 'Door swings open',
     tone: 'A confident answer with sharp clarity.',
-    className: 'decision decision--open',
+    shareable: true,
   },
   ajar: {
     label: 'Door stands ajar',
     tone: 'Close to the heart of the riddle, keep refining.',
-    className: 'decision decision--ajar',
+    shareable: true,
   },
   closed: {
     label: 'Door remains sealed',
     tone: 'Take another pass with focus and intent.',
-    className: 'decision decision--closed',
+    shareable: false,
   },
 };
+
+const DECISION_ART = {
+  open: {
+    background: backgroundThree,
+    cta: {
+      image: debattleButton,
+      label: 'Share your verdict',
+    },
+  },
+  ajar: {
+    background: backgroundFour,
+    cta: {
+      image: debattleButton,
+      label: 'Share your verdict',
+    },
+  },
+  closed: {
+    background: backgroundTwo,
+    cta: {
+      image: tryAgainButton,
+      label: 'Try another riddle',
+    },
+  },
+};
+
+const PRELOAD_IMAGES = [
+  backgroundOne,
+  backgroundTwo,
+  backgroundThree,
+  backgroundFour,
+  gameTitle,
+  knockButton,
+  infoIcon,
+  profileIcon,
+  closeIcon,
+  backIcon,
+  enterAnswerButton,
+  debattleButton,
+  tryAgainButton,
+  parchmentRibbon,
+  eagleIcon,
+  areteCoin,
+  riddleTop,
+  riddleMid,
+  riddleBottom,
+];
 
 const safeGetWebViewMode = (): 'inline' | 'expanded' => {
   try {
@@ -311,7 +376,31 @@ export function App() {
 
   const meaningfulLength = getMeaningfulAnswerLength(answerText);
   const decisionMeta = result ? DECISION_META[result.decision] : null;
+  const decisionArt = result ? DECISION_ART[result.decision] : null;
   const riddleText = riddle?.meta?.riddleText ?? '';
+  const isDecisionShareable = decisionMeta?.shareable ?? false;
+  const shareLabel = shareState?.postId
+    ? 'Open shared post'
+    : isSharing
+      ? 'Sharing...'
+      : 'Share your verdict';
+  const primaryCtaLabel = isDecisionShareable ? shareLabel : 'Try another riddle';
+  const primaryCtaImage = decisionArt?.cta.image ?? debattleButton;
+  const backgroundUrl = (() => {
+    if (screen === 'launch' || screen === 'home') {
+      return backgroundOne;
+    }
+    if (screen === 'answer') {
+      return backgroundTwo;
+    }
+    if (screen === 'result' && decisionArt) {
+      return decisionArt.background;
+    }
+    if (screen === 'achievements') {
+      return backgroundThree;
+    }
+    return backgroundOne;
+  })();
 
   const levelProgress = (() => {
     if (!currentUser) {
@@ -329,62 +418,78 @@ export function App() {
   })();
 
   return (
-    <div className="app">
-      <div className="shell">
+    <div className="app" style={{ backgroundImage: `url(${backgroundUrl})` }}>
+      <div className="app__content">
         <div className="debug-pill">{debugLabel}</div>
-        {screen !== 'launch' && (
-          <header className="topbar">
-            <div className="brand">
-              <span className="brand__title">Debattle</span>
-              <span className="brand__meta">{subredditLabel}</span>
-            </div>
-            <div className="profile">
-              <div className="profile__name">{resolvedUsername}</div>
-              <div className="profile__meta">
-                {currentUser ? `Level ${currentUser.level}` : isLoadingUser ? 'Loading...' : 'Guest'}
-              </div>
-            </div>
-          </header>
-        )}
 
         {screen === 'launch' && (
           <main className="screen screen--launch">
-            <div className="hero reveal reveal--1">
-              <p className="kicker">Ancient doors. Modern riddles.</p>
-              <h1 className="title">Debattle</h1>
-              <p className="lead">
-                Step into the gatekeeper story, answer a riddle in 200 characters, and earn a verdict.
-              </p>
-              <div className="hero-actions">
-                <button
-                  className="btn btn--primary"
-                  type="button"
-                  onClick={handleLaunch}
-                  disabled={isLaunching}
-                >
-                  {isLaunching ? 'Opening...' : 'Start the trial'}
-                </button>
-                <span className="hint">Opens the expanded web view.</span>
+            <div className="launch">
+              <button
+                className="image-button image-button--title"
+                type="button"
+                onClick={handleLaunch}
+                disabled={isLaunching}
+              >
+                <img src={gameTitle} alt="Debattle" />
+              </button>
+              <button
+                className="image-button image-button--knock"
+                type="button"
+                onClick={handleLaunch}
+                disabled={isLaunching}
+              >
+                <img src={knockButton} alt="Knock The Door" />
+              </button>
+              <div className="parchment launch-panel">
+                <p className="kicker">How it works</p>
+                <ol className="steps">
+                  <li>Knock to draw a riddle from the archive.</li>
+                  <li>Answer with clarity and intent.</li>
+                  <li>Share your take with {subredditLabel}.</li>
+                </ol>
               </div>
-            </div>
-            <div className="card reveal reveal--2">
-              <h2 className="card-title">How it works</h2>
-              <ol className="steps">
-                <li>Knock and receive a riddle from the archive.</li>
-                <li>Answer with clarity and intent.</li>
-                <li>Share your take with {subredditLabel}.</li>
-              </ol>
+              <p className="launch__hint">
+                {isLaunching
+                  ? 'Opening...'
+                  : devvitAvailable
+                    ? 'Tap to enter the gate.'
+                    : 'Welcome to Debattle.'}
+              </p>
             </div>
           </main>
         )}
 
         {screen === 'home' && (
           <main className="screen screen--home">
-            <div className="card reveal reveal--1">
-              <p className="kicker">Home</p>
-              <h2 className="card-title">Knock the door</h2>
-              <p className="card-body">
-                Choose a theme or leave it blank. The gatekeeper will draw a riddle from the vault.
+            <div className="corner-actions">
+              <button
+                className="icon-button"
+                type="button"
+                onClick={() => setScreen('launch')}
+                aria-label="How to play"
+              >
+                <img src={infoIcon} alt="" />
+              </button>
+              <button
+                className="icon-button"
+                type="button"
+                onClick={() => setScreen('achievements')}
+                aria-label="Your progress"
+              >
+                <img src={profileIcon} alt="" />
+              </button>
+            </div>
+            <div className="status-badge">
+              <span className="status-badge__name">{resolvedUsername}</span>
+              <span className="status-badge__meta">
+                {currentUser ? `Level ${currentUser.level}` : isLoadingUser ? 'Loading...' : 'Guest'}
+              </span>
+            </div>
+            <div className="parchment home-panel">
+              <p className="kicker">Choose a theme</p>
+              <p className="home-blurb">
+                Leave it blank if you want fate to choose the riddle.
               </p>
               <label className="label" htmlFor="theme-input">
                 Theme
@@ -397,101 +502,117 @@ export function App() {
                 value={themeInput}
                 onChange={(event) => setThemeInput(event.target.value)}
               />
-              <div className="actions">
+              <div className="home-actions">
                 <button
-                  className="btn btn--primary"
+                  className="image-button image-button--knock"
                   type="button"
                   onClick={handleStartRound}
                   disabled={isLoadingRiddle}
                 >
-                  {isLoadingRiddle ? 'Summoning...' : 'Knock the door'}
+                  <img
+                    src={knockButton}
+                    alt={isLoadingRiddle ? 'Summoning a riddle' : 'Knock the door'}
+                  />
                 </button>
-                <button
-                  className="btn btn--ghost"
-                  type="button"
-                  onClick={() => setScreen('achievements')}
-                >
+                <button className="text-link" type="button" onClick={() => setScreen('achievements')}>
                   View achievements
                 </button>
               </div>
-            </div>
-            <div className="card reveal reveal--2">
-              <h3 className="card-title">Your standing</h3>
-              {isLoadingUser ? (
-                <p className="card-body">Loading your record...</p>
-              ) : currentUser ? (
-                <div className="stat-grid">
-                  <div className="stat">
-                    <span className="stat__label">Level</span>
-                    <span className="stat__value">{currentUser.level}</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat__label">XP</span>
-                    <span className="stat__value">{currentUser.xp}</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat__label">Flair</span>
-                    <span className="stat__value">{currentUser.flair}</span>
-                  </div>
-                </div>
-              ) : (
-                <p className="card-body">Play a round to unlock your profile.</p>
-              )}
             </div>
           </main>
         )}
 
         {screen === 'answer' && (
           <main className="screen screen--answer">
-            <div className="riddle-card reveal reveal--1">
-              <div className="riddle-meta">
-                <span className="tag">Riddle</span>
-                <span className="timer">Time {formatDuration(elapsedMs)}</span>
-              </div>
-              <p className="riddle-text">{riddleText || 'Loading riddle...'}</p>
+            <div className="corner-actions">
+              <button
+                className="icon-button"
+                type="button"
+                onClick={handleBackHome}
+                aria-label="Close and return home"
+              >
+                <img src={closeIcon} alt="" />
+              </button>
             </div>
-            <div className="card reveal reveal--2">
-              <label className="label" htmlFor="answer-input">
-                Your answer
-              </label>
-              <textarea
-                id="answer-input"
-                className="textarea"
-                rows={6}
-                placeholder="Answer with clarity and intent."
-                value={answerText}
-                onChange={(event) => setAnswerText(event.target.value)}
-              />
-              <div className="answer-meta">
-                <span className={`meter ${meaningfulLength > MAX_MEANINGFUL_ANSWER_LENGTH ? 'meter--over' : ''}`}>
-                  {meaningfulLength}/{MAX_MEANINGFUL_ANSWER_LENGTH} meaningful characters
-                </span>
-                <div className="actions">
+            <div className="answer-stack">
+              <div className="parchment riddle-panel">
+                <div className="riddle-meta">
+                  <span className="tag">Riddle</span>
+                  <span className="timer">Time {formatDuration(elapsedMs)}</span>
+                </div>
+                <p className="riddle-text">{riddleText || 'Loading riddle...'}</p>
+              </div>
+              <div className="parchment answer-panel">
+                <label className="label" htmlFor="answer-input">
+                  Your answer
+                </label>
+                <textarea
+                  id="answer-input"
+                  className="textarea"
+                  rows={6}
+                  placeholder="Answer with clarity and intent."
+                  value={answerText}
+                  onChange={(event) => setAnswerText(event.target.value)}
+                />
+                <div className="answer-actions">
                   <button
-                    className="btn btn--primary"
+                    className="image-button image-button--enter"
                     type="button"
                     onClick={handleSubmitAnswer}
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit answer'}
+                    <img
+                      src={enterAnswerButton}
+                      alt={isSubmitting ? 'Submitting your answer' : 'Enter answer'}
+                    />
                   </button>
-                  <button className="btn btn--ghost" type="button" onClick={handleBackHome}>
+                  <button className="text-link" type="button" onClick={handleBackHome}>
                     Back
                   </button>
                 </div>
+                <span
+                  className={`meter ${
+                    meaningfulLength > MAX_MEANINGFUL_ANSWER_LENGTH ? 'meter--over' : ''
+                  }`}
+                >
+                  {meaningfulLength}/{MAX_MEANINGFUL_ANSWER_LENGTH} meaningful characters
+                </span>
               </div>
             </div>
           </main>
         )}
 
-        {screen === 'result' && result && decisionMeta && (
+        {screen === 'result' && result && decisionMeta && decisionArt && (
           <main className="screen screen--result">
-            <div className="card reveal reveal--1">
-              <div className={decisionMeta.className}>
-                <span className="decision__label">{decisionMeta.label}</span>
-                <span className="decision__tone">{decisionMeta.tone}</span>
+            {isDecisionShareable && (
+              <div className="corner-actions">
+                <button
+                  className="icon-button"
+                  type="button"
+                  onClick={handlePlayAgain}
+                  aria-label="Close results"
+                >
+                  <img src={closeIcon} alt="" />
+                </button>
               </div>
-              <p className="feedback">{result.feedback}</p>
+            )}
+            <div className="result-stack">
+              <div className="ribbon" style={{ backgroundImage: `url(${parchmentRibbon})` }}>
+                <span>{decisionMeta.label}</span>
+              </div>
+              <p className="result-tone">{decisionMeta.tone}</p>
+              <div className="parchment result-parchment">
+                <div className="feedback-block">
+                  <img className="feedback-icon" src={eagleIcon} alt="Gatekeeper crest" />
+                  <p className="feedback-text">"{result.feedback}"</p>
+                </div>
+              </div>
+              {result.areteEvaluation && (
+                <div className="arete-reward">
+                  <span className="arete-reward__value">+ {result.areteEvaluation.totalPoints}</span>
+                  <img className="arete-reward__icon" src={areteCoin} alt="Arete coin" />
+                </div>
+              )}
               <div className="score-grid">
                 <div className="score-card">
                   <span className="score-card__label">Wit</span>
@@ -510,30 +631,35 @@ export function App() {
                   <span className="score-card__value">{result.score.total}</span>
                 </div>
               </div>
-              {result.areteEvaluation && (
-                <div className="arete">
-                  <span className="arete__label">Arete score</span>
-                  <span className="arete__value">{result.areteEvaluation.totalPoints}/90</span>
-                </div>
-              )}
-            </div>
-            <div className="card reveal reveal--2">
-              <h3 className="card-title">Share your verdict</h3>
-              <p className="card-body">
-                Post the answer to {subredditLabel}. Sharing uses your account and can be revoked at any time.
-              </p>
-              <div className="actions">
+              <div className="result-actions">
                 <button
-                  className="btn btn--primary"
+                  className="image-button image-button--cta"
                   type="button"
-                  onClick={handleShare}
-                  disabled={isSharing}
+                  onClick={isDecisionShareable ? handleShare : handlePlayAgain}
+                  disabled={isDecisionShareable && isSharing}
+                  aria-label={primaryCtaLabel}
                 >
-                  {shareState?.postId ? 'Open shared post' : isSharing ? 'Sharing...' : 'Share to subreddit'}
+                  <img src={primaryCtaImage} alt="" />
                 </button>
-                <button className="btn btn--ghost" type="button" onClick={handlePlayAgain}>
-                  Play again
-                </button>
+                <span className="result-actions__hint">{primaryCtaLabel}</span>
+                {isDecisionShareable ? (
+                  <button
+                    className="text-link text-link--light"
+                    type="button"
+                    onClick={handlePlayAgain}
+                  >
+                    Play again
+                  </button>
+                ) : (
+                  <button
+                    className="text-link text-link--light"
+                    type="button"
+                    onClick={handleShare}
+                    disabled={isSharing}
+                  >
+                    Share anyway
+                  </button>
+                )}
               </div>
             </div>
           </main>
@@ -541,10 +667,21 @@ export function App() {
 
         {screen === 'achievements' && (
           <main className="screen screen--achievements">
-            <div className="card reveal reveal--1">
-              <h2 className="card-title">Achievements</h2>
+            <div className="corner-actions">
+              <button
+                className="icon-button"
+                type="button"
+                onClick={handleBackHome}
+                aria-label="Back to home"
+              >
+                <img src={backIcon} alt="" />
+              </button>
+            </div>
+            <div className="parchment achievements-panel">
+              <h2 className="panel-title">Achievements</h2>
+              <p className="panel-subtitle">{subredditLabel}</p>
               {isLoadingUser ? (
-                <p className="card-body">Loading your record...</p>
+                <p className="panel-body">Loading your record...</p>
               ) : currentUser ? (
                 <>
                   <div className="stat-grid">
@@ -579,16 +716,22 @@ export function App() {
                   )}
                 </>
               ) : (
-                <p className="card-body">Play a round to unlock your profile.</p>
+                <p className="panel-body">Play a round to unlock your profile.</p>
               )}
               <div className="actions">
-                <button className="btn btn--ghost" type="button" onClick={handleBackHome}>
+                <button className="text-link" type="button" onClick={handleBackHome}>
                   Back to home
                 </button>
               </div>
             </div>
           </main>
         )}
+
+        <div className="preload" aria-hidden="true">
+          {PRELOAD_IMAGES.map((src) => (
+            <img key={src} src={src} alt="" />
+          ))}
+        </div>
       </div>
     </div>
   );
