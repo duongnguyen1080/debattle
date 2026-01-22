@@ -1,3 +1,4 @@
+import { tokenParam } from '@devvit/shared-types/webbit';
 import type { AreteEvaluation, RiddleV2, User } from '../../types/index.js';
 
 export type SubmitAnswerResult = {
@@ -31,7 +32,37 @@ type ApiErrorPayload = {
 
 type RequestOptions = RequestInit & { body?: unknown };
 
+const getWebbitToken = (): string | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  const url = new URL(window.location.href);
+  const fromUrl = url.searchParams.get(tokenParam);
+  if (fromUrl) {
+    return fromUrl;
+  }
+  const devvitGlobal = (globalThis as any).devvit as { token?: unknown } | undefined;
+  const token = devvitGlobal?.token;
+  return typeof token === 'string' ? token : null;
+};
+
+const withRequestToken = (path: string): string => {
+  if (typeof window === 'undefined') {
+    return path;
+  }
+  const token = getWebbitToken();
+  if (!token) {
+    return path;
+  }
+  const url = new URL(path, window.location.origin);
+  if (!url.searchParams.has(tokenParam)) {
+    url.searchParams.set(tokenParam, token);
+  }
+  return url.toString();
+};
+
 const request = async <T>(path: string, options: RequestOptions = {}): Promise<T> => {
+  const url = withRequestToken(path);
   const headers = new Headers(options.headers);
   let body: string | undefined;
   if (options.body !== undefined) {
@@ -39,7 +70,7 @@ const request = async <T>(path: string, options: RequestOptions = {}): Promise<T
     body = JSON.stringify(options.body);
   }
 
-  const res = await fetch(path, { ...options, headers, body });
+  const res = await fetch(url, { ...options, headers, body, credentials: options.credentials ?? 'include' });
   const text = await res.text();
   let data: unknown = null;
 
