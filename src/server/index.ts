@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createServer, getServerPort, context, reddit, redis, settings } from '@devvit/web/server';
 import { Service } from '../services/Service.js';
 import { hydrateCurrentUser } from '../utils/user.js';
+import { getCachedUiAssets } from '../utils/uiAssets.js';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -105,6 +106,16 @@ const server = createServer(async (req, res) => {
   try {
     if (req.method === 'GET' && url.pathname === '/api/health') {
       sendJson(res, 200, { ok: true });
+      return;
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/ui/assets') {
+      const assets = await getCachedUiAssets(redis);
+      if (!assets) {
+        sendError(res, 404, 'UI assets not initialized');
+        return;
+      }
+      sendJson(res, 200, { assets });
       return;
     }
 

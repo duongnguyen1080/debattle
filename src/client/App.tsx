@@ -3,21 +3,20 @@ import {
   context,
   getWebViewMode,
   navigateTo,
-  requestExpandedMode,
   showToast,
 } from '@devvit/web/client';
 import type { RiddleV2, User } from '../types/index.js';
+import type { UiAssetMap, UiAssetPath } from '../types/uiAssets.js';
 import { LEVEL_TIERS } from '../types/index.js';
 import { ANSWER_LENGTH_LIMIT_MESSAGE, MAX_MEANINGFUL_ANSWER_LENGTH, getMeaningfulAnswerLength } from './lib/answer';
 import { ApiError, api, type SubmitAnswerResult } from './lib/api';
+import { consumeEntryAction } from './lib/entryAction';
 import { getDevvitAvailable, resolveEntrypointName } from './lib/entrypoint';
-import backgroundOne from './assets/images/background_1.png';
-import backgroundTwo from './assets/images/background_2.png';
-import backgroundThree from './assets/images/background_3.png';
-import backgroundFour from './assets/images/background_4.png';
-import gameTitle from './assets/images/game_title.png';
-import knockButton from './assets/images/knock button.gif';
-import infoIcon from './assets/images/info_icon.png';
+import backgroundOneFallback from './assets/images/background_1.png';
+import backgroundTwoFallback from './assets/images/background_2.png';
+import backgroundThreeFallback from './assets/images/background_3.png';
+import backgroundFourFallback from './assets/images/background_4.png';
+import knockButton from './assets/images/knock_button.png';
 import profileIcon from './assets/images/profile_icon.png';
 import closeIcon from './assets/images/close_button.png';
 import backIcon from './assets/images/back_icon.png';
@@ -31,7 +30,7 @@ import riddleTop from './assets/images/riddle_top.png';
 import riddleMid from './assets/images/riddle_mid.png';
 import riddleBottom from './assets/images/riddle_bottom.png';
 
-type Screen = 'launch' | 'home' | 'answer' | 'result' | 'achievements';
+type Screen = 'home' | 'answer' | 'result' | 'achievements';
 type Decision = 'open' | 'ajar' | 'closed';
 
 const DEFAULT_THEME = 'fate';
@@ -54,38 +53,8 @@ const DECISION_META: Record<Decision, { label: string; tone: string; shareable: 
   },
 };
 
-const DECISION_ART = {
-  open: {
-    background: backgroundThree,
-    cta: {
-      image: debattleButton,
-      label: 'Share your verdict',
-    },
-  },
-  ajar: {
-    background: backgroundFour,
-    cta: {
-      image: debattleButton,
-      label: 'Share your verdict',
-    },
-  },
-  closed: {
-    background: backgroundTwo,
-    cta: {
-      image: tryAgainButton,
-      label: 'Try another riddle',
-    },
-  },
-};
-
-const PRELOAD_IMAGES = [
-  backgroundOne,
-  backgroundTwo,
-  backgroundThree,
-  backgroundFour,
-  gameTitle,
+const PRELOAD_STATIC_IMAGES = [
   knockButton,
-  infoIcon,
   profileIcon,
   closeIcon,
   backIcon,
@@ -99,6 +68,14 @@ const PRELOAD_IMAGES = [
   riddleMid,
   riddleBottom,
 ];
+
+const resolveUiAsset = (assets: UiAssetMap | null, path: UiAssetPath, fallback: string): string => {
+  const url = assets?.[path];
+  if (typeof url === 'string' && url.trim()) {
+    return url;
+  }
+  return fallback;
+};
 
 const safeGetWebViewMode = (): 'inline' | 'expanded' => {
   try {
@@ -130,21 +107,12 @@ const toPermalinkUrl = (permalink?: string | null): string | null => {
 export function App() {
   const devvitAvailable = useMemo(() => getDevvitAvailable(), []);
   const entrypointName = useMemo(() => resolveEntrypointName(), []);
-  const initialMode = useMemo(() => safeGetWebViewMode(), []);
   const webViewMode = safeGetWebViewMode();
-  const [screen, setScreen] = useState<Screen>(() => {
-    if (!devvitAvailable) {
-      return 'home';
-    }
-    if (entrypointName === 'game' || initialMode === 'expanded') {
-      return 'home';
-    }
-    return 'launch';
-  });
+  const [screen, setScreen] = useState<Screen>('home');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [username, setUsername] = useState('anonymous');
+  const [uiAssets, setUiAssets] = useState<UiAssetMap | null>(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [themeInput, setThemeInput] = useState('');
   const [riddle, setRiddle] = useState<RiddleV2 | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [submittedAnswer, setSubmittedAnswer] = useState('');
@@ -155,7 +123,6 @@ export function App() {
   const [isSharing, setIsSharing] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
-  const [isLaunching, setIsLaunching] = useState(false);
 
   const notify = (message: string) => {
     try {
@@ -215,6 +182,22 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    api
+      .getUiAssets()
+      .then((data) => {
+        if (!active) return;
+        setUiAssets(data.assets);
+      })
+      .catch(() => {
+        // Fall back to bundled assets.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (screen !== 'answer' || !startedAt) {
       return;
     }
@@ -227,32 +210,26 @@ export function App() {
     };
   }, [screen, startedAt]);
 
-  const handleLaunch = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isLaunching) {
+  useEffect(() => {
+    const action = consumeEntryAction();
+    if (!action) {
       return;
     }
-    setIsLaunching(true);
-    let expanded = false;
-    if (devvitAvailable) {
-      try {
-        await requestExpandedMode(event.nativeEvent, 'game');
-        expanded = true;
-      } catch (err) {
-        console.warn('requestExpandedMode failed', err);
-        notify('Unable to expand. Opening inline instead.');
-      }
+    if (action === 'achievements') {
+      setScreen('achievements');
+      return;
     }
-    if (!expanded) {
-      setScreen('home');
+    if (action === 'start') {
+      void handleStartRound();
     }
-    setIsLaunching(false);
-  };
+  }, []);
+
 
   const handleStartRound = async () => {
     if (isLoadingRiddle) {
       return;
     }
-    const theme = themeInput.trim() || DEFAULT_THEME;
+    const theme = DEFAULT_THEME;
     setIsLoadingRiddle(true);
     setResult(null);
     setShareState(null);
@@ -374,9 +351,46 @@ export function App() {
     setSubmittedAnswer('');
   };
 
+  const backgroundOne = resolveUiAsset(uiAssets, 'background_1.png', backgroundOneFallback);
+  const backgroundTwo = resolveUiAsset(uiAssets, 'background_2.png', backgroundTwoFallback);
+  const backgroundThree = resolveUiAsset(uiAssets, 'background_3.png', backgroundThreeFallback);
+  const backgroundFour = resolveUiAsset(uiAssets, 'background_4.png', backgroundFourFallback);
+
+  const decisionArtMap = useMemo(
+    () => ({
+      open: {
+        background: backgroundThree,
+        cta: {
+          image: debattleButton,
+          label: 'Share your verdict',
+        },
+      },
+      ajar: {
+        background: backgroundFour,
+        cta: {
+          image: debattleButton,
+          label: 'Share your verdict',
+        },
+      },
+      closed: {
+        background: backgroundTwo,
+        cta: {
+          image: tryAgainButton,
+          label: 'Try another riddle',
+        },
+      },
+    }),
+    [backgroundTwo, backgroundThree, backgroundFour]
+  );
+
+  const preloadImages = useMemo(
+    () => [backgroundOne, backgroundTwo, backgroundThree, backgroundFour, ...PRELOAD_STATIC_IMAGES],
+    [backgroundOne, backgroundTwo, backgroundThree, backgroundFour]
+  );
+
   const meaningfulLength = getMeaningfulAnswerLength(answerText);
   const decisionMeta = result ? DECISION_META[result.decision] : null;
-  const decisionArt = result ? DECISION_ART[result.decision] : null;
+  const decisionArt = result ? decisionArtMap[result.decision] : null;
   const riddleText = riddle?.meta?.riddleText ?? '';
   const isDecisionShareable = decisionMeta?.shareable ?? false;
   const shareLabel = shareState?.postId
@@ -387,7 +401,7 @@ export function App() {
   const primaryCtaLabel = isDecisionShareable ? shareLabel : 'Try another riddle';
   const primaryCtaImage = decisionArt?.cta.image ?? debattleButton;
   const backgroundUrl = (() => {
-    if (screen === 'launch' || screen === 'home') {
+    if (screen === 'home') {
       return backgroundOne;
     }
     if (screen === 'answer') {
@@ -422,55 +436,9 @@ export function App() {
       <div className="app__content">
         <div className="debug-pill">{debugLabel}</div>
 
-        {screen === 'launch' && (
-          <main className="screen screen--launch">
-            <div className="launch">
-              <button
-                className="image-button image-button--title"
-                type="button"
-                onClick={handleLaunch}
-                disabled={isLaunching}
-              >
-                <img src={gameTitle} alt="Debattle" />
-              </button>
-              <button
-                className="image-button image-button--knock"
-                type="button"
-                onClick={handleLaunch}
-                disabled={isLaunching}
-              >
-                <img src={knockButton} alt="Knock The Door" />
-              </button>
-              <div className="parchment launch-panel">
-                <p className="kicker">How it works</p>
-                <ol className="steps">
-                  <li>Knock to draw a riddle from the archive.</li>
-                  <li>Answer with clarity and intent.</li>
-                  <li>Share your take with {subredditLabel}.</li>
-                </ol>
-              </div>
-              <p className="launch__hint">
-                {isLaunching
-                  ? 'Opening...'
-                  : devvitAvailable
-                    ? 'Tap to enter the gate.'
-                    : 'Welcome to Debattle.'}
-              </p>
-            </div>
-          </main>
-        )}
-
         {screen === 'home' && (
           <main className="screen screen--home">
             <div className="corner-actions">
-              <button
-                className="icon-button"
-                type="button"
-                onClick={() => setScreen('launch')}
-                aria-label="How to play"
-              >
-                <img src={infoIcon} alt="" />
-              </button>
               <button
                 className="icon-button"
                 type="button"
@@ -480,44 +448,18 @@ export function App() {
                 <img src={profileIcon} alt="" />
               </button>
             </div>
-            <div className="status-badge">
-              <span className="status-badge__name">{resolvedUsername}</span>
-              <span className="status-badge__meta">
-                {currentUser ? `Level ${currentUser.level}` : isLoadingUser ? 'Loading...' : 'Guest'}
-              </span>
-            </div>
-            <div className="parchment home-panel">
-              <p className="kicker">Choose a theme</p>
-              <p className="home-blurb">
-                Leave it blank if you want fate to choose the riddle.
-              </p>
-              <label className="label" htmlFor="theme-input">
-                Theme
-              </label>
-              <input
-                id="theme-input"
-                className="input"
-                type="text"
-                placeholder={`Try "${DEFAULT_THEME}" or leave empty`}
-                value={themeInput}
-                onChange={(event) => setThemeInput(event.target.value)}
-              />
-              <div className="home-actions">
-                <button
-                  className="image-button image-button--knock"
-                  type="button"
-                  onClick={handleStartRound}
-                  disabled={isLoadingRiddle}
-                >
-                  <img
-                    src={knockButton}
-                    alt={isLoadingRiddle ? 'Summoning a riddle' : 'Knock the door'}
-                  />
-                </button>
-                <button className="text-link" type="button" onClick={() => setScreen('achievements')}>
-                  View achievements
-                </button>
-              </div>
+            <div className="home-center">
+              <button
+                className="image-button image-button--knock"
+                type="button"
+                onClick={handleStartRound}
+                disabled={isLoadingRiddle}
+              >
+                <img
+                  src={knockButton}
+                  alt={isLoadingRiddle ? 'Summoning a riddle' : 'Knock the door'}
+                />
+              </button>
             </div>
           </main>
         )}
@@ -728,7 +670,7 @@ export function App() {
         )}
 
         <div className="preload" aria-hidden="true">
-          {PRELOAD_IMAGES.map((src) => (
+          {preloadImages.map((src) => (
             <img key={src} src={src} alt="" />
           ))}
         </div>

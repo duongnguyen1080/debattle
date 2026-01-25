@@ -1,5 +1,6 @@
 import { tokenParam } from '@devvit/shared-types/webbit';
 import type { AreteEvaluation, RiddleV2, User } from '../../types/index.js';
+import type { UiAssetMap } from '../../types/uiAssets.js';
 
 export type SubmitAnswerResult = {
   score: { wit: number; logic: number; style: number; total: number };
@@ -95,6 +96,7 @@ const request = async <T>(path: string, options: RequestOptions = {}): Promise<T
 
 export const api = {
   getCurrentUser: () => request<{ currentUser: User | null; username: string }>('/api/user/current'),
+  getUiAssets: () => request<{ assets: UiAssetMap }>('/api/ui/assets'),
   createRiddle: (payload: { theme: string; playerUsername?: string; question?: unknown }) =>
     request<{ riddle: RiddleV2 }>('/api/riddle/create', { method: 'POST', body: payload }),
   getRiddle: (id: string) =>

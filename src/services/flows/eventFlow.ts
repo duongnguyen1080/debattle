@@ -1,4 +1,5 @@
 import type { AppUpgrade, TriggerContext } from '@devvit/public-api';
+import { refreshUiAssets } from '../../utils/uiAssets.js';
 import type { SubmitAnswerParams, SubmitAnswerResult } from './answerFlow.js';
 
 export interface EventFlow {
@@ -62,6 +63,12 @@ export function createEventFlow(deps: {
     void event;
     const subredditName = context.subredditName ?? (await context.reddit.getCurrentSubredditName());
     console.log('App upgraded for subreddit:', subredditName ?? '(unknown)');
+
+    try {
+      await refreshUiAssets(context);
+    } catch (err) {
+      console.warn('[ui-assets] refresh failed', err);
+    }
 
     await cleanupExpiredRiddles();
   };
