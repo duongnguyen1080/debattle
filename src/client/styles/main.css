@@ -255,6 +255,12 @@ body {
   color: var(--ink);
 }
 
+.input::placeholder,
+.textarea::placeholder {
+  font-family: 'Merriweather', 'Times New Roman', serif;
+  font-style: italic;
+}
+
 .input:focus,
 .textarea:focus {
   outline: 2px solid rgba(196, 90, 42, 0.3);
@@ -319,6 +325,7 @@ body {
 }
 
 .riddle-text {
+  font-family: 'Pirata One', 'Times New Roman', serif;
   font-size: clamp(18px, 4.4vw, 26px);
   line-height: 1.5;
   margin: 0;
@@ -339,9 +346,9 @@ body {
 
 .meter {
   font-size: 11px;
-  text-transform: uppercase;
   letter-spacing: 0.16em;
   color: var(--ink-muted);
+  text-align: center;
 }
 
 .meter--over {

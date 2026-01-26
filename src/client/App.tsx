@@ -20,7 +20,7 @@ import knockButton from './assets/images/knock button.gif';
 import profileIcon from './assets/images/profile_icon.png';
 import closeIcon from './assets/images/close_button.png';
 import backIcon from './assets/images/back_icon.png';
-import enterAnswerButton from './assets/images/enter_answer_button.png';
+import enterAnswerButton from './assets/images/send_button.png';
 import debattleButton from './assets/images/debattle_button.png';
 import tryAgainButton from './assets/images/try_again_button.png';
 import parchmentRibbon from './assets/images/parchment_2.png';
@@ -499,6 +499,13 @@ export function App() {
                   value={answerText}
                   onChange={(event) => setAnswerText(event.target.value)}
                 />
+                <span
+                  className={`meter ${
+                    meaningfulLength > MAX_MEANINGFUL_ANSWER_LENGTH ? 'meter--over' : ''
+                  }`}
+                >
+                  {meaningfulLength}/{MAX_MEANINGFUL_ANSWER_LENGTH} meaningful characters
+                </span>
                 <div className="answer-actions">
                   <button
                     className="image-button image-button--enter"
@@ -515,13 +522,6 @@ export function App() {
                     Back
                   </button>
                 </div>
-                <span
-                  className={`meter ${
-                    meaningfulLength > MAX_MEANINGFUL_ANSWER_LENGTH ? 'meter--over' : ''
-                  }`}
-                >
-                  {meaningfulLength}/{MAX_MEANINGFUL_ANSWER_LENGTH} meaningful characters
-                </span>
               </div>
             </div>
           </main>
