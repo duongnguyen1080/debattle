@@ -48,6 +48,10 @@ body {
   background-color: #110b07;
 }
 
+.app--home {
+  --safe-y: 20px;
+}
+
 .app.app--splash::before {
   opacity: 0;
 }
@@ -101,14 +105,14 @@ body {
 }
 
 .screen--home {
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .screen--answer,
 .screen--result,
 .screen--achievements {
   padding-top: clamp(16px, 6vh, 40px);
-  padding-bottom: clamp(20px, 8vh, 48px);
+  padding-bottom: clamp(10px, 5vh, 30px);
 }
 
 .corner-actions {
@@ -130,7 +134,7 @@ body {
 }
 
 .icon-button img {
-  width: clamp(36px, 9vw, 54px);
+  width: clamp(30px, 9vw, 48px);
   height: auto;
   display: block;
 }
@@ -138,9 +142,10 @@ body {
 .home-center {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 0;
+  flex: 1;
 }
 
 .image-button {
@@ -178,7 +183,7 @@ body {
 
 .image-button--knock img,
 .image-button--enter img {
-  width: min(62vw, 230px);
+  width: min(50vw, 180px);
 }
 
 .image-button--cta img {
@@ -590,6 +595,14 @@ body {
     --safe-y: 28px;
   }
 
+  .icon-button img {
+    width: clamp(25px, 6vw, 40px);
+  }
+
+  .image-button--knock img {
+    width: min(50vw, 184px);
+  }
+
   .parchment {
     width: min(70vw, 620px);
     padding: 30px 28px 36px;
@@ -597,10 +610,6 @@ body {
 
   .answer-stack .parchment {
     width: min(46vw, 460px);
-  }
-
-  .screen--home {
-    justify-content: center;
   }
 
   .home-panel {

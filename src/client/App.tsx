@@ -16,7 +16,7 @@ import backgroundOneFallback from './assets/images/background_1.png';
 import backgroundTwoFallback from './assets/images/background_2.png';
 import backgroundThreeFallback from './assets/images/background_3.png';
 import backgroundFourFallback from './assets/images/background_4.png';
-import knockButton from './assets/images/knock_button.png';
+import knockButton from './assets/images/knock button.gif';
 import profileIcon from './assets/images/profile_icon.png';
 import closeIcon from './assets/images/close_button.png';
 import backIcon from './assets/images/back_icon.png';
@@ -432,7 +432,10 @@ export function App() {
   })();
 
   return (
-    <div className="app" style={{ backgroundImage: `url(${backgroundUrl})` }}>
+    <div
+      className={`app${screen === 'home' ? ' app--home' : ''}`}
+      style={{ backgroundImage: `url(${backgroundUrl})` }}
+    >
       <div className="app__content">
         <div className="debug-pill">{debugLabel}</div>
 

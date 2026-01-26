@@ -2,7 +2,7 @@ import { requestExpandedMode } from '@devvit/web/client';
 import { setEntryAction } from './lib/entryAction';
 import splashBackgroundWeb from './assets/images/background_1_splash_web.png';
 import splashBackgroundMobile from './assets/images/background_1_splash_mobile.png';
-import knockButton from './assets/images/knock_button.png';
+import knockButton from './assets/images/knock button.gif';
 import profileIcon from './assets/images/profile_icon.png';
 import './styles/main.css';
 
@@ -12,7 +12,7 @@ if (!root) {
 }
 
 const app = document.createElement('div');
-app.className = 'app app--splash';
+app.className = 'app app--splash app--home';
 
 const resolveSplashBackground = (): string => {
   if (typeof window === 'undefined') {
