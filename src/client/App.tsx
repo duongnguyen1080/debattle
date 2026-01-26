@@ -433,7 +433,7 @@ export function App() {
 
   return (
     <div
-      className={`app${screen === 'home' ? ' app--home' : ''}`}
+      className={`app${screen === 'home' ? ' app--home' : ''}${screen === 'answer' ? ' app--answer' : ''}`}
       style={{ backgroundImage: `url(${backgroundUrl})` }}
     >
       <div className="app__content">

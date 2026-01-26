@@ -115,6 +115,10 @@ body {
   padding-bottom: clamp(10px, 5vh, 30px);
 }
 
+.screen--answer .parchment {
+  background-color: transparent;
+}
+
 .corner-actions {
   position: absolute;
   top: 0;
@@ -212,15 +216,12 @@ body {
 
 .parchment {
   width: min(92vw, 520px);
-  background-color: var(--parchment);
-  background-image: url('../assets/images/riddle_top.png'), url('../assets/images/riddle_mid.png'),
-    url('../assets/images/riddle_bottom.png');
-  background-repeat: no-repeat, repeat-y, no-repeat;
-  background-position: top center, center center, bottom center;
-  background-size: 100% auto, 100% auto, 100% auto;
+  background-image: url('../assets/images/riddle_full.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
   padding: 24px 20px 28px;
   border-radius: 12px;
-  box-shadow: 0 18px 40px var(--shadow);
   animation: panel-rise 520ms ease both;
 }
 
@@ -593,6 +594,16 @@ body {
   :root {
     --safe-x: 32px;
     --safe-y: 28px;
+  }
+
+  .app--answer::before {
+    opacity: 0;
+  }
+
+  .app--answer .riddle-meta .tag,
+  .app--answer .answer-panel .label,
+  .app--answer .answer-actions .text-link {
+    display: none;
   }
 
   .icon-button img {
