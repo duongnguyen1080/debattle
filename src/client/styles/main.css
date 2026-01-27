@@ -187,7 +187,7 @@ body {
 
 .image-button--knock img,
 .image-button--enter img {
-  width: min(50vw, 180px);
+  width: min(40vw, 160px);
 }
 
 .image-button--cta img {
@@ -253,6 +253,11 @@ body {
   font-family: inherit;
   background: rgba(255, 255, 255, 0.85);
   color: var(--ink);
+}
+
+.answer-panel .textarea {
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 .input::placeholder,

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   context,
+  exitExpandedMode,
   getWebViewMode,
   navigateTo,
   showToast,
@@ -342,6 +343,14 @@ export function App() {
     setSubmittedAnswer('');
   };
 
+  const handleCloseRiddle = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    try {
+      await exitExpandedMode(event.nativeEvent);
+    } catch {
+      handleBackHome();
+    }
+  };
+
   const handlePlayAgain = () => {
     setScreen('home');
     setRiddle(null);
@@ -473,7 +482,7 @@ export function App() {
               <button
                 className="icon-button"
                 type="button"
-                onClick={handleBackHome}
+                onClick={handleCloseRiddle}
                 aria-label="Close and return home"
               >
                 <img src={closeIcon} alt="" />
@@ -483,7 +492,6 @@ export function App() {
               <div className="parchment riddle-panel">
                 <div className="riddle-meta">
                   <span className="tag">Riddle</span>
-                  <span className="timer">Time {formatDuration(elapsedMs)}</span>
                 </div>
                 <p className="riddle-text">{riddleText || 'Loading riddle...'}</p>
               </div>
