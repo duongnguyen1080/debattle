@@ -191,7 +191,7 @@ body {
 }
 
 .image-button--cta img {
-  width: min(68vw, 260px);
+  width: min(54vw, 208px);
 }
 
 .launch {
@@ -379,9 +379,10 @@ body {
 
 .result-tone {
   margin: 0;
-  color: rgba(243, 230, 203, 0.9);
+  color: #1f140d;
   font-size: 14px;
   text-align: center;
+  font-family: 'Merriweather', 'Times New Roman', serif;
 }
 
 .result-stack {
@@ -391,6 +392,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  font-family: 'Merriweather', 'Times New Roman', serif;
 }
 
 .result-parchment {
@@ -401,7 +403,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 12px;
+  text-align: center;
 }
 
 .feedback-icon {
@@ -411,8 +415,10 @@ body {
 
 .feedback-text {
   margin: 0;
-  font-size: clamp(16px, 4vw, 24px);
+  font-size: clamp(24px, 6vw, 30px);
   line-height: 1.5;
+  text-align: center;
+  font-family: 'Pirata One', 'Times New Roman', serif;
 }
 
 .arete-reward {
@@ -651,6 +657,10 @@ body {
 
   .feedback-block {
     flex-direction: row;
+  }
+
+  .screen--result .feedback-block {
+    flex-direction: column;
   }
 
   .score-grid {

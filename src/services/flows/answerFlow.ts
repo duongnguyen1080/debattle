@@ -199,7 +199,7 @@ export function createAnswerFlow(deps: {
       const clarity = clampScore(obj.clarity);
       const originality = clampScore(obj.originality);
       const aesthetic = clampScore(obj.aesthetic);
-      const totalPoints = Math.round(clamp(50 + completeness + clarity + originality + aesthetic, 0, 90));
+      const totalPoints = Math.round(clamp(completeness + clarity + originality + aesthetic, 0, 40));
       const praiseOrder = [
         { score: completeness, phrase: 'Impeccably detailed!' },
         { score: clarity, phrase: 'Perfectly lucid!' },

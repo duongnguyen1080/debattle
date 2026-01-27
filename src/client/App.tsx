@@ -304,7 +304,8 @@ export function App() {
     }
     setIsSharing(true);
     try {
-      const shareScoreValue = result.areteEvaluation?.totalPoints ?? result.score.total;
+      const shareScoreValue =
+        areteScoreTotal ?? result.areteEvaluation?.totalPoints ?? result.score.total;
       const shareFeedback = result.areteEvaluation?.feedback ?? result.feedback;
       const data = await api.shareResponse({
         riddleId: riddle.id,
@@ -410,6 +411,30 @@ export function App() {
       : 'Share your verdict';
   const primaryCtaLabel = isDecisionShareable ? shareLabel : 'Try another riddle';
   const primaryCtaImage = decisionArt?.cta.image ?? debattleButton;
+  const areteScoreTotal = result?.areteEvaluation
+    ? result.areteEvaluation.completeness +
+      result.areteEvaluation.clarity +
+      result.areteEvaluation.originality +
+      result.areteEvaluation.aesthetic
+    : null;
+  const scoreBreakdown = result
+    ? result.areteEvaluation
+      ? {
+          entries: [
+            { label: 'Completeness', value: result.areteEvaluation.completeness },
+            { label: 'Clarity', value: result.areteEvaluation.clarity },
+            { label: 'Originality', value: result.areteEvaluation.originality },
+            { label: 'Aesthetic', value: result.areteEvaluation.aesthetic },
+          ],
+        }
+      : {
+          entries: [
+            { label: 'Wit', value: result.score.wit },
+            { label: 'Logic', value: result.score.logic },
+            { label: 'Style', value: result.score.style },
+          ],
+        }
+    : null;
   const backgroundUrl = (() => {
     if (screen === 'home') {
       return backgroundOne;
@@ -543,7 +568,7 @@ export function App() {
                 <button
                   className="icon-button"
                   type="button"
-                  onClick={handlePlayAgain}
+                  onClick={handleCloseRiddle}
                   aria-label="Close results"
                 >
                   <img src={closeIcon} alt="" />
@@ -554,37 +579,33 @@ export function App() {
               <div className="ribbon" style={{ backgroundImage: `url(${parchmentRibbon})` }}>
                 <span>{decisionMeta.label}</span>
               </div>
-              <p className="result-tone">{decisionMeta.tone}</p>
               <div className="parchment result-parchment">
                 <div className="feedback-block">
                   <img className="feedback-icon" src={eagleIcon} alt="Gatekeeper crest" />
-                  <p className="feedback-text">"{result.feedback}"</p>
+                  <p className="feedback-text">
+                    "{result.areteEvaluation?.feedback ?? result.feedback}"
+                  </p>
                 </div>
+                <p className="result-tone">{decisionMeta.tone}</p>
               </div>
               {result.areteEvaluation && (
                 <div className="arete-reward">
-                  <span className="arete-reward__value">+ {result.areteEvaluation.totalPoints}</span>
+                  <span className="arete-reward__value">
+                    + {areteScoreTotal ?? result.areteEvaluation.totalPoints}
+                  </span>
                   <img className="arete-reward__icon" src={areteCoin} alt="Arete coin" />
                 </div>
               )}
-              <div className="score-grid">
-                <div className="score-card">
-                  <span className="score-card__label">Wit</span>
-                  <span className="score-card__value">{result.score.wit}</span>
+              {scoreBreakdown && (
+                <div className="score-grid">
+                  {scoreBreakdown.entries.map((entry) => (
+                    <div key={entry.label} className="score-card">
+                      <span className="score-card__label">{entry.label}</span>
+                      <span className="score-card__value">{entry.value}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="score-card">
-                  <span className="score-card__label">Logic</span>
-                  <span className="score-card__value">{result.score.logic}</span>
-                </div>
-                <div className="score-card">
-                  <span className="score-card__label">Style</span>
-                  <span className="score-card__value">{result.score.style}</span>
-                </div>
-                <div className="score-card score-card--total">
-                  <span className="score-card__label">Total</span>
-                  <span className="score-card__value">{result.score.total}</span>
-                </div>
-              </div>
+              )}
               <div className="result-actions">
                 <button
                   className="image-button image-button--cta"
@@ -595,16 +616,7 @@ export function App() {
                 >
                   <img src={primaryCtaImage} alt="" />
                 </button>
-                <span className="result-actions__hint">{primaryCtaLabel}</span>
-                {isDecisionShareable ? (
-                  <button
-                    className="text-link text-link--light"
-                    type="button"
-                    onClick={handlePlayAgain}
-                  >
-                    Play again
-                  </button>
-                ) : (
+                {!isDecisionShareable && (
                   <button
                     className="text-link text-link--light"
                     type="button"

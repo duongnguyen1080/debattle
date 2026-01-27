@@ -44,7 +44,7 @@ export function createEventFlow(deps: {
             const areteScoreValue = hasAreteScore
               ? Math.round(resp.areteEvaluation!.totalPoints)
               : resp.score.total;
-            const areteScoreMax = hasAreteScore ? 90 : 15;
+            const areteScoreMax = hasAreteScore ? 40 : 15;
             const decisionLabel = decisionSummary(resp.decision).label;
             await context.reddit.submitComment({
               id: comment.id,
