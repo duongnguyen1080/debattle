@@ -235,17 +235,18 @@ export function App() {
     setResult(null);
     setShareState(null);
     setSubmittedAnswer('');
+    setRiddle(null);
+    setAnswerText('');
+    setScreen('answer');
     try {
       const data = await api.createRiddle({
         theme,
         playerUsername: resolvedUsername,
       });
       setRiddle(data.riddle);
-      setAnswerText('');
       const now = Date.now();
       setStartedAt(now);
       setElapsedMs(0);
-      setScreen('answer');
     } catch (err) {
       console.error('create riddle failed', err);
       notify('Failed to create a riddle. Please try again.');

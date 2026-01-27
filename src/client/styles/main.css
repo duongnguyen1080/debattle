@@ -331,7 +331,7 @@ body {
 
 .riddle-text {
   font-family: 'Pirata One', 'Times New Roman', serif;
-  font-size: clamp(18px, 4.4vw, 26px);
+  font-size: clamp(24px, 6vw, 30px);
   line-height: 1.5;
   margin: 0;
 }
@@ -659,6 +659,27 @@ body {
 
   .stat-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 719px) {
+  .app--answer::before {
+    opacity: 0;
+  }
+
+  .app--answer {
+    background-position: center center;
+  }
+
+  .screen--answer .riddle-meta .tag,
+  .screen--answer .answer-panel .label,
+  .screen--answer .answer-actions .text-link {
+    display: none;
+  }
+
+  .answer-panel .textarea {
+    max-width: min(74vw, 304px);
+    height: 140px;
   }
 }
 
