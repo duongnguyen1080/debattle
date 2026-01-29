@@ -141,20 +141,31 @@ Deliverables:
 - Remove Blocks UI and related stack once Web parity is validated, except for any features without Web-equivalents.
 - Keep a minimal Blocks entry only for non-replaceable features (for example, mod actions/triggers), and document what remains.
 - Update docs and remove unused Blocks UI code after cutover.
-Risks:
-- Removing Blocks too early could drop mod menu items and triggers. Ensure replacements exist or keep a minimal Blocks entry.
+Status (2026-01-29):
+- Cutover confirmed: `devvit.json` points the custom post to Web entrypoints and web server bundles.
+- Remaining Blocks features (intentional): mod menu item (`installGame`) and triggers (`CommentCreate`, `AppUpgrade`); no Blocks UI.
+- Retired: comment-based `!answer` flow removed from trigger handling.
+- Pending decisions (not blocked on cutover): share card PNG restoration.
 
 ## Risks and mitigations summary
-- Asset and font fidelity risk: current UI relies on SVG glyph assets and custom layout. Mitigate by self-hosting WOFF2 fonts, preloading them, and re-tuning layout per breakpoint.
-- Permission and auth risk: user posting, flair, and DMs require userActions and consent. Mitigate with clear user prompts and fallback paths when permissions are missing.
-- Build output collisions: Devvit and Vite both write to `dist/`. Mitigate with strict output directories and build ordering.
-- Secret leakage risk: OpenAI and Supabase keys must stay server-side. Mitigate by centralizing all external API calls in server endpoints.
-- Latency and reliability risk: OpenAI calls can be slow or fail. Mitigate with timeouts and fallback scoring (already implemented).
-- Data consistency risk: riddle creation and answer submission must be single-source-of-truth. Mitigate by moving creation and submit logic to server endpoints and keeping the client stateless.
-- Responsive QA risk: a mobile-first layout can diverge from Blocks layouts across devices. Mitigate with breakpoint-specific QA and visual regression checks for key screens.
-- Entrypoint/expanded-mode risk: launch screen and gameplay entrypoints can drift or mis-route. Mitigate by keeping a single source of routing state and testing entrypoint transitions.
+- Asset and font fidelity risk: current UI relies on SVG glyph assets and custom layout. Mitigate by self-hosting WOFF2 fonts, preloading them, and re-tuning layout per breakpoint. 
+  - Status (2026-01-29): implemented; UI QA complete and confirmed.
+- Permission and auth risk: user posting, flair, and DMs require userActions and consent. Mitigate with clear user prompts and fallback paths when permissions are missing. 
+  - Status (2026-01-29): implemented; API QA complete and confirmed.
+- Build output collisions: Devvit and Vite both write to `dist/`. Mitigate with strict output directories and build ordering. 
+  - Status (2026-01-29): implemented; build output separation confirmed.
+- Secret leakage risk: OpenAI and Supabase keys must stay server-side. Mitigate by centralizing all external API calls in server endpoints. 
+  - Status (2026-01-29): implemented; verified server-only usage.
+- Latency and reliability risk: OpenAI calls can be slow or fail. Mitigate with timeouts and fallback scoring (already implemented). 
+  - Status (2026-01-29): implemented; API QA complete and confirmed.
+- Data consistency risk: riddle creation and answer submission must be single-source-of-truth. Mitigate by moving creation and submit logic to server endpoints and keeping the client stateless.   
+  - Status (2026-01-29): implemented; API QA complete and confirmed.
+- Responsive QA risk: a mobile-first layout can diverge from Blocks layouts across devices. Mitigate with breakpoint-specific QA and visual regression checks for key screens. 
+  - Status (2026-01-29): UI QA complete and confirmed.
+- Entrypoint/expanded-mode risk: launch screen and gameplay entrypoints can drift or mis-route. Mitigate by keeping a single source of routing state and testing entrypoint transitions. 
+  - Status (2026-01-29): UI QA complete and confirmed.
 
-## Open questions
+## Open questions (All Answered)
 - Should we keep Blocks UI for a longer hybrid period, or migrate quickly to full Web? Answer: migrate quickly to full Web; keep Blocks only to prevent breakage during transition, and retain Blocks UI only for features with no Web-equivalent.
 - What is the preferred font strategy (downloaded web fonts vs SVG glyph rendering)? Answer: exact-match web fonts (Pirata One + Merriweather WOFF2, self-hosted).
 - Do we need to preserve legacy comment-based `!answer` flow, or can it be deprecated? Answer: deprecate after web cutover, keep temporarily as fallback during migration.

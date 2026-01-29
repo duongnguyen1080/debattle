@@ -3,7 +3,7 @@ import { User, RiddleV2 } from '../types/index.js';
 import { createAnswerFlow, type SubmitAnswerParams, type SubmitAnswerResult } from './flows/answerFlow.js';
 import { createEventFlow } from './flows/eventFlow.js';
 import { createRiddleFlow, type CreateRiddleFromThemeParams } from './flows/riddleFlow.js';
-import { createShareFlow, decisionSummary, type ShareResponseParams, type ShareResponseResult } from './flows/shareFlow.js';
+import { createShareFlow, type ShareResponseParams, type ShareResponseResult } from './flows/shareFlow.js';
 import { createUserFlow } from './flows/userFlow.js';
 
 export class Service {
@@ -35,8 +35,6 @@ export class Service {
       resolveSubredditName: this.resolveSubredditName.bind(this),
     });
     this.eventFlow = createEventFlow({
-      submitAnswer: this.answerFlow.submitAnswer,
-      decisionSummary,
       cleanupExpiredRiddles: this.riddleFlow.cleanupExpiredRiddles,
     });
   }
