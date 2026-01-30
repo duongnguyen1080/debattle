@@ -70,11 +70,17 @@ const resolveUsername = (bodyValue: unknown): string => {
 
 const isUserActionError = (err: unknown): boolean => {
   const message = err instanceof Error ? err.message : String(err ?? '');
+  const details =
+    typeof (err as { details?: unknown })?.details === 'string'
+      ? ((err as { details?: string }).details ?? '')
+      : '';
   return (
     message.includes('Scope.SUBMIT_POST') ||
     message.includes('userActions') ||
     message.includes('runAs') ||
-    message.includes('permission')
+    message.includes('permission') ||
+    message.includes('run as user') ||
+    details.includes('run as user')
   );
 };
 

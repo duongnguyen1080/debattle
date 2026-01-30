@@ -1,15 +1,15 @@
 # 🎯 Debattle - Reddit Riddle Game
 
-An AI-powered riddle game on Reddit using Devvit. Players choose a theme, receive an AI-generated philosophical riddle, write their answer, and earn points based on AI evaluation and community upvotes.
+Debattle is a Ravenclaw-inspired riddle game: instead of logic puzzles, you face philosophical riddles to "open the door." There’s no right or wrong answer.
 
 ## 🎮 Game Overview
 
-### **Player Flow**
-- Choose from 3 random themes (10-second timer)
-- Receive an AI-generated riddle based on the theme
-- Write an answer within 60 seconds
-- Earn points from AI scoring (clarity, originality, aesthetic, time)
-- Share your answer post with the community for upvotes
+### **How It Works**
+- Open the game
+- Knock to start a round and receive a riddle
+- Write your answer (up to 200 meaningful characters)
+- Get the gatekeeper decision (open/ajar/closed) and score breakdown
+- Share your answer as a Reddit post if you want community debate around the riddle
 
 ## 🏆 Progression System
 
@@ -28,98 +28,8 @@ Players level up through 7 tiers, each unlocking unique community flairs:
 ## 🎯 Game Mechanics
 
 ### **Scoring System**
-- **Answering**: 0–20 points from AI evaluation (time, clarity, originality, aesthetic)
-- **Community**: +5 points per 10 upvotes on an answer post
-- **Reflections/Comments**: Commenters also gain points from upvotes on their reflections
+- Your XP comes from the round score (wit, logic, and style).
+- The gatekeeper also gives a decision and short feedback.
 
-### **Time Management**
-- Theme selection: 10 seconds
-- Answer writing: 60 seconds base
-- AI feedback: ~15 seconds
-- Post lifespan: 24 hours
-
-### **Theme Categories**
-- 🧍 Self
-- 🤝 Relationships
-- 💼 Work
-- 🌅 Life
-- 📖 Knowledge
-
-## 🚀 Getting Started
-
-### **For Moderators**
-1. Install the Devvit app in your subreddit
-2. Use the menu items to create:
-   - **Create Riddle**: Start a new riddle challenge
-   - **Community Hub**: Central hub with leaderboards and info
-
-### **For Players**
-1. **Playing the Game**:
-   - Choose a theme from 3 options
-   - Receive an AI-generated riddle
-   - Write your answer within the time limit
-   - Get AI feedback and score
-   - Share your answer post with the community for upvotes
-
-## 🛠️ Technical Architecture
-
-Built with:
-- **Frontend**: React-based Devvit Web UI (`src/client`)
-- **Backend**: Devvit Web server + Redis for data persistence
-- **Integration**: Reddit API for community features
-- **Language**: TypeScript for type safety
-
-### **Core Components**
-- `src/client/App.tsx` - Web UI flow and state management
-- `src/server/index.ts` - Web API handlers
-- `src/services/Service.ts` - Core game logic and data management
-- `src/main.tsx` - Devvit entry for triggers and mod actions
-
-### **Data Schema**
-- `users` - User profiles and progress (Redis hash)
-- `riddle:${id}` - AI-generated riddle metadata and responses
-- `riddles:active` - Active riddle IDs
-- `riddle:${id}:guesses` - Reflections/comments tracking per riddle
-
-## 🔧 Development
-
-### **Prerequisites**
-- Node.js 18+
-- Devvit CLI
-- Redis instance
-
-### **Installation**
-```bash
-npm install
-npm run dev
-```
-
-### **Building & Deployment**
-```bash
-npm run build
-npm run deploy
-```
-
-## 🎨 Customization
-
-The game is highly customizable:
-- Modify theme categories and difficulty
-- Adjust scoring algorithms
-- Customize level progression
-- Add new game modes
-
-## 🤝 Contributing
-
-Contributions welcome! Areas for improvement:
-- AI-powered riddle generation and evaluation improvements
-- Advanced moderation tools
-- Mobile-optimized interfaces
-- Additional game modes
-
-## 📄 License
-
-BSD-3-Clause License - see LICENSE file for details.
-
-## 🏛️ About
-
-Debattle brings the ancient art of riddles to the modern Reddit community, fostering creativity, critical thinking, and friendly competition. Join the community and become a Sage of Arete!
+### **Themes**
+- Each riddle is themed around big ideas of life like identity, purpose, or connection.
